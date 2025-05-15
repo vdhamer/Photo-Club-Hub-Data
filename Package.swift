@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "Photo Club Hub Data",
     defaultLocalization: "en",
-    platforms: [.iOS(.v18), .macOS(.v14)], // TODO tweak minimum version
+    platforms: [.iOS(.v17), .macOS(.v13)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(

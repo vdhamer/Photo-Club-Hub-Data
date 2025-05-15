@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension URLSession { // TODO should this be in the package? It is used outside the package.
+extension URLSession {
 
     // swiftlint:disable:next large_tuple
     public func synchronousDataTask(from url: URL) -> (Data?, URLResponse?, Error?) {

@@ -63,57 +63,57 @@ public struct PersistenceController: Sendable {
 
     }
 
-//    static let preview: PersistenceController = { // TODO preview disabled
-//        let result = PersistenceController(inMemory: true)
-//        let viewContext = result.container.viewContext
-//        for index in 1...10 {
-//            let memberRolesAndStatus =  MemberRolesAndStatus( roles: [.chairman: (index==1),
-//                                                                      .treasurer: (index==2)],
-//                                                              status: [.deceased: ((index % 4) == 0),
-//                                                                       .former: ((index % 4) == 1)]
-//            )
-//            let organization = Organization.findCreateUpdate(
-//                context: viewContext, // on main thread
-//                organizationTypeEnum: .club,
-//                idPlus: OrganizationIdPlus(
-//                    fullName: "PhotoClub\(index)",
-//                    town: "Town\(index)",
-//                    nickname: "ClubNick\(index)"
-//                ),
-//                coordinates: CLLocationCoordinate2D( // spread around BeNeLux
-//                    latitude: 51.39184 + Double.random(in: -2.0 ... 2.0),
-//                    longitude: 5.46144 + Double.random(in: -2.0 ... 1.0)),
-//                optionalFields: OrganizationOptionalFields(
-//                    organizationWebsite: URL(string: "http://www.example.com/\(index)"),
-//                    fotobondNumber: Int16(index*1111)
-//                ),
-//                pinned: (index % 4 == 0)
-//            )
-//            let photographer = Photographer.findCreateUpdate(
-//                context: viewContext, // on main thread
-//                personName: PersonName(givenName: "Jan", infixName: "D'", familyName: "Eau\(index)"),
-//                optionalFields: PhotographerOptionalFields(
-//                    bornDT: Date() - Double.random(in: 365*24*3600 ... 75*365*24*3600),
-//                    isDeceased: memberRolesAndStatus.isDeceased(),
-//                    photographerWebsite: URL(string: "https://www.example.com/JanDEau\(index)"),
-//                    photographerImage: nil
-//                )
-//            )
-//            let memberPortfolio = MemberPortfolio.findCreateUpdate(
-//                bgContext: viewContext,
-//                organization: organization,
-//                photographer: photographer,
-//                optionalFields: MemberOptionalFields( memberRolesAndStatus: memberRolesAndStatus )
-//            )
-//        }
-//
-//        do {
-//            try viewContext.save() // persist sample data in persistence controller
-//        } catch {
-//            let nsError = error as NSError
-//            fatalError("Unresolved error \(nsError), \(nsError.userInfo)") // preview cannot occur in shipping code
-//        }
-//        return result
-//    }()
+    static let preview: PersistenceController = {
+        let result = PersistenceController(inMemory: true)
+        let viewContext = result.container.viewContext
+        for index in 1...10 {
+            let memberRolesAndStatus =  MemberRolesAndStatus( roles: [.chairman: (index==1),
+                                                                      .treasurer: (index==2)],
+                                                              status: [.deceased: ((index % 4) == 0),
+                                                                       .former: ((index % 4) == 1)]
+            )
+            let organization = Organization.findCreateUpdate(
+                context: viewContext, // on main thread
+                organizationTypeEnum: .club,
+                idPlus: OrganizationIdPlus(
+                    fullName: "PhotoClub\(index)",
+                    town: "Town\(index)",
+                    nickname: "ClubNick\(index)"
+                ),
+                coordinates: CLLocationCoordinate2D( // spread around BeNeLux
+                    latitude: 51.39184 + Double.random(in: -2.0 ... 2.0),
+                    longitude: 5.46144 + Double.random(in: -2.0 ... 1.0)),
+                optionalFields: OrganizationOptionalFields(
+                    organizationWebsite: URL(string: "http://www.example.com/\(index)"),
+                    fotobondNumber: Int16(index*1111)
+                ),
+                pinned: (index % 4 == 0)
+            )
+            let photographer = Photographer.findCreateUpdate(
+                context: viewContext, // on main thread
+                personName: PersonName(givenName: "Jan", infixName: "D'", familyName: "Eau\(index)"),
+                optionalFields: PhotographerOptionalFields(
+                    bornDT: Date() - Double.random(in: 365*24*3600 ... 75*365*24*3600),
+                    isDeceased: memberRolesAndStatus.isDeceased(),
+                    photographerWebsite: URL(string: "https://www.example.com/JanDEau\(index)"),
+                    photographerImage: nil
+                )
+            )
+            let memberPortfolio = MemberPortfolio.findCreateUpdate(
+                bgContext: viewContext,
+                organization: organization,
+                photographer: photographer,
+                optionalFields: MemberOptionalFields( memberRolesAndStatus: memberRolesAndStatus )
+            )
+        }
+
+        do {
+            try viewContext.save() // persist sample data in persistence controller
+        } catch {
+            let nsError = error as NSError
+            fatalError("Unresolved error \(nsError), \(nsError.userInfo)") // preview cannot occur in shipping code
+        }
+        return result
+    }()
 
 }

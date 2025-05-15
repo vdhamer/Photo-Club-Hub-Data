@@ -8,7 +8,7 @@
 import Foundation // for Date
 import RegexBuilder // for Regex
 
-extension String { // TODO should this be in package? It is used by MembershipView which is outside package
+extension String {
 
     // "2001-12-31" returns Dec 31st 2001
     // "?" returns nil
