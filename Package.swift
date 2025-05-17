@@ -21,7 +21,9 @@ let package = Package(
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "Photo Club Hub Data",
-            dependencies: ["SwiftyJSON"]
+            dependencies: ["SwiftyJSON"],
+            resources: [
+                .copy("JSON/root.level0.json")]
         ),
         .testTarget(
             name: "Photo Club Hub DataTests",

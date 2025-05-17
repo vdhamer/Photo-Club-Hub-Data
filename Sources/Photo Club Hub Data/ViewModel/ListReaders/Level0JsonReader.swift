@@ -17,7 +17,7 @@ private let dataSourceFile: String = "root"
 private let fileSubType = "level0" // level0 is part of file name, the extension is "json" rather than "level0"
 private let fileType = "json"
 
-// see root.level0.json for a syntax example
+// see JSON/root.level0.json for a syntax example
 
 public class Level0JsonReader {
 
@@ -26,18 +26,21 @@ public class Level0JsonReader {
                 overrulingDataSourceFile: String? = nil) {
 
         bgContext.perform { // switch to supplied background thread
-            let overruledDataSourceFile = overrulingDataSourceFile ?? dataSourceFile
-            guard let filePath = Bundle.main.path(forResource: overruledDataSourceFile + "." + fileSubType,
-                                                  ofType: fileType) else {
+            let overruledDataSourceFile: String = overrulingDataSourceFile ?? dataSourceFile
+            let name = overruledDataSourceFile + "." + fileSubType
+
+            let bundle: Bundle = Bundle.module // instead of bundle = Bundle.main
+            let fileInBundleURL: URL? = bundle.url(forResource: name, withExtension: "." + fileType)
+            guard fileInBundleURL != nil else {
                 fatalError("""
-                           Internal file \(overruledDataSourceFile + "." + fileSubType + "." + fileType) \
-                           not found. Check file name.
+                           Failed to find URL to the file \(name).\(fileType) \
+                           in bundle \(bundle.bundleIdentifier ?? "")
                            """)
             }
             let data = self.getData( // get the data from one of the two sources
                 fileURL: URL(string: dataSourcePath + overruledDataSourceFile + "." +
                              fileSubType + "." + fileType)!,
-                filePath: filePath,
+                fileInBundleURL: fileInBundleURL!, // protected by guard statement
                 useOnlyFile: useOnlyFile
             )
             self.readRootLevel0Json(bgContext: bgContext,
@@ -47,18 +50,19 @@ public class Level0JsonReader {
     }
 
     // try to fetch the online root.level0.json file, and if that fails use a copy from the app's bundle instead
-    fileprivate func getData(fileURL: URL,
-                             filePath: String,
+    fileprivate func getData(fileURL: URL, // TODO needs checking/cleanup
+                             fileInBundleURL: URL,
                              useOnlyFile: Bool) -> String {
         if let urlData = try? String(contentsOf: fileURL, encoding: .utf8), !useOnlyFile {
             return urlData
         }
-        print("Could not access online file \(fileURL.relativeString). Trying in-app file \(filePath) instead.")
-        if let fileData = try? String(contentsOfFile: filePath, encoding: .utf8) {
-            return fileData
+        print("Could not access online file \(fileURL.relativeString). Trying in-app file instead.")
+
+        if let bundleFileData = try? String(contentsOf: fileInBundleURL, encoding: .utf8) {
+            return bundleFileData
         }
         // calling fatalError is ok for a compile-time constant (as defined above)
-        fatalError("Cannot load Level 0 file \(filePath)")
+        fatalError("Cannot load Level 0 file \(fileURL.relativeString)")
     }
 
     fileprivate func readRootLevel0Json(bgContext: NSManagedObjectContext,
