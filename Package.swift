@@ -23,7 +23,9 @@ let package = Package(
             name: "Photo Club Hub Data",
             dependencies: ["SwiftyJSON"],
             resources: [
-                .copy("JSON/root.level0.json")]
+                .copy("JSON/root.level0.json"),
+                .copy("JSON/root.level1.json")
+            ]
         ),
         .testTarget(
             name: "Photo Club Hub DataTests",

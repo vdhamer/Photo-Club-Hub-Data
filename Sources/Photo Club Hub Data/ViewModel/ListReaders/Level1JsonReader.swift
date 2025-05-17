@@ -17,52 +17,58 @@ private let dataSourcePath: String = """
 private let dataSourceFile: String = "root"
 private let fileSubType = "level1" // level1 is part of file name, not the extension
 private let fileType = "json"
+
 private let organizationTypesToLoad: [OrganizationTypeEnum] = [.club, .museum]
 
 // see xampleMin.level1.json and xampleMax.level1.json for syntax examples
 
 public class Level1JsonReader {
 
-    public init(bgContext: NSManagedObjectContext, useOnlyFile: Bool = false) {
+    public init(bgContext: NSManagedObjectContext,
+                useOnlyFile: Bool = false,
+                overrulingDataSourceFile: String? = nil) {
 
         bgContext.perform { // switch to supplied background thread
-            guard let filePath = Bundle.main.path(forResource: dataSourceFile + "." + fileSubType,
-                                                  ofType: fileType) else {
+            let overruledDataSourceFile: String = overrulingDataSourceFile ?? dataSourceFile
+            let name = overruledDataSourceFile + "." + fileSubType
+
+            let bundle: Bundle = Bundle.module // bundle may be a package rather than Bundle.main
+            let fileInBundleURL: URL? = bundle.url(forResource: name, withExtension: "." + fileType)
+            guard fileInBundleURL != nil else {
                 fatalError("""
-                           Internal file \(dataSourceFile + "." + fileSubType + "." + fileType) \
-                           not found. Check file name.
+                           Failed to find URL to the file \(name).\(fileType) \
+                           in bundle \(bundle.bundleIdentifier ?? "")
                            """)
             }
             let data = self.getData(
-                fileURL: URL(string: dataSourcePath + dataSourceFile + "." +
+                fileURL: URL(string: dataSourcePath + overruledDataSourceFile + "." +
                              fileSubType + "." + fileType)!,
-                filePath: filePath,
+                fileInBundleURL: fileInBundleURL!, // protected by guard statement
                 useOnlyFile: useOnlyFile
             )
             self.readRootLevel1Json(bgContext: bgContext,
-                                    data: data,
-                                    for: organizationTypesToLoad)
+                                    data: data)
         }
     }
 
     // try to fetch the online root.level1.json file, and if that fails use a copy from the app's bundle instead
     fileprivate func getData(fileURL: URL,
-                             filePath: String,
+                             fileInBundleURL: URL,
                              useOnlyFile: Bool) -> String {
         if let urlData = try? String(contentsOf: fileURL, encoding: .utf8), !useOnlyFile {
             return urlData
         }
-        print("Could not access online file \(fileURL.relativeString). Trying in-app file \(filePath) instead.")
-        if let fileData = try? String(contentsOfFile: filePath, encoding: .utf8) {
-            return fileData
+        print("Could not access online file \(fileURL.relativeString). Trying in-app file instead.")
+
+        if let bundleFileData = try? String(contentsOf: fileInBundleURL, encoding: .utf8) {
+            return bundleFileData
         }
         // calling fatalError is ok for a compile-time constant (as defined above)
-        fatalError("Cannot load Level 1 file \(filePath)")
+        fatalError("Cannot load Level 1 file \(fileURL.relativeString)")
     }
 
     fileprivate func readRootLevel1Json(bgContext: NSManagedObjectContext,
-                                        data: String,
-                                        for organizationTypeEnumsToLoad: [OrganizationTypeEnum]) {
+                                        data: String) {
 
         ifDebugPrint("\nWill read Level 1 file (\(dataSourceFile)) with a list of organizations in the background.")
 
@@ -70,7 +76,7 @@ public class Level1JsonReader {
         let jsonRoot = JSON(parseJSON: data) // call to SwiftyJSON
 
         // extract the `organizationTypes` in `organizationTypeEnumsToLoad` one-by-one from `jsonRoot`
-        for organizationTypeEnum in organizationTypeEnumsToLoad {
+        for organizationTypeEnum in organizationTypesToLoad {
 
             let jsonOrganizationsOfOneType: [JSON] = jsonRoot[organizationTypeEnum.unlocalizedPlural].arrayValue
             ifDebugPrint("Found \(jsonOrganizationsOfOneType.count) \(organizationTypeEnum.unlocalizedPlural) " +

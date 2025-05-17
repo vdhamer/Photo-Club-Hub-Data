@@ -17,7 +17,7 @@ private let dataSourceFile: String = "root"
 private let fileSubType = "level0" // level0 is part of file name, the extension is "json" rather than "level0"
 private let fileType = "json"
 
-// see JSON/root.level0.json for a syntax example
+// see root.level0.json for a syntax example
 
 public class Level0JsonReader {
 
@@ -29,7 +29,7 @@ public class Level0JsonReader {
             let overruledDataSourceFile: String = overrulingDataSourceFile ?? dataSourceFile
             let name = overruledDataSourceFile + "." + fileSubType
 
-            let bundle: Bundle = Bundle.module // instead of bundle = Bundle.main
+            let bundle: Bundle = Bundle.module // bundle may be a package rather than Bundle.main
             let fileInBundleURL: URL? = bundle.url(forResource: name, withExtension: "." + fileType)
             guard fileInBundleURL != nil else {
                 fatalError("""
@@ -46,11 +46,10 @@ public class Level0JsonReader {
             self.readRootLevel0Json(bgContext: bgContext,
                                     jsonData: data)
         }
-
     }
 
     // try to fetch the online root.level0.json file, and if that fails use a copy from the app's bundle instead
-    fileprivate func getData(fileURL: URL, // TODO needs checking/cleanup
+    fileprivate func getData(fileURL: URL,
                              fileInBundleURL: URL,
                              useOnlyFile: Bool) -> String {
         if let urlData = try? String(contentsOf: fileURL, encoding: .utf8), !useOnlyFile {
