@@ -11,6 +11,7 @@ import CoreLocation // for CLLocationCoordinate2DMake
 public class FotoclubBellusImagoMembersProvider {
 
     public init(bgContext: NSManagedObjectContext,
+                useOnlyInBundleFile: Bool = false, // still unused
                 synchronousWithRandomTown: Bool = false,
                 randomTown: String = "RandomTown") {
 
