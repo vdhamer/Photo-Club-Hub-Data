@@ -25,7 +25,7 @@ private let organizationTypesToLoad: [OrganizationTypeEnum] = [.club, .museum]
 public class Level1JsonReader {
 
     public init(bgContext: NSManagedObjectContext,
-                useOnlyFile: Bool = false,
+                useOnlyInBundleFile: Bool = false,
                 overrulingDataSourceFile: String? = nil) {
 
         bgContext.perform { // switch to supplied background thread
@@ -44,7 +44,7 @@ public class Level1JsonReader {
                 fileURL: URL(string: dataSourcePath + overruledDataSourceFile + "." +
                              fileSubType + "." + fileType)!,
                 fileInBundleURL: fileInBundleURL!, // protected by guard statement
-                useOnlyFile: useOnlyFile
+                useOnlyInBundleFile: useOnlyInBundleFile
             )
             self.readRootLevel1Json(bgContext: bgContext,
                                     data: data)
@@ -54,8 +54,8 @@ public class Level1JsonReader {
     // try to fetch the online root.level1.json file, and if that fails use a copy from the app's bundle instead
     fileprivate func getData(fileURL: URL,
                              fileInBundleURL: URL,
-                             useOnlyFile: Bool) -> String {
-        if let urlData = try? String(contentsOf: fileURL, encoding: .utf8), !useOnlyFile {
+                             useOnlyInBundleFile: Bool) -> String {
+        if let urlData = try? String(contentsOf: fileURL, encoding: .utf8), !useOnlyInBundleFile {
             return urlData
         }
         print("Could not access online file \(fileURL.relativeString). Trying in-app file instead.")
