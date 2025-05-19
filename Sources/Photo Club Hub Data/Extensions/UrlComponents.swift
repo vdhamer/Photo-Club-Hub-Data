@@ -28,44 +28,36 @@ public struct UrlComponents: Sendable {
         return dataSourceFile+"."+fileSubType+"."+fileType
     }
 
-    // MARK: - Fotogroep de Gender
-
-    public static let deGender = UrlComponents(
-        dataSourceFile: "fgDeGender",
-        fileSubType: "level2",
-        fileType: "json"
-    )
-
     // MARK: - Waalre
 
-    public static let waalre = UrlComponents(
-        dataSourceFile: "fgWaalre",
-        fileSubType: "level2",
-        fileType: "json"
-    )
+//    public static let waalre = UrlComponents( // TODO remove UrlComponents.waalre (etc)
+//        dataSourceFile: "fgWaalre",
+//        fileSubType: "level2",
+//        fileType: "json"
+//    )
 
     // MARK: - XampleMin
 
-    public static let xampleMin = UrlComponents(
-        dataSourceFile: "xampleMin",
-        fileSubType: "level2",
-        fileType: "json"
-    )
+//    public static let xampleMin = UrlComponents(
+//        dataSourceFile: "xampleMin",
+//        fileSubType: "level2",
+//        fileType: "json"
+//    )
 
     // MARK: - XampleMax
 
-    public static let xampleMax = UrlComponents(
-        dataSourceFile: "xampleMax",
-        fileSubType: "level2",
-        fileType: "json"
-    )
+//    public static let xampleMax = UrlComponents(
+//        dataSourceFile: "xampleMax",
+//        fileSubType: "level2",
+//        fileType: "json"
+//    )
 
     // MARK: - Bellus Imago
 
-    public static let bellusImago = UrlComponents(
-        dataSourceFile: "fcBellusImago",
-        fileSubType: "level2",
-        fileType: "json"
-    )
+//    public static let bellusImago = UrlComponents(
+//        dataSourceFile: "fcBellusImago",
+//        fileSubType: "level2",
+//        fileType: "json"
+//    )
 
 }

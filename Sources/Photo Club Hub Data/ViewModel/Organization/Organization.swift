@@ -182,7 +182,7 @@ extension Organization {
                                                     idPlus.town] )
         let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
         fetchRequest.predicate = predicate
-		let organizations: [Organization] = (try? context.fetch(fetchRequest)) ?? [] // EXC_BAD_ACCESS (code=1, address=0x100)
+		let organizations: [Organization] = (try? context.fetch(fetchRequest)) ?? []
 
         if organizations.count > 1 { // organization exists, but there shouldn't be multiple that satify the predicate
             ifDebugFatalError("Query returned \(organizations.count) organizations named " +

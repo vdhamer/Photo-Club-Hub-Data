@@ -19,17 +19,25 @@ public class Level1JsonReader {
                 fileName: String = "root",  // can overrule the name for unit testing
                 useOnlyInBundleFile: Bool = false // true can be used to avoid publishing a test file to GitHub
                ) {
+        let dummyText = "This struct only contains valid nickname for use as the fileName to fetch."
+        let dummyOrganizationId = OrganizationID(fullName: dummyText, town: dummyText)
+        let dummyOrganizationIdPlus = OrganizationIdPlus(id: dummyOrganizationId, nickname: fileName)
         _ = FetchAndProcessFile(bgContext: bgContext,
-                                filename: fileName, fileSubType: "level1", fileType: "json", // "root.level1.json"
+                                organizationIdPlus: dummyOrganizationIdPlus,
+                                fileSubType: "level1", fileType: "json", // "root.level1.json"
                                 useOnlyInBundleFile: useOnlyInBundleFile,
-                                fileContentProcessor: readRootLevel1Json(bgContext:jsonData:fileName:))
+                                fileContentProcessor: readRootLevel1Json(bgContext:jsonData:organizationIdPlus:))
     }
 
     fileprivate func readRootLevel1Json(bgContext: NSManagedObjectContext,
                                         jsonData: String,
-                                        fileName: String) {
+                                        organizationIdPlus: OrganizationIdPlus) {
 
-        ifDebugPrint("\nWill read Level 1 file (\(fileName)) with a list of organizations in the background.")
+        ifDebugPrint("""
+                     /n
+                     Will read Level 1 file (\(organizationIdPlus.nickname)) \
+                     with a list of organizations in the background.
+                     """)
 
         // hand the data to SwiftyJSON to parse
         let jsonRoot = JSON(parseJSON: jsonData) // call to SwiftyJSON
@@ -39,7 +47,7 @@ public class Level1JsonReader {
 
             let jsonOrganizationsOfOneType: [JSON] = jsonRoot[organizationTypeEnum.unlocalizedPlural].arrayValue
             ifDebugPrint("Found \(jsonOrganizationsOfOneType.count) \(organizationTypeEnum.unlocalizedPlural) " +
-                         "in \(fileName).")
+                         "in \(organizationIdPlus.nickname).")
 
             // extract the requested items (clubs, museums) of that organizationType one-by-one from the json file
             for jsonOrganization in jsonOrganizationsOfOneType {

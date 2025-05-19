@@ -16,30 +16,31 @@ struct FetchAndProcessFile {
                                                 """
 
     init(bgContext: NSManagedObjectContext,
-         filename: String, fileSubType: String, fileType: String,
+         organizationIdPlus: OrganizationIdPlus,
+         fileSubType: String, fileType: String,
          useOnlyInBundleFile: Bool,
          fileContentProcessor: @escaping (_ bgContext: NSManagedObjectContext,
                                           _ jsonData: String,
-                                          _ fileName: String) -> Void) {
+                                          _ organizationIdPlus: OrganizationIdPlus) -> Void) {
         bgContext.perform { [self] in // run on requested background thread
-            let name = filename + "." + fileSubType // e.g. "root.level0"
+            let name = organizationIdPlus.nickname + "." + fileSubType // e.g. "root.level0"
 
             let bundle: Bundle = Bundle.module // bundle may be a package rather than Bundle.main
             let fileInBundleURL: URL? = bundle.url(forResource: name, withExtension: "." + fileType)
             guard fileInBundleURL != nil else {
                 fatalError("""
-                           Failed to find URL to the file \(name).\(fileType) \
+                           Failed to find URL to the file \(organizationIdPlus).\(fileType) \
                            in bundle \(bundle.bundleIdentifier ?? "")
                            """)
             }
 
             let data = self.getData( // get the data from one of the two sources
-                remoteFileURL: URL(string: Self.dataSourcePath + filename + "." +
+                remoteFileURL: URL(string: Self.dataSourcePath + organizationIdPlus.nickname + "." +
                                    fileSubType + "." + fileType)!,
                 fileInBundleURL: fileInBundleURL!, // forced unwrap is safe due to by guard statement
                 useOnlyInBundleFile: useOnlyInBundleFile
             )
-            fileContentProcessor(bgContext, data, filename)
+            fileContentProcessor(bgContext, data, organizationIdPlus)
         }
     }
 

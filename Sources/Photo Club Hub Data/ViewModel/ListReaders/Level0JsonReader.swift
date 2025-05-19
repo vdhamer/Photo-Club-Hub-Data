@@ -16,16 +16,21 @@ public class Level0JsonReader {
                 fileName: String = "root",  // can overrule the name for unit testing
                 useOnlyInBundleFile: Bool = false // true can be used to avoid publishing a test file to GitHub
                ) {
+        let dummyText = "This struct only contains valid nickname for use as the fileName to fetch."
+        let dummyOrganizationId = OrganizationID(fullName: dummyText, town: dummyText)
+        let dummyOrganizationIdPlus = OrganizationIdPlus(id: dummyOrganizationId, nickname: fileName)
         _ = FetchAndProcessFile(bgContext: bgContext,
-                                filename: fileName, fileSubType: "level0", fileType: "json", // "root.level0.json"
+                                organizationIdPlus: dummyOrganizationIdPlus,
+                                fileSubType: "level0", fileType: "json", // "root.level0.json"
                                 useOnlyInBundleFile: useOnlyInBundleFile,
-                                fileContentProcessor: readRootLevel0Json(bgContext:jsonData:fileName:))
+                                fileContentProcessor: readRootLevel0Json(bgContext:jsonData:organizationIdPlus:))
     }
 
     fileprivate func readRootLevel0Json(bgContext: NSManagedObjectContext,
                                         jsonData: String,
-                                        fileName: String) {
+                                        organizationIdPlus: OrganizationIdPlus) {
 
+        let fileName: String = organizationIdPlus.nickname
         ifDebugPrint("\nWill read Level 0 file (\(fileName)) with standard keywords and languages in background.")
 
         // hand the data to SwiftyJSON to parse

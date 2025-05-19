@@ -11,54 +11,54 @@ import CoreLocation // for CLLocationCoordinate2DMake
 
 public class FotogroepWaalreMembersProvider { // WWDC21 Earthquakes also uses a Class here
 
-    public init(bgContext: NSManagedObjectContext,
-                useOnlyInBundleFile: Bool = false, // still unused
-                synchronousWithRandomTown: Bool = false,
-                randomTown: String = "RandomTown") {
+//    public init(bgContext: NSManagedObjectContext, // TODO
+//                useOnlyInBundleFile: Bool = false, // still unused
+//                synchronousWithRandomTown: Bool = false,
+//                randomTown: String = "RandomTown") {
+//
+//        if synchronousWithRandomTown {
+//            bgContext.performAndWait { // execute block synchronously or ...
+//                self.insertOnlineMemberData(bgContext: bgContext, town: randomTown)
+//            }
+//        } else {
+//            bgContext.perform { // ...execute block asynchronously
+//                self.insertOnlineMemberData(bgContext: bgContext)
+//            }
+//        }
+//
+//    }
 
-        if synchronousWithRandomTown {
-            bgContext.performAndWait { // execute block synchronously or ...
-                self.insertOnlineMemberData(bgContext: bgContext, town: randomTown)
-            }
-        } else {
-            bgContext.perform { // ...execute block asynchronously
-                self.insertOnlineMemberData(bgContext: bgContext)
-            }
-        }
-
-    }
-
-    fileprivate func insertOnlineMemberData(bgContext: NSManagedObjectContext, town: String = "Waalre") {
-
-        let fotogroepWaalreIdPlus = OrganizationIdPlus(fullName: "Fotogroep Waalre",
-                                                       town: town,
-                                                       nickname: "fgWaalre")
-
-        bgContext.perform { // execute on background thread
-            let club = Organization.findCreateUpdate(context: bgContext,
-                                                     organizationTypeEnum: .club,
-                                                     idPlus: fotogroepWaalreIdPlus,
-                                                     // real coordinates added in fgWaalre.level2.json
-                                                     coordinates: CLLocationCoordinate2DMake(0, 0),
-                                                     optionalFields: OrganizationOptionalFields() // empty fields
-                                                    )
-            ifDebugPrint("\(club.fullNameTown): Starting insertOnlineMemberData() in background")
-
-            _ = Level2JsonReader(bgContext: bgContext,
-                                 urlComponents: UrlComponents.waalre,
-                                 club: club,
-                                 useOnlyFile: false)
-        }
-
-        do {
-            if bgContext.hasChanges { // optimisation
-                try bgContext.save() // persist club and its online member data
-                print("Sucess loading FG Waalre member data")
-            }
-        } catch {
-            ifDebugFatalError("Error saving members of FG Waalre: \(error.localizedDescription)")
-        }
-    }
+//    fileprivate func insertOnlineMemberData(bgContext: NSManagedObjectContext, town: String = "Waalre") {
+//
+//        let fotogroepWaalreIdPlus = OrganizationIdPlus(fullName: "Fotogroep Waalre",
+//                                                       town: town,
+//                                                       nickname: "fgWaalre")
+//
+//        bgContext.perform { // execute on background thread
+//            let club = Organization.findCreateUpdate(context: bgContext,
+//                                                     organizationTypeEnum: .club,
+//                                                     idPlus: fotogroepWaalreIdPlus,
+//                                                     // real coordinates added in fgWaalre.level2.json
+//                                                     coordinates: CLLocationCoordinate2DMake(0, 0),
+//                                                     optionalFields: OrganizationOptionalFields() // empty fields
+//                                                    )
+//            ifDebugPrint("\(club.fullNameTown): Starting insertOnlineMemberData() in background")
+//
+//            _ = Level2JsonReader(bgContext: bgContext,
+//                                 urlComponents: UrlComponents.waalre,
+//                                 club: club,
+//                                 useOnlyFile: false)
+//        }
+//
+//        do {
+//            if bgContext.hasChanges { // optimisation
+//                try bgContext.save() // persist club and its online member data
+//                print("Sucess loading FG Waalre member data")
+//            }
+//        } catch {
+//            ifDebugFatalError("Error saving members of FG Waalre: \(error.localizedDescription)")
+//        }
+//    }
 
 }
 

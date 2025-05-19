@@ -42,9 +42,8 @@ public class FotogroepDeGenderMembersProvider {
         ifDebugPrint("\(club.fullNameTown): Starting insertOnlineMemberData() in background")
 
         _ = Level2JsonReader(bgContext: bgContext,
-                             urlComponents: UrlComponents.deGender,
-                             club: club,
-                             useOnlyFile: false)
+                             organizationIdPlus: fgIdPlus,
+                             useOnlyInBundleFile: false)
         do {
             try bgContext.save()
         } catch {
