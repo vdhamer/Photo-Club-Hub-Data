@@ -11,13 +11,13 @@ import CoreLocation // for CLLocationCoordinate2DMake
 public class FotogroepDeGenderMembersProvider {
 
     public init(bgContext: NSManagedObjectContext,
-                useOnlyInBundleFile: Bool = false, // still unused
+                useOnlyInBundleFile: Bool = false,
                 synchronousWithRandomTown: Bool = false,
                 randomTown: String = "RandomTown") {
 
         if synchronousWithRandomTown {
             bgContext.performAndWait { // execute block synchronously or ...
-                self.insertOnlineMemberData(bgContext: bgContext, town: randomTown)
+                insertOnlineMemberData(bgContext: bgContext, town: randomTown)
             }
         } else {
             bgContext.perform { // ...execute block asynchronously

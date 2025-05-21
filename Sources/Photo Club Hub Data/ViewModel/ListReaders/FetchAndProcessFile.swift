@@ -16,31 +16,39 @@ struct FetchAndProcessFile {
                                                 """
 
     init(bgContext: NSManagedObjectContext,
-         organizationIdPlus: OrganizationIdPlus,
-         fileSubType: String, fileType: String,
+         organizationIdPlus: OrganizationIdPlus?, // level2 describes individual clubs
+         fileName: String?, // level0 and level1 are not club-specific, so provide either organizIdPlus or fileName
+         fileType: String, fileSubType: String,
          useOnlyInBundleFile: Bool,
          fileContentProcessor: @escaping (_ bgContext: NSManagedObjectContext,
                                           _ jsonData: String,
-                                          _ organizationIdPlus: OrganizationIdPlus) -> Void) {
+                                          _ organizationIdPlus: OrganizationIdPlus?,
+                                          _ fileName: String?) -> Void) {
+        guard organizationIdPlus != nil || fileName != nil else {
+            fatalError("Either organizationIdPlus or fileName must be provided")
+        }
         bgContext.perform { [self] in // run on requested background thread
-            let name = organizationIdPlus.nickname + "." + fileSubType // e.g. "root.level0"
+            let nameWithSubtype = (organizationIdPlus?.nickname ?? fileName!) + "." + fileSubType // e.g. "root.level0"
 
             let bundle: Bundle = Bundle.module // bundle may be a package rather than Bundle.main
-            let fileInBundleURL: URL? = bundle.url(forResource: name, withExtension: "." + fileType)
+            let fileInBundleURL: URL? = bundle.url(forResource: nameWithSubtype, withExtension: "." + fileType)
             guard fileInBundleURL != nil else {
                 fatalError("""
-                           Failed to find URL to the file \(organizationIdPlus).\(fileType) \
-                           in bundle \(bundle.bundleIdentifier ?? "")
+                           Failed to find URL to the file \
+                           \(organizationIdPlus?.nickname ?? fileName ?? "fileName?" ).\(fileSubType).\(fileType) \
+                           in bundle \(bundle.bundleIdentifier ?? "bundle?")
                            """)
             }
 
-            let data = self.getData( // get the data from one of the two sources
-                remoteFileURL: URL(string: Self.dataSourcePath + organizationIdPlus.nickname + "." +
-                                   fileSubType + "." + fileType)!,
-                fileInBundleURL: fileInBundleURL!, // forced unwrap is safe due to by guard statement
+            let optionalName: String? = organizationIdPlus?.nickname ?? fileName // one of them is not nil (guard)
+            let data = getData( // get the data from one of the two sources
+                remoteFileURL: URL(string: Self.dataSourcePath + optionalName! // "fgDeGender" or "root"
+                                   + "." + fileSubType // ".level2" or ".level1"
+                                   + "." + fileType)!, // ".json"
+                fileInBundleURL: fileInBundleURL!, // forced unwrap is safe (due to guard statement above)
                 useOnlyInBundleFile: useOnlyInBundleFile
             )
-            fileContentProcessor(bgContext, data, organizationIdPlus)
+            fileContentProcessor(bgContext, data, organizationIdPlus, fileName)
         }
     }
 

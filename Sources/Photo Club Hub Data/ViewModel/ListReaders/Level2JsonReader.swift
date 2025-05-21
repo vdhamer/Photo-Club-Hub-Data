@@ -28,14 +28,21 @@ public class Level2JsonReader { // normally running on a background thread
                ) {
         _ = FetchAndProcessFile(bgContext: bgContext,
                                 organizationIdPlus: organizationIdPlus,
-                                fileSubType: "level2", fileType: "json", // "root.level0.json"
+                                fileName: nil,
+                                fileType: "json", fileSubType: "level2", // "root.level0.json"
                                 useOnlyInBundleFile: useOnlyInBundleFile,
-                                fileContentProcessor: mergeLevel2Json(bgContext:jsonData:targetIdPlus:))
+                                fileContentProcessor: readRootLevel2Json(bgContext:jsonData:targetIdPlus:fileName:))
     }
 
-    fileprivate func mergeLevel2Json(bgContext: NSManagedObjectContext,
-                                     jsonData: String,
-                                     targetIdPlus: OrganizationIdPlus) {
+    fileprivate func readRootLevel2Json(bgContext: NSManagedObjectContext,
+                                        jsonData: String,
+                                        targetIdPlus: OrganizationIdPlus?,
+                                        fileName: String?) {
+        guard targetIdPlus != nil else {
+            ifDebugFatalError("Missing `targetIdPlus` in readRootLevel2Json()")
+            return
+        }
+        let targetIdPlus: OrganizationIdPlus = targetIdPlus! // safe due to guard statement
         ifDebugPrint("Loading members of club \(targetIdPlus.fullName) in background.")
 
         let jsonRoot: JSON = JSON(parseJSON: jsonData) // pass the data to SwiftyJSON to parse
@@ -57,20 +64,20 @@ public class Level2JsonReader { // normally running on a background thread
                                         town: jsonIdPlus["town"].stringValue,
                                         nickname: jsonIdPlus["nickName"].stringValue)
 
-        if !isDebug() {
-            // Only load Level2 files for clubs already listed in a Level1 file.
-            // But skip this checking when in DEBUG mode (=developers).
-            // And, when in RELEASE mode, this aborts mergeLevel2Json with a string printed - which nobody will see.
-            guard targetIdPlus.town == idPlus.town && targetIdPlus.fullName == idPlus.fullName
-            else {
-                //  throw MergeError.mismatchedNameTown("""
-                //                                      Error: mismatched Name/Town for club \
-                //                                      \(club.fullNameTown) in \(targetIdPlus.fullName)
-                //                                      """)
-                ifDebugFatalError("Error: mismatched Name/Town for club \(targetIdPlus.fullName)")
-                return
-            }
-        }
+//        if !isDebug() { // TODO needed?
+//            // Only load Level2 files for clubs already listed in a Level1 file.
+//            // But skip this checking when in DEBUG mode (=developers).
+//            // And, when in RELEASE mode, this aborts mergeLevel2Json with a string printed - which nobody will see.
+//            guard targetIdPlus.town == idPlus.town && targetIdPlus.fullName == idPlus.fullName
+//            else {
+//                //  throw MergeError.mismatchedNameTown("""
+//                //                                      Error: mismatched Name/Town for club \
+//                //                                      \(club.fullNameTown) in \(targetIdPlus.fullName)
+//                //                                      """)
+//                ifDebugFatalError("Error: mismatched Name/Town for club \(targetIdPlus.fullName)")
+//                return
+//            }
+//        }
 
         // hopefully the club already exists, but if not.. create it
         let club: Organization = Organization.findCreateUpdate(context: bgContext,
@@ -102,7 +109,6 @@ public class Level2JsonReader { // normally running on a background thread
                               file: #fileID, line: #line) // likely deprecation of #fileID in Swift 6.0
             // in release mode, the failed database update is only logged. App doesn't stop.
             ifDebugPrint("Failed to save JSON ClubList items in background")
-            // throw MergeError.saveFailed /* "Error: failed to save Level 2 changes to Core Data" */ // TODO
             ifDebugFatalError("Error: failed to save Level 2 changes to Core Data")
        }
 

@@ -23,10 +23,14 @@ let package = Package(
             name: "Photo Club Hub Data",
             dependencies: ["SwiftyJSON"],
             resources: [
-                // can be done with a single copy command at directory level?
+                // copying can probably also be done with a single copy command at directory level
                 .copy("JSON/root.level0.json"),
                 .copy("JSON/root.level1.json"),
-                .copy("JSON/fgDeGender.level2.json")
+                .copy("JSON/fgDeGender.level2.json"),
+                .copy("JSON/fgWaalre.level2.json"),
+                .copy("JSON/fcBellusImago.level2.json"),
+                .copy("JSON/xampleMax.level2.json"),
+                .copy("JSON/xampleMin.level2.json")
             ]
         ),
         .testTarget(

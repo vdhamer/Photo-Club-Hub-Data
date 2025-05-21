@@ -19,25 +19,28 @@ public class Level1JsonReader {
                 fileName: String = "root",  // can overrule the name for unit testing
                 useOnlyInBundleFile: Bool = false // true can be used to avoid publishing a test file to GitHub
                ) {
-        let dummyText = "This struct only contains valid nickname for use as the fileName to fetch."
-        let dummyOrganizationId = OrganizationID(fullName: dummyText, town: dummyText)
-        let dummyOrganizationIdPlus = OrganizationIdPlus(id: dummyOrganizationId, nickname: fileName)
         _ = FetchAndProcessFile(bgContext: bgContext,
-                                organizationIdPlus: dummyOrganizationIdPlus,
-                                fileSubType: "level1", fileType: "json", // "root.level1.json"
+                                organizationIdPlus: nil, // no specific Organization for level1 fles
+                                fileName: fileName,
+                                fileType: "json", fileSubType: "level1", // "root.level1.json"
                                 useOnlyInBundleFile: useOnlyInBundleFile,
-                                fileContentProcessor: readRootLevel1Json(bgContext:jsonData:organizationIdPlus:))
+                                fileContentProcessor: readRootLevel1Json(bgContext:
+                                                                         jsonData:
+                                                                         organizationIdPlus:
+                                                                         fileName:))
     }
 
     fileprivate func readRootLevel1Json(bgContext: NSManagedObjectContext,
                                         jsonData: String,
-                                        organizationIdPlus: OrganizationIdPlus) {
+                                        organizationIdPlus: OrganizationIdPlus?,
+                                        fileName: String?) {
 
-        ifDebugPrint("""
-                     /n
-                     Will read Level 1 file (\(organizationIdPlus.nickname)) \
-                     with a list of organizations in the background.
-                     """)
+        guard fileName != nil else {
+            ifDebugFatalError("Missing `fileName` in readRootLevel1Json()")
+            return
+        }
+        let fileName = fileName!
+        ifDebugPrint("/nWill read (\(fileName)).level1.json with a list of organizations in the background.")
 
         // hand the data to SwiftyJSON to parse
         let jsonRoot = JSON(parseJSON: jsonData) // call to SwiftyJSON
@@ -47,7 +50,7 @@ public class Level1JsonReader {
 
             let jsonOrganizationsOfOneType: [JSON] = jsonRoot[organizationTypeEnum.unlocalizedPlural].arrayValue
             ifDebugPrint("Found \(jsonOrganizationsOfOneType.count) \(organizationTypeEnum.unlocalizedPlural) " +
-                         "in \(organizationIdPlus.nickname).")
+                         "in \(fileName).")
 
             // extract the requested items (clubs, museums) of that organizationType one-by-one from the json file
             for jsonOrganization in jsonOrganizationsOfOneType {

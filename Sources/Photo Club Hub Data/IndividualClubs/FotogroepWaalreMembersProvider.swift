@@ -11,54 +11,50 @@ import CoreLocation // for CLLocationCoordinate2DMake
 
 public class FotogroepWaalreMembersProvider { // WWDC21 Earthquakes also uses a Class here
 
-//    public init(bgContext: NSManagedObjectContext, // TODO reenable
-//                useOnlyInBundleFile: Bool = false, // still unused
-//                synchronousWithRandomTown: Bool = false,
-//                randomTown: String = "RandomTown") {
-//
-//        if synchronousWithRandomTown {
-//            bgContext.performAndWait { // execute block synchronously or ...
-//                self.insertOnlineMemberData(bgContext: bgContext, town: randomTown)
-//            }
-//        } else {
-//            bgContext.perform { // ...execute block asynchronously
-//                self.insertOnlineMemberData(bgContext: bgContext)
-//            }
-//        }
-//
-//    }
+    public init(bgContext: NSManagedObjectContext,
+                useOnlyInBundleFile: Bool = false,
+                synchronousWithRandomTown: Bool = false,
+                randomTown: String = "RandomTown") {
 
-//    fileprivate func insertOnlineMemberData(bgContext: NSManagedObjectContext, town: String = "Waalre") {
-//
-//        let fotogroepWaalreIdPlus = OrganizationIdPlus(fullName: "Fotogroep Waalre",
-//                                                       town: town,
-//                                                       nickname: "fgWaalre")
-//
-//        bgContext.perform { // execute on background thread
-//            let club = Organization.findCreateUpdate(context: bgContext,
-//                                                     organizationTypeEnum: .club,
-//                                                     idPlus: fotogroepWaalreIdPlus,
-//                                                     // real coordinates added in fgWaalre.level2.json
-//                                                     coordinates: CLLocationCoordinate2DMake(0, 0),
-//                                                     optionalFields: OrganizationOptionalFields() // empty fields
-//                                                    )
-//            ifDebugPrint("\(club.fullNameTown): Starting insertOnlineMemberData() in background")
-//
-//            _ = Level2JsonReader(bgContext: bgContext,
-//                                 urlComponents: UrlComponents.waalre,
-//                                 club: club,
-//                                 useOnlyFile: false)
-//        }
-//
-//        do {
-//            if bgContext.hasChanges { // optimisation
-//                try bgContext.save() // persist club and its online member data
-//                print("Sucess loading FG Waalre member data")
-//            }
-//        } catch {
-//            ifDebugFatalError("Error saving members of FG Waalre: \(error.localizedDescription)")
-//        }
-//    }
+        if synchronousWithRandomTown {
+            bgContext.performAndWait { // execute block synchronously or ...
+                insertOnlineMemberData(bgContext: bgContext, town: randomTown, useOnlyInBundleFile: useOnlyInBundleFile)
+            }
+        } else {
+            bgContext.perform { // ...execute block asynchronously
+                self.insertOnlineMemberData(bgContext: bgContext, useOnlyInBundleFile: useOnlyInBundleFile)
+            }
+        }
+
+    }
+
+    fileprivate func insertOnlineMemberData(bgContext: NSManagedObjectContext,
+                                            town: String = "Waalre",
+                                            useOnlyInBundleFile: Bool) {
+
+        let fgWaalreIdPlus = OrganizationIdPlus(fullName: "Fotogroep Waalre",
+                                                       town: town,
+                                                       nickname: "fgWaalre")
+
+            let club = Organization.findCreateUpdate(context: bgContext,
+                                                     organizationTypeEnum: .club,
+                                                     idPlus: fgWaalreIdPlus,
+                                                     // real coordinates added in fgWaalre.level2.json
+                                                     coordinates: CLLocationCoordinate2DMake(0, 0),
+                                                     optionalFields: OrganizationOptionalFields() // empty fields
+                                                    )
+            ifDebugPrint("\(club.fullNameTown): Starting insertOnlineMemberData() in background")
+
+            _ = Level2JsonReader(bgContext: bgContext,
+                                 organizationIdPlus: fgWaalreIdPlus,
+                                 useOnlyInBundleFile: useOnlyInBundleFile)
+
+        do {
+            try bgContext.save()
+        } catch {
+            ifDebugFatalError("Failed to save club \(fgWaalreIdPlus.nickname)", file: #fileID, line: #line)
+        }
+    }
 
 }
 
