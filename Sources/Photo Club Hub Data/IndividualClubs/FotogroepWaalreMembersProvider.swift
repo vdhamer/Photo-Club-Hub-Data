@@ -11,7 +11,7 @@ import CoreLocation // for CLLocationCoordinate2DMake
 
 public class FotogroepWaalreMembersProvider { // WWDC21 Earthquakes also uses a Class here
 
-//    public init(bgContext: NSManagedObjectContext, // TODO
+//    public init(bgContext: NSManagedObjectContext, // TODO reenable
 //                useOnlyInBundleFile: Bool = false, // still unused
 //                synchronousWithRandomTown: Bool = false,
 //                randomTown: String = "RandomTown") {
