@@ -29,8 +29,8 @@ let package = Package(
                 .copy("JSON/fgDeGender.level2.json"),
                 .copy("JSON/fgWaalre.level2.json"),
                 .copy("JSON/fcBellusImago.level2.json"),
-                .copy("JSON/xampleMax.level2.json"),
-                .copy("JSON/xampleMin.level2.json")
+                .copy("JSON/XampleMax.level2.json"),
+                .copy("JSON/XampleMin.level2.json")
             ]
         ),
         .testTarget(
