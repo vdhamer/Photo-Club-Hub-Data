@@ -1,5 +1,5 @@
 //
-//  ExampleMinMembersProvider.swift
+//  XampleMinMembersProvider.swift
 //  Photo Club Hub
 //
 //  Created by Peter van den Hamer on 17/07/2021.
@@ -28,7 +28,7 @@ public class XampleMinMembersProvider {
     }
 
     fileprivate func insertOnlineMemberData(bgContext: NSManagedObjectContext, town: String = "Rotterdam") {
-        let idPlus = OrganizationIdPlus(fullName: "Xample Club Min",
+        let idPlus = OrganizationIdPlus(fullName: "Xample Club With Minimal Data",
                                           town: town,
                                           nickname: "XampleMin")
 
