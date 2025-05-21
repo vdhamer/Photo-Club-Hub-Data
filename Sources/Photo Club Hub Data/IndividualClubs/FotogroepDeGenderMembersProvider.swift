@@ -28,13 +28,13 @@ public class FotogroepDeGenderMembersProvider {
     }
 
     fileprivate func insertOnlineMemberData(bgContext: NSManagedObjectContext, town: String = "Eindhoven") {
-        let fgIdPlus = OrganizationIdPlus(fullName: "Fotogroep de Gender",
-                                          town: town,
-                                          nickname: "fgDeGender")
+        let idPlus = OrganizationIdPlus(fullName: "Fotogroep de Gender",
+                                        town: town,
+                                        nickname: "fgDeGender")
 
         let club = Organization.findCreateUpdate(context: bgContext,
                                                  organizationTypeEnum: .club,
-                                                 idPlus: fgIdPlus,
+                                                 idPlus: idPlus,
                                                  // real coordinates added in fgDeGender.level2.json
                                                  coordinates: CLLocationCoordinate2DMake(0, 0),
                                                  optionalFields: OrganizationOptionalFields() // empty fields
@@ -42,12 +42,12 @@ public class FotogroepDeGenderMembersProvider {
         ifDebugPrint("\(club.fullNameTown): Starting insertOnlineMemberData() in background")
 
         _ = Level2JsonReader(bgContext: bgContext,
-                             organizationIdPlus: fgIdPlus,
+                             organizationIdPlus: idPlus,
                              useOnlyInBundleFile: false)
         do {
             try bgContext.save()
         } catch {
-            ifDebugFatalError("Failed to save club \(fgIdPlus.nickname)", file: #fileID, line: #line)
+            ifDebugFatalError("Failed to save club \(idPlus.nickname)", file: #fileID, line: #line)
         }
     }
 

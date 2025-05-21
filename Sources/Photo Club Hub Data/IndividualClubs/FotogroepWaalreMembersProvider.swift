@@ -32,27 +32,27 @@ public class FotogroepWaalreMembersProvider { // WWDC21 Earthquakes also uses a 
                                             town: String = "Waalre",
                                             useOnlyInBundleFile: Bool) {
 
-        let fgWaalreIdPlus = OrganizationIdPlus(fullName: "Fotogroep Waalre",
-                                                       town: town,
-                                                       nickname: "fgWaalre")
+        let idPlus = OrganizationIdPlus(fullName: "Fotogroep Waalre",
+                                        town: town,
+                                        nickname: "fgWaalre")
 
-            let club = Organization.findCreateUpdate(context: bgContext,
-                                                     organizationTypeEnum: .club,
-                                                     idPlus: fgWaalreIdPlus,
-                                                     // real coordinates added in fgWaalre.level2.json
-                                                     coordinates: CLLocationCoordinate2DMake(0, 0),
-                                                     optionalFields: OrganizationOptionalFields() // empty fields
-                                                    )
-            ifDebugPrint("\(club.fullNameTown): Starting insertOnlineMemberData() in background")
+        let club = Organization.findCreateUpdate(context: bgContext,
+                                                 organizationTypeEnum: .club,
+                                                 idPlus: idPlus,
+                                                 // real coordinates added in fgWaalre.level2.json
+                                                 coordinates: CLLocationCoordinate2DMake(0, 0),
+                                                 optionalFields: OrganizationOptionalFields() // empty fields
+        )
+        ifDebugPrint("\(club.fullNameTown): Starting insertOnlineMemberData() in background")
 
-            _ = Level2JsonReader(bgContext: bgContext,
-                                 organizationIdPlus: fgWaalreIdPlus,
-                                 useOnlyInBundleFile: useOnlyInBundleFile)
+        _ = Level2JsonReader(bgContext: bgContext,
+                             organizationIdPlus: idPlus,
+                             useOnlyInBundleFile: useOnlyInBundleFile)
 
         do {
             try bgContext.save()
         } catch {
-            ifDebugFatalError("Failed to save club \(fgWaalreIdPlus.nickname)", file: #fileID, line: #line)
+            ifDebugFatalError("Failed to save club \(idPlus.nickname)", file: #fileID, line: #line)
         }
     }
 

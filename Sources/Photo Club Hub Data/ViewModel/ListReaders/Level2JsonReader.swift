@@ -176,8 +176,7 @@ public class Level2JsonReader { // normally running on a background thread
 
         _ = Organization.findCreateUpdate(context: bgContext,
                                           organizationTypeEnum: OrganizationTypeEnum.club,
-                                          idPlus: OrganizationIdPlus(id: OrganizationID(fullName: club.fullName,
-                                                                                     town: club.town),
+                                          idPlus: OrganizationIdPlus(fullName: club.fullName, town: club.town,
                                                                      nickname: club.nickname),
                                           coordinates: coordinates,
                                           optionalFields: OrganizationOptionalFields(
