@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "9FCD3154-5140-4BC8-A910-3E9E06E910C4",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Photo Club Hub HTML.xcodeproj",
+        "identifier" : "D06B8D452DA48F3200547A05",
+        "name" : "Photo Club Hub HTMLTests"
+      }
+    }
+  ],
+  "version" : 1
+}

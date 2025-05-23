@@ -1,0 +1,33 @@
+{
+    "clubs": [
+        {
+            "idPlus": {
+                "town": "Rotterdam",
+                "fullName": "Xample Club With Minimal Data",
+                "nickName": "XampleMin"
+            },
+            "optional": {
+                "coordinates": {
+                    "latitude": 51.92275,
+                    "longitude": 4.47972
+                },
+                "level2URL": "https://www.example.com/XampleMin.level2.json"
+            }
+        }
+    ],
+    "museums": [
+        {
+            "idPlus": {
+                "town": "New York",
+                "fullName": "Fotografiska New York",
+                "nickName": "Fotografiska NYC"
+            },
+            "optional": {
+                "coordinates": {
+                    "latitude": 40.739278,
+                    "longitude": -73.986722
+                }
+            }
+        }
+    ]
+}

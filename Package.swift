@@ -32,7 +32,12 @@ let package = Package(
                 .copy("JSON/fcBellusImago.level2.json"),
 
                 .copy("JSON/XampleMin.level2.json"),
-                .copy("JSON/XampleMax.level2.json")
+                .copy("JSON/XampleMax.level2.json"),
+
+                .copy("JSONtesting/empty.level0.json"),
+                .copy("JSONtesting/abstractKeyword.level0.json"),
+                .copy("JSONtesting/language.level0.json"),
+                .copy("JSONtesting/languages.level0.json")
             ]
         ),
         .testTarget(
