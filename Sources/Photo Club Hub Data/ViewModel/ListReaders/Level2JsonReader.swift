@@ -14,35 +14,28 @@ import CoreLocation // for CLLocationCoordinate2D
 
 public class Level2JsonReader { // normally running on a background thread
 
-//    enum MergeError: Error {
-//        case invalidJsonData(String)
-//        case clubNotFound(String)
-//        case mismatchedNameTown(String)
-//        case saveFailed
-//    }
-
-    // init() does all the work: it fetches the JSON data, parses it, and updates the data stored in Core Data.
+    // init() does it all: it fetches the JSON data, parses it, and updates the data stored in Core Data.
     public init(bgContext: NSManagedObjectContext,
                 organizationIdPlus: OrganizationIdPlus,
-                useOnlyInBundleFile: Bool = false // true can be used to avoid publishing a test file to GitHub
+                useOnlyInBundleFile: Bool = false // true avoids fetching the latest version from GitHub
                ) {
-        _ = FetchAndProcessFile(bgContext: bgContext,
-                                organizationIdPlus: organizationIdPlus,
-                                fileName: nil,
-                                fileType: "json", fileSubType: "level2", // "root.level0.json"
+        _ = FetchAndProcessFile( // FetchAndProcessFile fetches jsonData and passes it to readRootLevel2Json
+                                bgContext: bgContext,
+                                fileSelector: FileSelector(organizationIdPlus: organizationIdPlus),
+                                fileType: "json",
+                                fileSubType: "level2", // "fgDeGender.level2.json"
                                 useOnlyInBundleFile: useOnlyInBundleFile,
-                                fileContentProcessor: readRootLevel2Json(bgContext:jsonData:targetIdPlus:fileName:))
+                                fileContentProcessor: readRootLevel2Json(bgContext:jsonData:fileSelector:)
+                               )
     }
 
     fileprivate func readRootLevel2Json(bgContext: NSManagedObjectContext,
                                         jsonData: String,
-                                        targetIdPlus: OrganizationIdPlus?,
-                                        fileName: String?) {
-        guard targetIdPlus != nil else {
-            ifDebugFatalError("Missing `targetIdPlus` in readRootLevel2Json()")
-            return
+                                        fileSelector: FileSelector) {
+        guard fileSelector.organizationIdPlus != nil else {
+            fatalError("Missing `targetIdorganizationIdPlus` in readRootLevel2Json()")
         }
-        let targetIdPlus: OrganizationIdPlus = targetIdPlus! // safe due to guard statement
+        let targetIdPlus: OrganizationIdPlus = fileSelector.organizationIdPlus! // safe due to guard statement
         ifDebugPrint("Loading members of club \(targetIdPlus.fullName) in background.")
 
         let jsonRoot: JSON = JSON(parseJSON: jsonData) // pass the data to SwiftyJSON to parse

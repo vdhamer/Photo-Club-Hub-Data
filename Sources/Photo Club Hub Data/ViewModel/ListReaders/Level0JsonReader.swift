@@ -17,27 +17,19 @@ public class Level0JsonReader {
                 useOnlyInBundleFile: Bool = false // true can be used to avoid publishing a test file to GitHub
                ) {
         _ = FetchAndProcessFile(bgContext: bgContext,
-                                organizationIdPlus: nil, // no specific Organization for level0 fles
-                                fileName: fileName,
+                                fileSelector: FileSelector(fileName: fileName),
                                 fileType: "json", fileSubType: "level0", // "root.level0.json"
                                 useOnlyInBundleFile: useOnlyInBundleFile,
                                 fileContentProcessor: readRootLevel0Json(bgContext:
                                                                          jsonData:
-                                                                         organizationIdPlus:
-                                                                         fileName:))
+                                                                         fileSelector:))
     }
 
     fileprivate func readRootLevel0Json(bgContext: NSManagedObjectContext,
                                         jsonData: String,
-                                        organizationIdPlus: OrganizationIdPlus?,
-                                        fileName: String?) {
+                                        fileSelector: FileSelector) {
 
-        guard organizationIdPlus != nil || fileName != nil else {
-            ifDebugFatalError("Either organizationIdPlus or fileName must be provided")
-            return
-        }
-
-        let fileName: String = organizationIdPlus?.nickname ?? fileName ?? "unnamed"
+        let fileName: String = fileSelector.fileName
         ifDebugPrint("\nWill read Level 0 file (\(fileName)) with standard keywords and languages in background.")
 
         // hand the data to SwiftyJSON to parse
