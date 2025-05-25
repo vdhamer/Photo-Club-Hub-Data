@@ -14,9 +14,17 @@
   "testTargets" : [
     {
       "target" : {
+        "containerPath" : "container:Photo Club Hub Data",
+        "identifier" : "Photo Club Hub DataTests",
+        "name" : "Photo Club Hub DataTests"
+      }
+    },
+    {
+      "enabled" : false,
+      "target" : {
         "containerPath" : "container:Photo Club Hub HTML.xcodeproj",
-        "identifier" : "D06B8D452DA48F3200547A05",
-        "name" : "Photo Club Hub HTMLTests"
+        "identifier" : "D05E36A52DD253A7005697AC",
+        "name" : "Photo Club Hub DataTests"
       }
     }
   ],
