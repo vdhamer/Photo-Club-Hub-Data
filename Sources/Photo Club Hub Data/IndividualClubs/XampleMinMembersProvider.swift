@@ -34,11 +34,7 @@ public class XampleMinMembersProvider {
 
         let club = Organization.findCreateUpdate(context: bgContext,
                                                  organizationTypeEnum: .club,
-                                                 idPlus: idPlus,
-                                                 // real coordinates added in XampleMin.level2.json
-                                                 coordinates: CLLocationCoordinate2DMake(0, 0),
-                                                 optionalFields: OrganizationOptionalFields() // empty fields
-        )
+                                                 idPlus: idPlus)
         ifDebugPrint("\(club.fullNameTown): Starting insertOnlineMemberData() in background")
 
         _ = Level2JsonReader(bgContext: bgContext,

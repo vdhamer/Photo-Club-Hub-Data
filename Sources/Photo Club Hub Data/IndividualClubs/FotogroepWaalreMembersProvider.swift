@@ -38,10 +38,7 @@ public class FotogroepWaalreMembersProvider { // WWDC21 Earthquakes also uses a 
 
         let club = Organization.findCreateUpdate(context: bgContext,
                                                  organizationTypeEnum: .club,
-                                                 idPlus: idPlus,
-                                                 // real coordinates added in fgWaalre.level2.json
-                                                 coordinates: CLLocationCoordinate2DMake(0, 0),
-                                                 optionalFields: OrganizationOptionalFields() // empty fields
+                                                 idPlus: idPlus
         )
         ifDebugPrint("\(club.fullNameTown): Starting insertOnlineMemberData() in background")
 

@@ -169,9 +169,9 @@ extension Organization {
     public static func findCreateUpdate(context: NSManagedObjectContext, // can be foreground or background context
                                         organizationTypeEnum: OrganizationTypeEnum,
                                         idPlus: OrganizationIdPlus,
-                                        coordinates: CLLocationCoordinate2D,
+                                        coordinates: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0),
                                         removeOrganization: Bool = false, // can remove records for removed org's
-                                        optionalFields: OrganizationOptionalFields,
+                                        optionalFields: OrganizationOptionalFields = OrganizationOptionalFields(),
                                         pinned: Bool = false) -> Organization {
 
         let predicateFormat: String = "fullName_ = %@ AND town_ = %@" // avoid localization

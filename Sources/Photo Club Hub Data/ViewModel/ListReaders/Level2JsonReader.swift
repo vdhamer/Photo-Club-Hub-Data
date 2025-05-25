@@ -19,7 +19,7 @@ public class Level2JsonReader { // normally running on a background thread
                 organizationIdPlus: OrganizationIdPlus,
                 useOnlyInBundleFile: Bool = false // true avoids fetching the latest version from GitHub
                ) {
-        _ = FetchAndProcessFile( // FetchAndProcessFile fetches jsonData and passes it to readRootLevel2Json
+        _ = FetchAndProcessFile( // FetchAndProcessFile fetches jsonData and passes it to readRootLevel2Json()
                                 bgContext: bgContext,
                                 fileSelector: FileSelector(organizationIdPlus: organizationIdPlus),
                                 fileType: "json",
@@ -32,52 +32,42 @@ public class Level2JsonReader { // normally running on a background thread
     fileprivate func readRootLevel2Json(bgContext: NSManagedObjectContext,
                                         jsonData: String,
                                         fileSelector: FileSelector) {
-        guard fileSelector.organizationIdPlus != nil else {
+
+        guard fileSelector.organizationIdPlus != nil else { // need id of a club
             fatalError("Missing `targetIdorganizationIdPlus` in readRootLevel2Json()")
         }
-        let targetIdPlus: OrganizationIdPlus = fileSelector.organizationIdPlus! // safe due to guard statement
+        let targetIdPlus: OrganizationIdPlus = fileSelector.organizationIdPlus! // safe due to preceding guard statement
         ifDebugPrint("Loading members of club \(targetIdPlus.fullName) in background.")
 
         let jsonRoot: JSON = JSON(parseJSON: jsonData) // pass the data to SwiftyJSON to parse
         guard jsonRoot["club"].exists() else {
-            // throw MergeError.invalidJsonData("Cannot find `club` keyword for club \(idPlus.fullName)")
             ifDebugFatalError("Cannot find `club` keyword for club \(targetIdPlus.fullName)")
             return
         }
 
         let jsonClub: JSON = jsonRoot["club"]
         guard jsonClub["idPlus"].exists() else {
-            // throw MergeError.invalidJsonData("Cannot find idPlus keyword for club \(idPlus.fullName)")
             ifDebugFatalError("Cannot find `idPlus` keyword for club \(targetIdPlus.fullName)")
             return
         }
 
         let jsonIdPlus: JSON = jsonClub["idPlus"]
-        let idPlus = OrganizationIdPlus(fullName: jsonIdPlus["fullName"].stringValue, // idPlus found in JSON file
+        let idPlus = OrganizationIdPlus(fullName: jsonIdPlus["fullName"].stringValue, // idPlus found inside JSON file
                                         town: jsonIdPlus["town"].stringValue,
                                         nickname: jsonIdPlus["nickName"].stringValue)
 
-//        if !isDebug() { // TODO needed?
-//            // Only load Level2 files for clubs already listed in a Level1 file.
-//            // But skip this checking when in DEBUG mode (=developers).
-//            // And, when in RELEASE mode, this aborts mergeLevel2Json with a string printed - which nobody will see.
-//            guard targetIdPlus.town == idPlus.town && targetIdPlus.fullName == idPlus.fullName
-//            else {
-//                //  throw MergeError.mismatchedNameTown("""
-//                //                                      Error: mismatched Name/Town for club \
-//                //                                      \(club.fullNameTown) in \(targetIdPlus.fullName)
-//                //                                      """)
-//                ifDebugFatalError("Error: mismatched Name/Town for club \(targetIdPlus.fullName)")
-//                return
-//            }
-//        }
+        guard idPlus.fullName == targetIdPlus.fullName else { // does fine contain the right club?
+            ifDebugFatalError("""
+                              Warning: JSON file for club \(targetIdPlus.fullName) \
+                              contains club \(idPlus.fullName) instead.
+                              """)
+            return // in non-debug software, just don't load the file
+        }
 
-        // hopefully the club already exists, but if not.. create it
+        // normally  the club already exists, but if not.. create it
         let club: Organization = Organization.findCreateUpdate(context: bgContext,
                                                                organizationTypeEnum: OrganizationTypeEnum.club,
-                                                               idPlus: idPlus,
-                                                               coordinates: CLLocationCoordinate2DMake(0, 0),
-                                                               optionalFields: OrganizationOptionalFields()) // empty
+                                                               idPlus: idPlus)
 
         // optional fields within jsonClub
         if jsonClub["optional"].exists() {
@@ -98,8 +88,7 @@ public class Level2JsonReader { // normally running on a background thread
                 try bgContext.save() // persist contents of entire Level2.json file
             }
         } catch {
-            ifDebugFatalError("Failed to save changes to Core Data",
-                              file: #fileID, line: #line) // likely deprecation of #fileID in Swift 6.0
+            ifDebugFatalError("Failed to save changes to Core Data", file: #fileID, line: #line)
             // in release mode, the failed database update is only logged. App doesn't stop.
             ifDebugPrint("Failed to save JSON ClubList items in background")
             ifDebugFatalError("Error: failed to save Level 2 changes to Core Data")
