@@ -76,7 +76,7 @@ extension Photographer {
     // Update existing attributes or fill the new object
     public static func findCreateUpdate(context: NSManagedObjectContext, // foreground or background context
                                         personName: PersonName,
-                                        optionalFields: PhotographerOptionalFields
+                                        optionalFields: PhotographerOptionalFields = PhotographerOptionalFields()
                                        ) -> Photographer {
         let predicateFormat: String = "givenName_ = %@ AND infixName_ = %@ AND familyName_ = %@" // avoid localization
         let predicate = NSPredicate(format: predicateFormat, argumentArray: [

@@ -23,7 +23,7 @@ extension MemberPortfolio { // findCreateUpdate() records in Member table
                                         // remove records for members that disappeared from lists:
                                         removeMember: Bool = false,
                                         // non-identifying attributes of a Member:
-                                        optionalFields: MemberOptionalFields
+                                        optionalFields: MemberOptionalFields = MemberOptionalFields() // empty default
     ) -> MemberPortfolio {
 
         let predicateFormat: String = "organization_ = %@ AND photographer_ = %@" // avoid localization of query string
