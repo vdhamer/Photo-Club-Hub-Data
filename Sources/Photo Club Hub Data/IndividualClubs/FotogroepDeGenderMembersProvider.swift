@@ -6,7 +6,6 @@
 //
 
 import CoreData // for PersistenceController
-import CoreLocation // for CLLocationCoordinate2DMake
 
 public class FotogroepDeGenderMembersProvider {
 

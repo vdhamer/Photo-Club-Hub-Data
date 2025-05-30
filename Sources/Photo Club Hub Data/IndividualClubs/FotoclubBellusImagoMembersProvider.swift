@@ -6,12 +6,11 @@
 //
 
 import CoreData // for PersistenceController
-import CoreLocation // for CLLocationCoordinate2DMake
 
 public class FotoclubBellusImagoMembersProvider {
 
     public init(bgContext: NSManagedObjectContext,
-                useOnlyInBundleFile: Bool = false, // still unused
+                useOnlyInBundleFile: Bool = false,
                 synchronousWithRandomTown: Bool = false,
                 randomTown: String = "RandomTown") {
 

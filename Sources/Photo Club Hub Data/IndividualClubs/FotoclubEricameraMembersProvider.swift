@@ -1,22 +1,22 @@
 //
-//  XampleMaxMembersProvider.swift
-//  Photo Club Hub
+//  FotoclubEricameraMembersProvider.swift
+//  Photo Club Hub Data
 //
-//  Created by Peter van den Hamer on 17/07/2021.
+//  Created by Peter van den Hamer on 29/05/2025.
 //
 
 import CoreData // for PersistenceController
 
-public class XampleMaxMembersProvider {
+public class FotoclubEricameraMembersProvider {
 
     public init(bgContext: NSManagedObjectContext,
-                useOnlyInBundleFile: Bool = false,
+                useOnlyInBundleFile: Bool = true,
                 synchronousWithRandomTown: Bool = false,
                 randomTown: String = "RandomTown") {
 
         if synchronousWithRandomTown {
             bgContext.performAndWait { // ...or execute same block synchronously
-                insertOnlineMemberData(bgContext: bgContext, town: randomTown)
+                self.insertOnlineMemberData(bgContext: bgContext, town: randomTown)
             }
         } else {
             bgContext.perform { // execute block asynchronously...
@@ -26,14 +26,15 @@ public class XampleMaxMembersProvider {
 
     }
 
-    fileprivate func insertOnlineMemberData(bgContext: NSManagedObjectContext, town: String = "Amsterdam") {
-        let idPlus = OrganizationIdPlus(fullName: "Xample Club With Maximal Data",
+    fileprivate func insertOnlineMemberData(bgContext: NSManagedObjectContext, town: String = "Eindhoven") {
+        let idPlus = OrganizationIdPlus(fullName: "Fotoclub Ericamera",
                                         town: town,
-                                        nickname: "XampleMax")
+                                        nickname: "fcEricamera")
 
         let club = Organization.findCreateUpdate(context: bgContext,
                                                  organizationTypeEnum: .club,
-                                                 idPlus: idPlus)
+                                                 idPlus: idPlus
+                                                )
         ifDebugPrint("\(club.fullNameTown): Starting insertOnlineMemberData() in background")
 
         _ = Level2JsonReader(bgContext: bgContext,
