@@ -9,22 +9,26 @@
 // But you are not allowed to provide both.
 struct FileSelector {
     let organizationIdPlus: OrganizationIdPlus?
+    let isInTestBundle: Bool
+
     private let providedFileName: String?
 
-    init(organizationIdPlus: OrganizationIdPlus) {
+    init(organizationIdPlus: OrganizationIdPlus, isInTestBundle: Bool) {
         self.organizationIdPlus = organizationIdPlus
         self.providedFileName = nil
+        self.isInTestBundle = isInTestBundle
     }
 
-    init(fileName: String) {
+    init(fileName: String, isInTestBundle: Bool) {
         self.providedFileName = fileName
         self.organizationIdPlus = nil
+        self.isInTestBundle = isInTestBundle
     }
 
     @available(*, unavailable)
-    init(organizationIdPlus: OrganizationIdPlus, fileName: String) {
+    init(organizationIdPlus: OrganizationIdPlus, fileName: String, isInTestBundle: Bool) {
         ifDebugFatalError("Calls to SelectFile.init() must supply one parameter only.")
-        self.init(organizationIdPlus: organizationIdPlus) // try to continue although there is an error
+        self.init(organizationIdPlus: organizationIdPlus, isInTestBundle: isInTestBundle) // continue despite the error
     }
 
     var fileName: String {

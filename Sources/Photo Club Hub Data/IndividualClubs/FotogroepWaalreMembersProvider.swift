@@ -43,6 +43,7 @@ public class FotogroepWaalreMembersProvider { // WWDC21 Earthquakes also uses a 
 
         _ = Level2JsonReader(bgContext: bgContext,
                              organizationIdPlus: idPlus,
+                             isInTestBundle: false,
                              useOnlyInBundleFile: useOnlyInBundleFile)
 
         do {

@@ -14,10 +14,11 @@ public class Level0JsonReader {
 
     public init(bgContext: NSManagedObjectContext,
                 fileName: String = "root",  // can overrule the name for unit testing
+                isInTestBundle: Bool,
                 useOnlyInBundleFile: Bool = false // true can be used to avoid publishing a test file to GitHub
                ) {
         _ = FetchAndProcessFile(bgContext: bgContext,
-                                fileSelector: FileSelector(fileName: fileName),
+                                fileSelector: FileSelector(fileName: fileName, isInTestBundle: isInTestBundle),
                                 fileType: "json", fileSubType: "level0", // "root.level0.json"
                                 useOnlyInBundleFile: useOnlyInBundleFile,
                                 fileContentProcessor: readRootLevel0Json(bgContext:

@@ -38,6 +38,7 @@ public class XampleMinMembersProvider {
 
         _ = Level2JsonReader(bgContext: bgContext,
                              organizationIdPlus: idPlus,
+                             isInTestBundle: false,
                              useOnlyInBundleFile: false)
         do {
             try bgContext.save()

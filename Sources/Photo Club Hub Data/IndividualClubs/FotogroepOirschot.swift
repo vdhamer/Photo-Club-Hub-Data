@@ -1,16 +1,16 @@
 //
-//  FotoclubBellusImagoMembersProvider.swift
-//  Photo Club Hub
+//  File.swift
+//  Photo Club Hub Data
 //
-//  Created by Peter van den Hamer on 24/03/2025.
+//  Created by Peter van den Hamer on 31/05/2025.
 //
 
 import CoreData // for PersistenceController
 
-public class FotoclubBellusImagoMembersProvider {
+public class FotogroepOirschotMembersProvider {
 
     public init(bgContext: NSManagedObjectContext,
-                useOnlyInBundleFile: Bool = false,
+                useOnlyInBundleFile: Bool = true,
                 synchronousWithRandomTown: Bool = false,
                 randomTown: String = "RandomTown") {
 
@@ -26,10 +26,10 @@ public class FotoclubBellusImagoMembersProvider {
 
     }
 
-    fileprivate func insertOnlineMemberData(bgContext: NSManagedObjectContext, town: String = "Veldhoven") {
-        let idPlus = OrganizationIdPlus(fullName: "Fotoclub Bellus Imago",
+    fileprivate func insertOnlineMemberData(bgContext: NSManagedObjectContext, town: String = "Oirschot") {
+        let idPlus = OrganizationIdPlus(fullName: "Fotogroep Oirschot",
                                         town: town,
-                                        nickname: "fcBellusImago")
+                                        nickname: "fgOirschot")
 
         let club = Organization.findCreateUpdate(context: bgContext,
                                                  organizationTypeEnum: .club,

@@ -31,19 +31,21 @@ let package = Package(
                 .copy("JSON/fgWaalre.level2.json"),
                 .copy("JSON/fcBellusImago.level2.json"),
                 .copy("JSON/fcEricamera.level2.json"),
+                .copy("JSON/fgOirschot.level2.json"),
 
                 .copy("JSON/XampleMin.level2.json"),
-                .copy("JSON/XampleMax.level2.json"),
-
-                .copy("JSONtesting/empty.level0.json"),
-                .copy("JSONtesting/abstractKeyword.level0.json"),
-                .copy("JSONtesting/language.level0.json"),
-                .copy("JSONtesting/languages.level0.json")
+                .copy("JSON/XampleMax.level2.json")
             ]
         ),
         .testTarget(
             name: "Photo Club Hub DataTests",
-            dependencies: ["Photo Club Hub Data"]
+            dependencies: ["Photo Club Hub Data"],
+            resources: [
+                .copy("JSON/empty.level0.json"),
+                .copy("JSON/abstractKeyword.level0.json"),
+                .copy("JSON/language.level0.json"),
+                .copy("JSON/languages.level0.json")
+            ]
         )
     ]
 )

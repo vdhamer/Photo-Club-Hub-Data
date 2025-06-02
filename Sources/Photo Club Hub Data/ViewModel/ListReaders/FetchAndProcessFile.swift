@@ -25,13 +25,26 @@ struct FetchAndProcessFile {
         bgContext.perform { [self] in // run on requested background thread
             let nameWithSubtype = (fileSelector.fileName) + "." + fileSubType // e.g. "root.level0"
 
-            let bundle: Bundle = Bundle.module // bundle may be a package rather than Bundle.main
-            let fileInBundleURL: URL? = bundle.url(forResource: nameWithSubtype, withExtension: "." + fileType)
+            var bundle: Bundle = Bundle.module // overwritten by Test Bundle depending if fileSelector.isInTestBundle
+
+            if fileSelector.isInTestBundle {
+                let testUrl = Bundle.module.bundleURL.deletingLastPathComponent().appending(
+                    path: "Photo Club Hub Data_Photo Club Hub DataTests.bundle")
+                let testBundle: Bundle? = Bundle(url: testUrl)
+                guard testBundle != nil else {
+                    fatalError("""
+                               Failed to find URL to test bundle \
+                               \(fileSelector.fileName).\(fileSubType).\(fileType) because testBundle is nil.
+                               """)
+                }
+                bundle = testBundle!
+           }
+
+            let fileInBundleURL: URL? = bundle.url(forResource: nameWithSubtype, withExtension: fileType)
             guard fileInBundleURL != nil else {
                 fatalError("""
                            Failed to find URL to the file \
-                           \(fileSelector.fileName).\(fileSubType).\(fileType) \
-                           in bundle \(bundle.bundleIdentifier ?? "bundle?")
+                           \(fileSelector.fileName).\(fileSubType).\(fileType) because fileInBundleURL is nil.
                            """)
             }
 

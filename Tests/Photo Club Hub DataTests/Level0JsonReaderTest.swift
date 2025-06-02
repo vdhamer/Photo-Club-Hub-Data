@@ -31,7 +31,7 @@ import CoreData // for NSManagedObjectContext
         #expect(PhotographerKeyword.count(context: bgContext) == 0)
 
         _ = Level0JsonReader(bgContext: bgContext, // read root.Level0.json file
-                             fileName: "empty",
+                             fileName: "empty", isInTestBundle: true,
                              useOnlyInBundleFile: false)
         #expect(Keyword.count(context: bgContext) == 0)
         #expect(LocalizedKeyword.count(context: bgContext) == 0)
@@ -53,7 +53,7 @@ import CoreData // for NSManagedObjectContext
 
         bgContext.performAndWait {
             _ = Level0JsonReader(bgContext: bgContext, // read root.Level0.json file
-                                 fileName: "abstractKeyword",
+                                 fileName: "abstractKeyword", isInTestBundle: true,
                                  useOnlyInBundleFile: false)
             try? bgContext.save()
         }
@@ -74,7 +74,7 @@ import CoreData // for NSManagedObjectContext
         #expect(Keyword.count(context: bgContext) == 0)
 
         _ = Level0JsonReader(bgContext: bgContext, // read root.Level0.json file
-                             fileName: "root",
+                             fileName: "root", isInTestBundle: false,
                              useOnlyInBundleFile: false)
         #expect(Keyword.count(context: bgContext) == 21)
     }
@@ -93,7 +93,7 @@ import CoreData // for NSManagedObjectContext
         #expect(LocalizedKeyword.count(context: bgContext) == 0)
 
         _ = Level0JsonReader(bgContext: bgContext, // read root.Level0.json file
-                             fileName: "language",
+                             fileName: "language", isInTestBundle: true,
                              useOnlyInBundleFile: false)
 
         #expect(Language.count(context: bgContext, isoCode: "UR") == 1)
@@ -115,7 +115,7 @@ import CoreData // for NSManagedObjectContext
         #expect(LocalizedKeyword.count(context: bgContext) == 0)
 
         _ = Level0JsonReader(bgContext: bgContext, // read root.Level0.json file
-                             fileName: "languages",
+                             fileName: "languages", isInTestBundle: true,
                              useOnlyInBundleFile: false)
 
         #expect(Language.count(context: bgContext, isoCode: "EN") == 1)

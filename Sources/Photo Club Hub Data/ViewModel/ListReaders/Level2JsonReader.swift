@@ -17,11 +17,13 @@ public class Level2JsonReader { // normally running on a background thread
     // init() does it all: it fetches the JSON data, parses it, and updates the data stored in Core Data.
     public init(bgContext: NSManagedObjectContext,
                 organizationIdPlus: OrganizationIdPlus,
+                isInTestBundle: Bool,
                 useOnlyInBundleFile: Bool = false // true avoids fetching the latest version from GitHub
                ) {
         _ = FetchAndProcessFile( // FetchAndProcessFile fetches jsonData and passes it to readRootLevel2Json()
                                 bgContext: bgContext,
-                                fileSelector: FileSelector(organizationIdPlus: organizationIdPlus),
+                                fileSelector: FileSelector(organizationIdPlus: organizationIdPlus,
+                                                           isInTestBundle: isInTestBundle),
                                 fileType: "json",
                                 fileSubType: "level2", // "fgDeGender.level2.json"
                                 useOnlyInBundleFile: useOnlyInBundleFile,
