@@ -28,8 +28,8 @@ public class XampleMinMembersProvider {
 
     fileprivate func insertOnlineMemberData(bgContext: NSManagedObjectContext, town: String = "Rotterdam") {
         let idPlus = OrganizationIdPlus(fullName: "Xample Club With Minimal Data",
-                                          town: town,
-                                          nickname: "XampleMin")
+                                        town: town,
+                                        nickname: "XampleMin")
 
         let club = Organization.findCreateUpdate(context: bgContext,
                                                  organizationTypeEnum: .club,
