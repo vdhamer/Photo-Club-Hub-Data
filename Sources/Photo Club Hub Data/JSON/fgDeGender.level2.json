@@ -59,7 +59,7 @@
                 "nlSpecific": {
                     "fotobondNumber": 1620108
                 },
-                "keywords": [ "Travel", "Street", "Museum" ]
+                "keywords": [ "Travel", "Museum" ]
             }
         },
 
@@ -76,7 +76,7 @@
                 "nlSpecific": {
                     "fotobondNumber": 1620059
                 },
-                "keywords": [ "Architecture", "Postprocessing", "Travel" ]
+                "keywords": [ "Travel" ]
             }
         },
 
@@ -126,7 +126,7 @@
                 "website": "https://glass.photo/jerdam",
                 "level3URL": "http://www.vdhamer.com/fgDeGender/Bettina_de_Graaf/",
                 "membershipStartDate": "2024-01-01",
-                "keywords": [ "Portrait", "Street", "Concert" ],
+                "keywords": [ "Portrait", "Concert" ],
                 "nlSpecific": {
                     "fotobondNumber": 1620111
                 }
@@ -160,7 +160,7 @@
                 "website": "https://www.ericvdven.nl/",
                 "level3URL": "http://www.vdhamer.com/fgDeGender/Eric_van_de_Ven/",
                 "membershipStartDate": "2022-12-01",
-                "keywords": [ "Experimental", "Mixed-Media", "Postprocessing" ],
+                "keywords": [ "Experimental", "Mixed-Media" ],
                 "nlSpecific": {
                     "fotobondNumber": 1620109
                 }
@@ -182,7 +182,7 @@
                 "nlSpecific": {
                     "fotobondNumber": 1620099
                 },
-                "keywords": [ "Street", "Portrait", "Macro" ]
+                "keywords": [ "Street", "Macro" ]
             }
         },
 
@@ -286,7 +286,7 @@
                     "isOther": false
                 },
                 "membershipStartDate": "2016-04-01",
-                "keywords": [ "Architecture", "Black & White", "Landscape" ],
+                "keywords": [ "Architecture", "Landscape" ],
                 "nlSpecific": {
                     "fotobondNumber": 1620090
                 }
@@ -324,7 +324,7 @@
                 "nlSpecific": {
                     "fotobondNumber": 1620103
                 },
-                "keywords": [ "Street", "Portrait", "Abstract" ]
+                "keywords": [ "Street", "Portrait" ]
             }
         },
 
@@ -422,7 +422,7 @@
                 "nlSpecific": {
                     "fotobondNumber": 1620104
                 },
-                "keywords": [ "Architecture", "Experimental", "Landscape" ]
+                "keywords": [ "Experimental", "Landscape" ]
             }
         },
 
@@ -547,7 +547,7 @@
                     "isAdmin": true
                 },
                 "membershipStartDate": "2024-01-01",
-                "keywords": [ "Landscape", "Minimal", "Travel" ],
+                "keywords": [ "Minimal", "Travel" ],
                 "nlSpecific": {
                     "fotobondNumber": 1620110
                 }
@@ -597,7 +597,7 @@
                 "birthday": "9999-12-19",
                 "level3URL": "http://www.vdhamer.com/fgDeGender/Regina_Bakker/",
                 "membershipStartDate": "2020-01-01",
-                "keywords": [ "Landscape", "Abstract", "Macro" ],
+                "keywords": [ "Abstract", "Macro" ],
                 "nlSpecific": {
                     "fotobondNumber": 1620101
                 }
@@ -617,7 +617,7 @@
                 "nlSpecific": {
                     "fotobondNumber": 1620093
                 },
-                "keywords": [ "Conceptual", "Abstract", "Experimental" ]
+                "keywords": [ "Conceptual", "Abstract" ]
             }
         },
 
@@ -685,7 +685,7 @@
                 "nlSpecific": {
                     "fotobondNumber": 1620078
                 },
-                "keywords": [ "Portrait" ]
+                "keywords": [ "Portrait", "Travel" ]
             }
         },
 
