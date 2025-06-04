@@ -42,7 +42,7 @@ let package = Package(
             dependencies: ["Photo Club Hub Data"],
             resources: [
                 .copy("JSON/empty.level0.json"),
-                .copy("JSON/abstractKeyword.level0.json"),
+                .copy("JSON/abstractExpertise.level0.json"),
                 .copy("JSON/language.level0.json"),
                 .copy("JSON/languages.level0.json")
             ]
