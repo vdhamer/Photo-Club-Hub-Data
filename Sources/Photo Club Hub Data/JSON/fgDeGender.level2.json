@@ -92,7 +92,7 @@
                 "status": {
                     "isProspectiveMember": false
                 },
-                "keywords": [ "Bird", "Landscape", "Macro" ]
+                "keywords": [ "Bird", "Landscape" ]
             }
         },
 
@@ -358,7 +358,7 @@
                     "isOther": false
                 },
                 "membershipStartDate": "2005-01-01",
-                "keywords": [ "Macro", "Panorama", "Experimental" ],
+                "keywords": [ "Macro", "Panorama" ],
                 "nlSpecific": {
                     "fotobondNumber": 1620064
                 }
@@ -652,7 +652,7 @@
                 "nlSpecific": {
                     "fotobondNumber": 1620106
                 },
-                "keywords": [ "Architecture", "Portrait", "Black & White" ]
+                "keywords": [ "Architecture", "Portrait" ]
             }
         },
 
@@ -701,7 +701,7 @@
                 "status": {
                     "isProspectiveMember": false
                 },
-                "keywords": [ "Bird", "Landscape", "Architecture" ]
+                "keywords": [ "Bird", "Landscape" ]
             }
         },
 
