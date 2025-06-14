@@ -20,7 +20,12 @@ public struct LocalizedExpertiseResultLists {
 
 public struct LocalizedExpertiseResultList {
 
-    public let icon: String // cannot be modified
+    public init(isStandard: Bool, list: [LocalizedKeywordResult]) {
+        self.icon = isStandard ? "🏵️" : "🪲"
+        self.list = list
+    }
+
+    public let icon: String // cannot be modified, icon is a single Unicode character
     public var list: [LocalizedKeywordResult]
 
 }
