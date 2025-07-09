@@ -18,6 +18,8 @@
       "fotobondNumber": 1674
     }
   },
+
+
   "members": [
     {
       "name": {
@@ -33,12 +35,11 @@
         "roles": {
           "isMember": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Bas",
@@ -53,12 +54,11 @@
         "roles": {
           "isMember": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Ben",
@@ -73,12 +73,11 @@
         "roles": {
           "isBestuurslid": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Bob",
@@ -93,12 +92,11 @@
         "roles": {
           "isVoorzitter": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Cor",
@@ -113,12 +111,11 @@
         "roles": {
           "isMember": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Edjoe",
@@ -133,12 +130,11 @@
         "roles": {
           "isMember": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Geoff",
@@ -153,12 +149,11 @@
         "roles": {
           "isBestuurslid": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Gerd",
@@ -173,12 +168,11 @@
         "roles": {
           "isMember": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Gertjan",
@@ -193,12 +187,11 @@
         "roles": {
           "isMember": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Harry",
@@ -213,12 +206,11 @@
         "roles": {
           "isMember": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Ineke",
@@ -233,12 +225,11 @@
         "roles": {
           "isMember": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Joost",
@@ -253,12 +244,11 @@
         "roles": {
           "isMember": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Klaas",
@@ -273,12 +263,11 @@
         "roles": {
           "isMember": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Manfred",
@@ -293,12 +282,11 @@
         "roles": {
           "isPenningmeester": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Marie-Louise",
@@ -313,12 +301,11 @@
         "roles": {
           "isSecretaris": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Marjo",
@@ -334,11 +321,10 @@
       "roles": {
         "isMember": true
       },
-      "keywords": [
-        "Aaa",
-        "Bbb"
+      "expertises": [
       ]
     },
+
     {
       "name": {
         "givenName": "Peter",
@@ -353,12 +339,11 @@
         "roles": {
           "isMember": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Rob",
@@ -373,12 +358,11 @@
         "roles": {
           "isMember": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     },
+
     {
       "name": {
         "givenName": "Ton",
@@ -393,11 +377,10 @@
         "roles": {
           "isMember": true
         },
-        "keywords": [
-          "Aaa",
-          "Bbb"
+        "expertises": [
         ]
       }
     }
+
   ]
 }

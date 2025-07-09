@@ -192,7 +192,7 @@ public class Level2JsonReader { // normally running on a background thread
         let membershipEndDate: Date? = jsonOptionals["membershipEndDate"].exists() ?
             jsonOptionals["membershipEndDate"].stringValue.extractDate() : nil
 
-        let photographerKeywords: [JSON] = jsonOptionals["keywords"].arrayValue
+        let photographerExpertises: [JSON] = jsonOptionals["expertises"].arrayValue
 
         let fotobondNumber: Int32? = jsonOptionals["nlSpecific"]["fotobondNumber"].exists() ?
             jsonOptionals["nlSpecific"]["fotobondNumber"].int32Value : nil
@@ -207,7 +207,7 @@ public class Level2JsonReader { // normally running on a background thread
                                               isDeceased: memberRolesAndStatus.isDeceased(),
                                               photographerWebsite: photographerWebsite,
                                               photographerImage: photographerImage,
-                                              photographerKeywords: photographerKeywords
+                                              photographerExpertises: photographerExpertises
                                               )
                                           )
 

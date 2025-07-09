@@ -22,8 +22,8 @@ extension Photographer {
         fatalError("init() is not available. Use .findCreateUpdate instead.")
     }
 
-    public var photographerKeywords: Set<PhotographerKeyword> {
-        (photographerKeywords_ as? Set<PhotographerKeyword>) ?? []
+    public var photographerExpertises: Set<PhotographerExpertise> {
+        (photographerExpertises_ as? Set<PhotographerExpertise>) ?? []
     }
 
 	var memberships: Set<MemberPortfolio> {
@@ -148,15 +148,15 @@ extension Photographer {
             photographer.photographerImage = newImage
         }
 
-        for photographerKeywordJSON in optionalFields.photographerKeywords {
-            let photographerKeywordID = photographerKeywordJSON.stringValue
-            let keyword = Keyword.findCreateUpdateUndefStandard(context: bgContext,
-                                                                id: photographerKeywordID,
-                                                                name: [],
-                                                                usage: [])
-            _ = PhotographerKeyword.findCreateUpdate(context: bgContext,
-                                                     photographer: photographer,
-                                                     keyword: keyword)
+        for photographerExpertiseJSON in optionalFields.photographerExpertises {
+            let photographerExpertiseID = photographerExpertiseJSON.stringValue
+            let expertise = Expertise.findCreateUpdateUndefStandard(context: bgContext,
+                                                                    id: photographerExpertiseID,
+                                                                    name: [],
+                                                                    usage: [])
+            _ = PhotographerExpertise.findCreateUpdate(context: bgContext,
+                                                       photographer: photographer,
+                                                       expertise: expertise)
         }
 
         var hasChanges: Bool = bgContext.hasChanges

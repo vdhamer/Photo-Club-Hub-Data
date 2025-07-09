@@ -1,5 +1,5 @@
 {
-    "keywords": [
+    "expertises": [
 
         {
             "idString": "Abstract",
@@ -294,6 +294,7 @@
                  ]
             }
         }
+
     ],
 
     "languages": [
