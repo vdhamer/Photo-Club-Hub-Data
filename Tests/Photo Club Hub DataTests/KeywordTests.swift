@@ -1,5 +1,5 @@
 //
-// KeywordTests.swift
+// ExpertiseTests.swift
 //  Photo Club HubTests
 //
 //  Created by Peter van den Hamer on 21/02/2025.
@@ -9,7 +9,7 @@ import Testing
 @testable import Photo_Club_Hub_Data
 import CoreData // for NSManagedObjectContext
 
-@MainActor @Suite("Tests the Core Data Keyword class") struct KeywordTests {
+@MainActor @Suite("Tests the Core Data Expertise class") struct ExpertiseTests {
 
     fileprivate let context: NSManagedObjectContext
 
@@ -17,43 +17,44 @@ import CoreData // for NSManagedObjectContext
         context = PersistenceController.shared.container.viewContext
     }
 
-    @Test("Add a standard keyword") func addStandardKeyword() throws {
-        let keywordID = String.random(length: 10).capitalized
-        let keyword = Keyword.findCreateUpdateStandard(context: context, id: keywordID, name: [], usage: [])
-        #expect(keyword.id == keywordID)
-        #expect(keyword.isStandard == true)
-        Keyword.save(context: context, errorText: "Error saving keyword \"\(keywordID)\"")
-        #expect(Keyword.count(context: context, keywordID: keywordID) == 1)
+    @Test("Add a standard keyword") func addStandardExpertise() throws {
+        let expertiseID = String.random(length: 10).capitalized
+        let expertise = Expertise.findCreateUpdateStandard(context: context, id: expertiseID, name: [], usage: [])
+        #expect(expertise.id == expertiseID)
+        #expect(expertise.isStandard == true)
+        Expertise.save(context: context, errorText: "Error saving expertise \"\(expertiseID)\"")
+        #expect(Expertise.count(context: context, expertiseID: expertiseID) == 1)
     }
 
-    @Test("Add a non-standard keyword") func addNonStandardKeyword() throws {
-        let keywordID = String.random(length: 10).capitalized
-        let keyword = Keyword.findCreateUpdateNonStandard(context: context, id: keywordID, name: [], usage: [])
-        #expect(keyword.id == keywordID)
-        #expect(keyword.isStandard == false)
-        Keyword.save(context: context, errorText: "Error saving keyword \"\(keywordID)\"")
-        #expect(Keyword.count(context: context, keywordID: keywordID) == 1)
+    @Test("Add a non-standard keyword") func addNonStandardExpertise() throws {
+        let expertiseID = String.random(length: 10).capitalized
+        let expertise = Expertise.findCreateUpdateNonStandard(context: context, id: expertiseID, name: [], usage: [])
+        #expect(expertise.id == expertiseID)
+        #expect(expertise.isStandard == false)
+        Expertise.save(context: context, errorText: "Error saving keyword \"\(expertiseID)\"")
+        #expect(Expertise.count(context: context, expertiseID: expertiseID) == 1)
     }
 
     @Test("Check capitalization of incoming ID strings") func checkIdCaplitalization() throws {
-        let keywordID = "a " + String.random(length: 8).capitalized
-        let keyword = Keyword.findCreateUpdateStandard(context: context, id: keywordID.capitalized, name: [], usage: [])
-        #expect(keyword.id == keywordID.capitalized)
+        let expertiseID = "a " + String.random(length: 8).capitalized
+        let expertise = Expertise.findCreateUpdateStandard(context: context, id: expertiseID.capitalized,
+                                                           name: [], usage: [])
+        #expect(expertise.id == expertiseID.capitalized)
     }
 
-    @Test("Avoid creating same keyword twice") func avoidDuplicateKeywords() {
+    @Test("Avoid creating same keyword twice") func avoidDuplicateExpertises() {
         let id = String.random(length: 10).capitalized
-        let keyword1 = Keyword.findCreateUpdateStandard(context: context, id: id, name: [], usage: [])
-        #expect(keyword1.isStandard == true)
-        Keyword.save(context: context, errorText: "Error saving keyword \"\(id)\"")
-        #expect(Keyword.count(context: context, keywordID: id) == 1)
-        Keyword.save(context: context, errorText: "Error saving keyword \"\(id)\"") // shouldn't create a new record
+        let expertise1 = Expertise.findCreateUpdateStandard(context: context, id: id, name: [], usage: [])
+        #expect(expertise1.isStandard == true)
+        Expertise.save(context: context, errorText: "Error saving keyword \"\(id)\"")
+        #expect(Expertise.count(context: context, expertiseID: id) == 1)
+        Expertise.save(context: context, errorText: "Error saving keyword \"\(id)\"") // shouldn't create a new record
 
-        let keyword2 = Keyword.findCreateUpdateNonStandard(context: context, id: id, name: [], usage: [])
-        #expect(Keyword.count(context: context, keywordID: id) == 1)
-        #expect(keyword2.isStandard == false)
+        let expertise2 = Expertise.findCreateUpdateNonStandard(context: context, id: id, name: [], usage: [])
+        #expect(Expertise.count(context: context, expertiseID: id) == 1)
+        #expect(expertise2.isStandard == false)
 
-        #expect(keyword1.isStandard == false) // should not create a new record
+        #expect(expertise1.isStandard == false) // should not create a new record
     }
 
 }
