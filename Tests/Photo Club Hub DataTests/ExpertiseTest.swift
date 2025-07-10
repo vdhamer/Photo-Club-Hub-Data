@@ -1,5 +1,5 @@
 //
-// ExpertiseTests.swift
+//  ExpertiseTest.swift
 //  Photo Club HubTests
 //
 //  Created by Peter van den Hamer on 21/02/2025.
@@ -17,7 +17,7 @@ import CoreData // for NSManagedObjectContext
         context = PersistenceController.shared.container.viewContext
     }
 
-    @Test("Add a standard keyword") func addStandardExpertise() throws {
+    @Test("Add a standard expertise") func addStandardExpertise() throws {
         let expertiseID = String.random(length: 10).capitalized
         let expertise = Expertise.findCreateUpdateStandard(context: context, id: expertiseID, name: [], usage: [])
         #expect(expertise.id == expertiseID)
@@ -26,12 +26,12 @@ import CoreData // for NSManagedObjectContext
         #expect(Expertise.count(context: context, expertiseID: expertiseID) == 1)
     }
 
-    @Test("Add a non-standard keyword") func addNonStandardExpertise() throws {
+    @Test("Add a non-standard expertise") func addNonStandardExpertise() throws {
         let expertiseID = String.random(length: 10).capitalized
         let expertise = Expertise.findCreateUpdateNonStandard(context: context, id: expertiseID, name: [], usage: [])
         #expect(expertise.id == expertiseID)
         #expect(expertise.isStandard == false)
-        Expertise.save(context: context, errorText: "Error saving keyword \"\(expertiseID)\"")
+        Expertise.save(context: context, errorText: "Error saving expertise \"\(expertiseID)\"")
         #expect(Expertise.count(context: context, expertiseID: expertiseID) == 1)
     }
 
@@ -42,13 +42,13 @@ import CoreData // for NSManagedObjectContext
         #expect(expertise.id == expertiseID.capitalized)
     }
 
-    @Test("Avoid creating same keyword twice") func avoidDuplicateExpertises() {
+    @Test("Avoid creating same expertise twice") func avoidDuplicateExpertises() {
         let id = String.random(length: 10).capitalized
         let expertise1 = Expertise.findCreateUpdateStandard(context: context, id: id, name: [], usage: [])
         #expect(expertise1.isStandard == true)
-        Expertise.save(context: context, errorText: "Error saving keyword \"\(id)\"")
+        Expertise.save(context: context, errorText: "Error saving expertise \"\(id)\"")
         #expect(Expertise.count(context: context, expertiseID: id) == 1)
-        Expertise.save(context: context, errorText: "Error saving keyword \"\(id)\"") // shouldn't create a new record
+        Expertise.save(context: context, errorText: "Error saving expertise \"\(id)\"") // shouldn't create a new record
 
         let expertise2 = Expertise.findCreateUpdateNonStandard(context: context, id: id, name: [], usage: [])
         #expect(Expertise.count(context: context, expertiseID: id) == 1)

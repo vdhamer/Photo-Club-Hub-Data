@@ -1,5 +1,5 @@
 //
-//  LocalizedKeywordTest.swift
+//  LocalizedExertiseTest.swift
 //  Photo Club HubTests
 //
 //  Created by Peter van den Hamer on 23/02/2025.
@@ -9,7 +9,7 @@ import Testing
 @testable import Photo_Club_Hub_Data
 import CoreData // for NSManagedObjectContext
 
-@MainActor @Suite("Tests the Core Data LocalizedKeyword class") struct LocalizedKeywordTests {
+@MainActor @Suite("Tests the Core Data LocalizedExpertise class") struct LocalizedExpertiseTest {
 
     fileprivate let context: NSManagedObjectContext
 
@@ -17,7 +17,7 @@ import CoreData // for NSManagedObjectContext
         context = PersistenceController.shared.container.viewContext
     }
 
-    @Test("Create a randomly named LocalizedKeyword") func addLocalizedKeyword() {
+    @Test("Create a randomly named LocalizedExpertise") func addLocalizedExpertise() {
         let expertise = Expertise.findCreateUpdateNonStandard(context: context, id: String.random(length: 5),
                                                               name: [], usage: [])
         let language = Language.findCreateUpdate(context: context, isoCode: "NL")
@@ -38,7 +38,7 @@ import CoreData // for NSManagedObjectContext
         #expect(localizedExpertise.usage == localizedUsage)
     }
 
-    @Test("Check that isoCode can handle lower case") func addLocalizedKeywordLowerCase() {
+    @Test("Check that isoCode can handle lower case") func addLocalizedExpertiseLowerCase() {
         let expertise = Expertise.findCreateUpdateNonStandard(context: context, id: String.random(length: 25),
                                                               name: [], usage: [])
         let language = Language.findCreateUpdate(context: context, isoCode: "eN")
@@ -56,7 +56,7 @@ import CoreData // for NSManagedObjectContext
         #expect(localizedExpertise.language.nameEN == "English")
     }
 
-    @Test("Is nil handled properly") func addLocalizedKeywordNilUsage() {
+    @Test("Is nil handled properly") func addLocalizedExpertiseNilUsage() {
         let expertise = Expertise.findCreateUpdateNonStandard(context: context, id: String.random(length: 25),
                                                               name: [], usage: [])
         let language = Language.findCreateUpdate(context: context, isoCode: "NL")
@@ -72,7 +72,7 @@ import CoreData // for NSManagedObjectContext
         #expect(localizedExpertise.usage == nil)
     }
 
-    @Test("Is nil overwritten properly") func addLocalizedKeywordReplaceNil() {
+    @Test("Is nil overwritten properly") func addLocalizedExpertiseReplaceNil() {
         let expertise = Expertise.findCreateUpdateNonStandard(context: context, id: String.random(length: 25),
                                                               name: [], usage: [])
         let language = Language.findCreateUpdate(context: context, isoCode: "NL")

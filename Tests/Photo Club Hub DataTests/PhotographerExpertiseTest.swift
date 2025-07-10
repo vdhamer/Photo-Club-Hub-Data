@@ -1,5 +1,5 @@
 //
-//  PhotographerKeywordTest.swift
+//  PhotographerExpertiseTest.swift
 //  Photo Club HubTests
 //
 //  Created by Peter van den Hamer on 26/02/2025.
@@ -9,7 +9,7 @@ import Testing
 @testable import Photo_Club_Hub_Data
 import CoreData // for NSManagedObjectContext
 
-@MainActor @Suite("Tests the Core Data PhotographerKeyword class") struct PhotographerKeywordTests {
+@MainActor @Suite("Tests the Core Data PhotographerExpertise class") struct PhotographerExpertiseTest {
 
     fileprivate let context: NSManagedObjectContext
     fileprivate let photographer: Photographer
@@ -24,23 +24,23 @@ import CoreData // for NSManagedObjectContext
                                                      optionalFields: optionalFields)
     }
 
-    @Test("Create a random keyword for a random photographer") func addPhotographerKeyword() {
+    @Test("Create a random expertise for a random photographer") func addPhotographerExpertise() {
 
         let expertiseID = String.random(length: 10).capitalized // internally expertise.id is capitalized
-        let photographerKeyword = PhotographerExpertise.findCreateUpdate(
+        let photographerExpertise = PhotographerExpertise.findCreateUpdate(
             context: context,
             photographer: photographer,
             expertise: Expertise.findCreateUpdateNonStandard(context: context, id: expertiseID, name: [], usage: []))
-        #expect(photographerKeyword.expertise.id == expertiseID)
-        #expect(photographerKeyword.photographer === photographer)
-        #expect(photographerKeyword.photographer.givenName == photographer.givenName)
-        #expect(photographerKeyword.photographer.infixName == photographer.infixName)
-        #expect(photographerKeyword.photographer.familyName == photographer.familyName)
+        #expect(photographerExpertise.expertise.id == expertiseID)
+        #expect(photographerExpertise.photographer === photographer)
+        #expect(photographerExpertise.photographer.givenName == photographer.givenName)
+        #expect(photographerExpertise.photographer.infixName == photographer.infixName)
+        #expect(photographerExpertise.photographer.familyName == photographer.familyName)
     }
 
-    @Test("Attempt to create duplicate PhotographerKeyword") func duplicatePhotographerKeyword() {
+    @Test("Attempt to create duplicate PhotographerExpertise") func duplicatePhotographerExpertise() {
 
-        let expertiseID = String.random(length: 10).capitalized // internally keyword.id is capitalized
+        let expertiseID = String.random(length: 10).capitalized // internally expertise.id is capitalized
         let photographerExpertise1 = PhotographerExpertise.findCreateUpdate(
             context: context,
             photographer: photographer,
@@ -56,7 +56,7 @@ import CoreData // for NSManagedObjectContext
             context: context,
             photographer: photographer, // same photographer
             expertise: Expertise.findCreateUpdateNonStandard(context: context, id: expertiseID,
-                                                         name: [], usage: [])) // same keyword
+                                                         name: [], usage: [])) // same expertise
         #expect(photographerExpertise2.expertise.id == expertiseID)
         #expect(photographerExpertise2.photographer === photographer)
         #expect(photographerExpertise2.photographer.givenName == photographer.givenName)
@@ -67,7 +67,7 @@ import CoreData // for NSManagedObjectContext
         #expect(photographerExpertise1 == photographerExpertise2)
         #expect(PhotographerExpertise.count(context: context,
                                             expertiseID: expertiseID,
-                                            photographer: photographer) == 1)
+					    photographer: photographer) == 1)
     }
 
 }
