@@ -48,8 +48,8 @@ import CoreData // for NSManagedObjectContext
 
         Model.deleteCoreDataExpertisesLanguages(context: bgContext)
         #expect(Expertise.count(context: bgContext) == 0) // returns 3 instead of zero, why??
-        #expect(PhotographerExpertise.count(context: bgContext) == 0) // returns 3 instead of zero, why??
         #expect(LocalizedExpertise.count(context: bgContext) == 0)
+        #expect(PhotographerExpertise.count(context: bgContext) == 0) // returns 3 instead of zero, why??
 
         bgContext.performAndWait {
             _ = Level0JsonReader(bgContext: bgContext, // read root.Level0.json file
