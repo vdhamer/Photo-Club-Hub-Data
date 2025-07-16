@@ -26,7 +26,7 @@ extension Organization {
 
     // MARK: - getters and setters
 
-	var members: Set<MemberPortfolio> {
+	public var members: Set<MemberPortfolio> {
 		get { (members_ as? Set<MemberPortfolio>) ?? [] }
 		set { members_ = newValue as NSSet }
 	}
