@@ -249,6 +249,34 @@
 
         {
             "idPlus": {
+                "town": "Brabant Oost",
+                "fullName": "Individuele Leden Brabant Oost",
+                "nickName": "IndividueelBO"
+            },
+            "coordinates": {
+                "latitude": 51.44327,
+                "longitude": 5.47990
+            },
+            "optional": {
+               "level2URL": "https://www.example.com/IndividueelBO.level2.json",
+                "remark": [
+                    {
+                        "language": "EN",
+                        "value": "These photographers are members of the Dutch national Fotobond, but not via their membership of any specific club."
+                    },
+                    {
+                        "language": "NL",
+                        "value": "Individuele leden van de Koninklijke Fotobond, Afdeling 16: Brabant Oost."
+                    }
+                ],
+                "nlSpecific": {
+                    "fotobondNumber": 1600
+                }
+            }
+        },
+
+        {
+            "idPlus": {
                 "town": "Den Bosch",
                 "fullName": "Fotogroep Argus",
                 "nickName": "fgArgus"
@@ -661,7 +689,6 @@
                 "longitude": 5.51534
             },
             "optional": {
-                "website": "",
                 "level2URL": "https://www.example.com/deBeeldmakers.level2.json",
                 "remark": [
                     {
@@ -1477,7 +1504,6 @@
                 "longitude": 5.60938
             },
             "optional": {
-                "website": "",
                 "level2URL": "https://www.example.com/fcBeeldspraakU.level2.json",
                 "remark": [
                     {
@@ -1767,34 +1793,6 @@
 
         {
             "idPlus": {
-                "town": "Eindhoven",
-                "fullName": "Individuele Leden Brabant Oost",
-                "nickName": "IndividueelBO"
-            },
-            "coordinates": {
-                "latitude": 51.44327,
-                "longitude": 5.47990
-            },
-            "optional": {
-               "level2URL": "https://www.example.com/IndividueelBO.level2.json",
-                "remark": [
-                    {
-                        "language": "EN",
-                        "value": "These photographers are members of the Dutch national Fotobond, but not via their membership of any specific club."
-                    },
-                    {
-                        "language": "NL",
-                        "value": "Individuele leden van de Koninklijke Fotobond, Afdeling 16: Brabant Oost."
-                    }
-                ],
-                "nlSpecific": {
-                    "fotobondNumber": 1600
-                }
-            }
-        },
-
-        {
-            "idPlus": {
                 "town": "Waalwijk",
                 "fullName": "Collectief Brabant",
                 "nickName": "fcBrabant"
@@ -1888,7 +1886,6 @@
                 "longitude": 5.25076
             },
             "optional": {
-                "website": "",
                 "level2URL": "https://www.example.com/?.level2.json",
                 "remark": [
                     {
@@ -1917,7 +1914,7 @@
                 "longitude": 5.67461
             },
             "optional": {
-                "website": "www.facebook.com/ObjectiefZeeland",
+                "website": "https://www.facebook.com/ObjectiefZeeland",
                 "level2URL": "https://www.example.com/???.level2.json",
                 "remark": [
                     {
@@ -2132,7 +2129,7 @@
                 "longitude": -6.265375
             },
             "optional": {
-                "website": "",
+                "website": "https://www.nli.ie/collections/our-collections/photographs",
                 "wikipedia": "https://en.wikipedia.org/wiki/National_Photographic_Archive",
                 "remark": [
                     {
