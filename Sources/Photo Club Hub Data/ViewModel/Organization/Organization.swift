@@ -83,12 +83,12 @@ extension Organization {
         OrganizationID(fullName: self.fullName, town: self.town)
     }
 
-    var nickname: String {
+    public var nickname: String {
         get { return nickName_ ?? "Name?" }
         set { nickName_ = newValue }
     }
 
-	var town: String { // may be one word ("Rotterdam") or multiple words ("Den Bosch").
+	public var town: String { // may be one word ("Rotterdam") or multiple words ("Den Bosch").
 		get { return town_ ?? "DefaultPhotoClubTown" }  // nil shouldn't occur, but it does?
 		set { town_ = newValue }
 	}
