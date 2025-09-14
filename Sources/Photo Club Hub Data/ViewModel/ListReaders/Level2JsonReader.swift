@@ -10,78 +10,84 @@ import CoreData // for NSManagedObjectContext
 import SwiftyJSON // for JSON struct
 import CoreLocation // for CLLocationCoordinate2D
 
-// see XampleMin.level2.json or XampleMax.level2.json for syntax examples
+// see XampleMin.level2.json and XampleMax.level2.json for example data files
 
 public class Level2JsonReader { // normally running on a background thread
 
     // init() does it all: it fetches the JSON data, parses it, and updates the data stored in Core Data.
     public init(bgContext: NSManagedObjectContext,
                 organizationIdPlus: OrganizationIdPlus,
-                isInTestBundle: Bool,
+                isBeingTested: Bool,
                 useOnlyInBundleFile: Bool = false // true avoids fetching the latest version from GitHub
                ) {
         _ = FetchAndProcessFile( // FetchAndProcessFile fetches jsonData and passes it to readRootLevel2Json()
                                 bgContext: bgContext,
                                 fileSelector: FileSelector(organizationIdPlus: organizationIdPlus,
-                                                           isInTestBundle: isInTestBundle),
+                                                           isBeingTested: isBeingTested),
                                 fileType: "json",
                                 fileSubType: "level2", // "fgDeGender.level2.json"
                                 useOnlyInBundleFile: useOnlyInBundleFile,
-                                fileContentProcessor: readRootLevel2Json(bgContext:jsonData:fileSelector:)
+                                isBeingTested: isBeingTested,
+                                fileContentProcessor: Level2JsonReader.readRootLevel2Json(bgContext:
+                                                                                          jsonData:
+                                                                                          fileSelector:
+                                                                                          isBeingTested:)
                                )
     }
 
-    fileprivate func readRootLevel2Json(bgContext: NSManagedObjectContext,
-                                        jsonData: String,
-                                        fileSelector: FileSelector) {
+    @Sendable static fileprivate func readRootLevel2Json(bgContext: NSManagedObjectContext,
+                                                         jsonData: String,
+                                                         fileSelector: FileSelector,
+                                                         isBeingTested: Bool) {
 
-        guard fileSelector.organizationIdPlus != nil else { // need id of a club
+        guard fileSelector.organizationIdPlus != nil else { // need expected id of a club
             fatalError("Missing `targetIdorganizationIdPlus` in readRootLevel2Json()")
         }
         let targetIdPlus: OrganizationIdPlus = fileSelector.organizationIdPlus! // safe due to preceding guard statement
-        ifDebugPrint("Loading members of club \(targetIdPlus.fullName) in background.")
+        ifDebugPrint("Will try to Load members of club \(targetIdPlus.fullName) in background.")
 
+        // MARK: - /
         let jsonRoot: JSON = JSON(parseJSON: jsonData) // pass the data to SwiftyJSON to parse
+
+        // MARK: - /club
         guard jsonRoot["club"].exists() else {
             ifDebugFatalError("Cannot find `club` keyword for club \(targetIdPlus.fullName)")
             return
         }
-
         let jsonClub: JSON = jsonRoot["club"]
-        guard jsonClub["idPlus"].exists() else {
-            ifDebugFatalError("Cannot find `idPlus` keyword for club \(targetIdPlus.fullName)")
-            return
+
+        // MARK: - /club/idPlus
+        guard let idPlus = checkIdPlus(jsonClub: jsonClub,
+                                       targetIdPlus: targetIdPlus,
+                                       isBeingTested: isBeingTested) else {
+            return // in the Debug version checkIdPlus forces a fatal error, so we never reach this point
         }
 
-        let jsonIdPlus: JSON = jsonClub["idPlus"]
-        let idPlus = OrganizationIdPlus(fullName: jsonIdPlus["fullName"].stringValue, // idPlus found inside JSON file
-                                        town: jsonIdPlus["town"].stringValue,
-                                        nickname: jsonIdPlus["nickName"].stringValue)
-
-        guard idPlus.fullName == targetIdPlus.fullName else { // does fine contain the right club?
-            ifDebugFatalError("""
-                              Warning: JSON file for club \(targetIdPlus.fullName) \
-                              contains club \(idPlus.fullName) instead.
-                              """)
-            return // in non-debug software, just don't load the file
-        }
-
-        // normally  the club already exists, but if not.. create it
+        // normally the club already exists, but if it somehow doesn't we will just have to create it
         let club: Organization = Organization.findCreateUpdate(context: bgContext,
                                                                organizationTypeEnum: OrganizationTypeEnum.club,
                                                                idPlus: idPlus)
 
-        // optional fields within jsonClub
+        // MARK: - /club/coordinates
+        guard let coordinates = loadClubCoordinates(jsonClub: jsonClub, targetIdPlus: targetIdPlus) else {
+            return // in the Debug version loadClubCoordinates forces a fatal error, so we never reach this point
+        }
+        if club.coordinates != coordinates {
+            club.coordinates = coordinates
+        }
+
+        // MARK: - /club/optional may not exist
         if jsonClub["optional"].exists() {
             loadClubOptionals(bgContext: bgContext,
                               jsonOptionals: jsonClub["optional"],
                               club: club)
         }
 
+        // MARK: - /members
         if jsonRoot["members"].exists() { // could be empty (although level2.json file would only contain club data)
             let members: [JSON] = jsonRoot["members"].arrayValue
             for member in members {
-                loadMember(bgContext: bgContext, member: member, club: club)
+                Level2JsonReader.loadMember(bgContext: bgContext, member: member, club: club)
             }
         }
 
@@ -90,7 +96,7 @@ public class Level2JsonReader { // normally running on a background thread
                 try bgContext.save() // persist contents of entire Level2.json file
             }
         } catch {
-            ifDebugFatalError("Failed to save changes to Core Data", file: #fileID, line: #line)
+            ifDebugFatalError("Error saving changes to Core Data: \(error)", file: #fileID, line: #line)
             // in release mode, the failed database update is only logged. App doesn't stop.
             ifDebugPrint("Failed to save JSON ClubList items in background")
             ifDebugFatalError("Error: failed to save Level 2 changes to Core Data")
@@ -99,9 +105,10 @@ public class Level2JsonReader { // normally running on a background thread
         ifDebugPrint("Completed mergeLevel2Json() in background")
     }
 
-    fileprivate func loadMember(bgContext: NSManagedObjectContext,
-                                member: JSON,
-                                club: Organization) {
+    fileprivate static func loadMember(bgContext: NSManagedObjectContext,
+                                       member: JSON,
+                                       club: Organization) {
+        // MARK: - /members/member/name
         guard member["name"].exists(),
               member["name"]["givenName"].exists(),
               // if member["name"]["givenName"] doesn't exist, SwiftyJSON returns ""
@@ -113,22 +120,24 @@ public class Level2JsonReader { // normally running on a background thread
         let infixName: String = member["name"]["infixName"].stringValue
         let familyName: String = member["name"]["familyName"].stringValue
         print("""
-                  Member "\(givenName) \
-                  \(infixName=="" ? "" : infixName + " ")\
-                  \(familyName)" found in \(club.id.fullName)
-                  """)
+              Member "\(givenName) \
+              \(infixName=="" ? "" : infixName + " ")\
+              \(familyName)" found in \(club.id.fullName)
+              """)
         let photographer = Photographer.findCreateUpdate(context: bgContext,
                                                          personName: PersonName(
-                                                            givenName: givenName,
-                                                            infixName: infixName, // may be ""
-                                                            familyName: familyName),
+                                                             givenName: givenName,
+                                                             infixName: infixName, // may be ""
+                                                             familyName: familyName
+                                                         ),
                                                          optionalFields: PhotographerOptionalFields()) // filled later
 
         let memberPortfolio: MemberPortfolio
         if member["optional"].exists() { // could contain photographerOptionalFields, memberOptionalFields, or both.
-            memberPortfolio = loadPhotographerAndMemberOptionals(bgContext: bgContext,
-                                                                 jsonOptionals: member["optional"],
-                                                                 photographer: photographer, club: club)
+            memberPortfolio = Level2JsonReader.loadPhotographerAndMemberOptionals(bgContext: bgContext,
+                                                                                  jsonOptionals: member["optional"],
+                                                                                  photographer: photographer,
+                                                                                  club: club)
         } else {
             memberPortfolio = MemberPortfolio.findCreateUpdate(bgContext: bgContext,
                                                                organization: club,
@@ -143,26 +152,23 @@ public class Level2JsonReader { // normally running on a background thread
         memberPortfolio.refreshFirstImage()
     }
 
-    fileprivate func loadClubOptionals(bgContext: NSManagedObjectContext,
-                                       jsonOptionals: JSON,
-                                       club: Organization) {
+    fileprivate static func loadClubOptionals(bgContext: NSManagedObjectContext,
+                                              jsonOptionals: JSON,
+                                              club: Organization) {
         let clubWebsite = jsonOptionals["website"].exists() ? URL(string: jsonOptionals["website"].stringValue) : nil
-        let wikipedia: URL? = jsonOptionalsToURL(jsonOptionals: jsonOptionals, key: "wikipedia")
-        let fotobondNumber = jsonOptionals["nlSpecific"]["fotobondNumber"].exists()  ? // id of club
-            jsonOptionals["nlSpecific"]["fotobondNumber"].int16Value : nil
+        let wikipedia: URL? = Level2JsonReader.jsonOptionalsToURL(jsonOptionals: jsonOptionals, key: "wikipedia")
+        // level2URL is deliberately ignoring to avoid possibility of overruling what is stated in Level 1 file
+        let localizedRemarks: [JSON] = jsonOptionals["remark"].arrayValue // empty array if missing
         let contactEmail: String? = jsonOptionals["contactEmail"].exists() ?
             jsonOptionals["contactEmail"].stringValue : nil
-        let coordinates: CLLocationCoordinate2D = jsonOptionals["coordinates"].exists() ?
-            CLLocationCoordinate2D(latitude: jsonOptionals["coordinates"]["latitude"].doubleValue,
-                                    longitude: jsonOptionals["coordinates"]["longitude"].doubleValue) :
-            CLLocationCoordinate2DMake(0, 0) // for safety: Level 1 file should always contain coordinate fields
-        let localizedRemarks: [JSON] = jsonOptionals["remark"].arrayValue // empty array if missing
+        let fotobondNumber = jsonOptionals["nlSpecific"]["fotobondNumber"].exists()  ? // id of club
+            jsonOptionals["nlSpecific"]["fotobondNumber"].int16Value : nil
 
         _ = Organization.findCreateUpdate(context: bgContext,
                                           organizationTypeEnum: OrganizationTypeEnum.club,
                                           idPlus: OrganizationIdPlus(fullName: club.fullName, town: club.town,
-                                                                     nickname: club.nickname),
-                                          coordinates: coordinates,
+                                                                     nickname: club.nickName),
+                                          coordinates: club.coordinates,
                                           optionalFields: OrganizationOptionalFields(
                                               organizationWebsite: clubWebsite,
                                               wikipedia: wikipedia,
@@ -173,19 +179,23 @@ public class Level2JsonReader { // normally running on a background thread
         )
     }
 
-    fileprivate func loadPhotographerAndMemberOptionals(bgContext: NSManagedObjectContext,
-                                                        jsonOptionals: JSON,
-                                                        photographer: Photographer,
-                                                        club: Organization) -> MemberPortfolio {
+    fileprivate static func loadPhotographerAndMemberOptionals(bgContext: NSManagedObjectContext,
+                                                               jsonOptionals: JSON,
+                                                               photographer: Photographer,
+                                                               club: Organization) -> MemberPortfolio {
 
         let memberRolesAndStatus = MemberRolesAndStatus(jsonRoles: jsonOptionals["roles"],
                                                         jsonStatus: jsonOptionals["status"])
 
         let birthday: String? = jsonOptionals["birthday"].exists() ? jsonOptionals["birthday"].stringValue : nil
-        let photographerWebsite: URL? = jsonOptionalsToURL(jsonOptionals: jsonOptionals, key: "website")
-        let photographerImage: URL? = jsonOptionalsToURL(jsonOptionals: jsonOptionals, key: "photographerImage")
-        let featuredImage: URL? = jsonOptionalsToURL(jsonOptionals: jsonOptionals, key: "featuredImage")
-        let level3URL: URL? = jsonOptionalsToURL(jsonOptionals: jsonOptionals, key: "level3URL")
+        let photographerWebsite: URL? = Level2JsonReader.jsonOptionalsToURL(jsonOptionals: jsonOptionals,
+                                                                            key: "website")
+        let photographerImage: URL? = Level2JsonReader.jsonOptionalsToURL(jsonOptionals: jsonOptionals,
+                                                                          key: "photographerImage")
+        let featuredImage: URL? = Level2JsonReader.jsonOptionalsToURL(jsonOptionals: jsonOptionals,
+                                                                      key: "featuredImage")
+        let level3URL: URL? = Level2JsonReader.jsonOptionalsToURL(jsonOptionals: jsonOptionals,
+                                                                  key: "level3URL")
 
         let membershipStartDate: Date? = jsonOptionals["membershipStartDate"].exists() ?
             jsonOptionals["membershipStartDate"].stringValue.extractDate() : nil
@@ -230,10 +240,88 @@ public class Level2JsonReader { // normally running on a background thread
 
     }
 
-    fileprivate func jsonOptionalsToURL(jsonOptionals: JSON, key: String) -> URL? {
+    fileprivate static func jsonOptionalsToURL(jsonOptionals: JSON, key: String) -> URL? {
         guard jsonOptionals[key].exists() else { return nil }
         guard let string = jsonOptionals[key].string else { return nil }
         return URL(string: string) // returns nil if the string doesn’t represent a valid URL
+    }
+
+    /// Checks the completeness of the IdPlus part of a level2.json file and its value against the expected value..
+    /// - Parameters:
+    ///   - jsonClub: The JSON object representing the club data.
+    ///   - targetIdPlus: The expected value for OrganizationIdPlus.
+    ///   - isBeingTested: if true, disable check on town.
+    /// - Returns: The validated OrganizationIdPlus if all fields exist and match, or nil otherwise.
+    fileprivate static func checkIdPlus(jsonClub: JSON,
+                                        targetIdPlus: OrganizationIdPlus,
+                                        isBeingTested: Bool) -> OrganizationIdPlus? {
+
+        // MARK: - /club/idPlus loading
+        guard jsonClub["idPlus"].exists() else {
+            ifDebugFatalError("Cannot find `idPlus` keyword for club \(targetIdPlus.fullName)")
+            return nil
+        }
+        let jsonIdPlus: JSON = jsonClub["idPlus"]
+
+        // MARK: - /club/idPlus/fullName
+        guard jsonIdPlus["fullName"].exists() else {
+            ifDebugFatalError("Cannot find `fullName` keyword in idPlus for club \(targetIdPlus.fullName)")
+            return nil
+        }
+        // MARK: - /club/idPlus/town
+        guard jsonIdPlus["town"].exists() else {
+            ifDebugFatalError("Cannot find `town` keyword in idPlus for club \(targetIdPlus.fullName)")
+            return nil
+        }
+        // MARK: - /club/idPlus/nickName
+        guard jsonIdPlus["nickName"].exists() else {
+            ifDebugFatalError("Cannot find `nickName` keyword in idPlus for club \(targetIdPlus.fullName)")
+            return nil
+        }
+        // MARK: - /club/idPlus check if this is the club we were expecting
+        let idPlus = OrganizationIdPlus(fullName: jsonIdPlus["fullName"].stringValue, // idPlus found _inside_ JSON file
+                                        town: jsonIdPlus["town"].stringValue,
+                                        nickname: jsonIdPlus["nickName"].stringValue)
+        guard idPlus.fullName == targetIdPlus.fullName &&
+              idPlus.nickname == targetIdPlus.nickname else {// does file contain the expected club?
+            ifDebugFatalError("""
+                              Warning: JSON file expecting to contain club \
+                              \(targetIdPlus.fullName) (\(targetIdPlus.nickname)) \
+                              contains club \(idPlus.fullName) (\(idPlus.nickname)) instead.
+                              """)
+            return nil // in non-debug software, just skip loading this Level 2 file
+        }
+
+        if isBeingTested == false {
+            guard idPlus.town == targetIdPlus.town else { // expected town?
+                ifDebugFatalError("""
+                                  Warning: there is a mismatch for the Town of \(targetIdPlus.fullName): \
+                                  the in-file town is \(idPlus.town) but \(targetIdPlus.town) was expected.
+                                  """)
+                return nil // in non-debug software, just skip loading this Level 2 file
+            }
+        }
+
+        return idPlus
+    }
+
+    fileprivate static func loadClubCoordinates(jsonClub: JSON, targetIdPlus: OrganizationIdPlus) ->
+        CLLocationCoordinate2D? {
+
+        guard jsonClub["coordinates"].exists() else {
+            ifDebugFatalError("Cannot find `coordinates` keyword for club \(targetIdPlus.fullName)")
+            return nil
+        }
+
+        guard jsonClub["coordinates"]["latitude"].exists() && jsonClub["coordinates"]["longitude"].exists() else {
+            ifDebugFatalError("`coordinates` keyword missing `latitude` or `longitude` for \(targetIdPlus.fullName)")
+            return nil
+        }
+
+        let coordinates: CLLocationCoordinate2D =
+            CLLocationCoordinate2D(latitude: jsonClub["coordinates"]["latitude"].doubleValue,
+                                   longitude: jsonClub["coordinates"]["longitude"].doubleValue)
+        return coordinates
     }
 
 }

@@ -32,7 +32,7 @@ extension LocalizedRemark { // expose computed properties (some related to handl
         }
     }
 
-    // MARK: - find (if it exits) or create (if it doesn't)
+    // MARK: - find (if it exits) or create (if it doesn't exist) a LocalizedRemark
 
     // Find existing LocalizedRemark object or create a new LocalizedRemark object
     static func findCreateUpdate(bgContext: NSManagedObjectContext,
@@ -48,16 +48,28 @@ extension LocalizedRemark { // expose computed properties (some related to handl
         let fetchRequest: NSFetchRequest<LocalizedRemark> = LocalizedRemark.fetchRequest()
         fetchRequest.predicate = predicate
         let localizedRemarks: [LocalizedRemark] = (try? bgContext.fetch(fetchRequest)) ?? [] // nil = absolute failure
+
         if localizedRemarks.count > 1 { // there is actually a Core Data constraint to prevent this
             ifDebugFatalError("Query returned multiple (\(localizedRemarks.count)) remarks for " +
-                              "\(organization.fullNameTown) for language code \(language.isoCodeAllCaps)",
+                              "\(organization.fullNameTown) for language code \(language.isoCode)",
                               file: #fileID, line: #line) // likely deprecation of #fileID in Swift 6.0
             // in release mode, log that there are multiple clubs, but continue using the first one.
         }
 
         if let localizedRemark = localizedRemarks.first, localizedRemark.localizedString==localizedString {
             let changed: Bool = localizedRemark.update(bgContext: bgContext, localizedString: localizedString)
-            return changed // the record is already in CoreData, but property may have changed
+            do {
+                if bgContext.hasChanges && Settings.extraCoreDataSaves { // optimisation
+                    try bgContext.save() // persist modifications in PhotoClub record
+                }
+            } catch {
+                ifDebugFatalError("""
+                                  Updating of localized remark failed \
+                                  for \(organization.fullName) in language \(language.isoCode)
+                                  """,
+                                  file: #fileID, line: #line) // likely deprecation of #fileID in Swift 6.0
+            }
+            return changed // the record is already in CoreData, but one or more properties may have changed
         } else {
             let entity = NSEntityDescription.entity(forEntityName: "LocalizedRemark", in: bgContext)!
             let localizedRemark = LocalizedRemark(entity: entity, insertInto: bgContext) // bg needs special .init()
@@ -70,8 +82,8 @@ extension LocalizedRemark { // expose computed properties (some related to handl
                 }
             } catch {
                 ifDebugFatalError("""
-                                  Creation of remark failed for \(organization.fullName) \
-                                  in language \(language.isoCodeAllCaps)
+                                  Creation of localized remark failed \
+                                  for \(organization.fullName) in language \(language.isoCode)
                                   """,
                                   file: #fileID, line: #line) // likely deprecation of #fileID in Swift 6.0
             }
@@ -87,26 +99,30 @@ extension LocalizedRemark { // expose computed properties (some related to handl
         return true // indicates that there was an update
     }
 
-    // count total number of objects in CoreData database
-    static func count(context: NSManagedObjectContext) -> Int {
-        var localizedRemarks: [LocalizedRemark]! = []
+    // MARK: - count utility functions
 
-        context.performAndWait {
+    // count total number of LocalizedRemark objects in CoreData database
+    // there are ways to count without fetching all records, but this func is only used for testing
+    static func count(context: NSManagedObjectContext) -> Int {
+
+        let localizedRemarkCount: Int = context.performAndWait {
             let fetchRequest: NSFetchRequest<LocalizedRemark> = LocalizedRemark.fetchRequest()
             let predicateAll = NSPredicate(format: "TRUEPREDICATE")
             fetchRequest.predicate = predicateAll
 
-            context.perform {
-                do {
-                    localizedRemarks = try context.fetch(fetchRequest)
-                } catch {
-                    ifDebugFatalError("Failed to fetch list of all LocalizedLanguages: \(error)",
-                                      file: #fileID, line: #line)
-                    // on non-Debug version, continue with empty `localizedRemarks` array
-                }
+            var localizedRemarks: [LocalizedRemark]! = []
+
+            do {
+                localizedRemarks = try context.fetch(fetchRequest)
+            } catch {
+                ifDebugFatalError("Failed to fetch list of all LocalizedLanguages: \(error)",
+                                  file: #fileID, line: #line)
+                // on non-Debug version, continue with empty `localizedRemarks` array
             }
+            return localizedRemarks.count
         }
-        return localizedRemarks.count
+
+        return localizedRemarkCount
     }
 
 }

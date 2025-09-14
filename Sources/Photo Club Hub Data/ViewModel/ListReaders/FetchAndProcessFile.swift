@@ -19,15 +19,17 @@ struct FetchAndProcessFile {
          fileSelector: FileSelector,
          fileType: String, fileSubType: String,
          useOnlyInBundleFile: Bool,
-         fileContentProcessor: @escaping (_ bgContext: NSManagedObjectContext,
-                                          _ jsonData: String,
-                                          _ selectFile: FileSelector) -> Void) {
+         isBeingTested: Bool,
+         fileContentProcessor: @Sendable @escaping (_ bgContext: NSManagedObjectContext,
+                                                    _ jsonData: String,
+                                                    _ selectFile: FileSelector,
+                                                    _ isBeingTested: Bool) -> Void) {
         bgContext.perform { [self] in // run on requested background thread
             let nameWithSubtype = (fileSelector.fileName) + "." + fileSubType // e.g. "root.level0"
 
-            var bundle: Bundle = Bundle.module // overwritten by Test Bundle depending if fileSelector.isInTestBundle
+            var bundle: Bundle = Bundle.module // overwritten by Test Bundle if fileSelector.isBeingTested
 
-            if fileSelector.isInTestBundle {
+            if fileSelector.isBeingTested {
                 let testUrl = Bundle.module.bundleURL.deletingLastPathComponent().appending(
                     path: "Photo Club Hub Data_Photo Club Hub DataTests.bundle")
                 let testBundle: Bundle? = Bundle(url: testUrl)
@@ -38,7 +40,7 @@ struct FetchAndProcessFile {
                                """)
                 }
                 bundle = testBundle!
-           }
+            }
 
             let fileInBundleURL: URL? = bundle.url(forResource: nameWithSubtype, withExtension: fileType)
             guard fileInBundleURL != nil else {
@@ -56,7 +58,7 @@ struct FetchAndProcessFile {
                 fileInBundleURL: fileInBundleURL!, // forced unwrap is safe (due to guard statement above)
                 useOnlyInBundleFile: useOnlyInBundleFile
             )
-            fileContentProcessor(bgContext, data, fileSelector)
+            fileContentProcessor(bgContext, data, fileSelector, isBeingTested)
         }
     }
 

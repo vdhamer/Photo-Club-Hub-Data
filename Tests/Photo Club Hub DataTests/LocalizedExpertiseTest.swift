@@ -19,7 +19,7 @@ import CoreData // for NSManagedObjectContext
 
     @Test("Create a randomly named LocalizedExpertise") func addLocalizedExpertise() {
         let expertise = Expertise.findCreateUpdateNonStandard(context: context, id: String.random(length: 5),
-                                                              name: [], usage: [])
+                                                              names: [], usages: [])
         let language = Language.findCreateUpdate(context: context, isoCode: "NL")
         let localizedName = String.random(length: 10)
         let localizedUsage = String.random(length: 20)
@@ -31,8 +31,8 @@ import CoreData // for NSManagedObjectContext
                                                                       localizedUsage: localizedUsage)
         LocalizedExpertise.save(context: context) // probably not needed, but sloppy not to commit this change
 
-        #expect(localizedExpertise.expertise.id == expertise.id)
-        #expect(localizedExpertise.language.isoCodeAllCaps == language.isoCodeAllCaps)
+        #expect(localizedExpertise.expertise.id == expertise.id.canonicalCase)
+        #expect(localizedExpertise.language.isoCode == language.isoCode)
         #expect(localizedExpertise.language.nameEN == "Dutch")
         #expect(localizedExpertise.name == localizedName)
         #expect(localizedExpertise.usage == localizedUsage)
@@ -40,7 +40,7 @@ import CoreData // for NSManagedObjectContext
 
     @Test("Check that isoCode can handle lower case") func addLocalizedExpertiseLowerCase() {
         let expertise = Expertise.findCreateUpdateNonStandard(context: context, id: String.random(length: 25),
-                                                              name: [], usage: [])
+                                                              names: [], usages: [])
         let language = Language.findCreateUpdate(context: context, isoCode: "eN")
         let localizedName = String.random(length: 10)
         let localizedUsage = String.random(length: 20)
@@ -52,13 +52,13 @@ import CoreData // for NSManagedObjectContext
                                                                       localizedUsage: localizedUsage)
         LocalizedExpertise.save(context: context) // probably not needed, but sloppy not to commit this change
 
-        #expect(localizedExpertise.language.isoCodeAllCaps == "EN")
+        #expect(localizedExpertise.language.isoCode == "EN")
         #expect(localizedExpertise.language.nameEN == "English")
     }
 
     @Test("Is nil handled properly") func addLocalizedExpertiseNilUsage() {
         let expertise = Expertise.findCreateUpdateNonStandard(context: context, id: String.random(length: 25),
-                                                              name: [], usage: [])
+                                                              names: [], usages: [])
         let language = Language.findCreateUpdate(context: context, isoCode: "NL")
         let localizedName = String.random(length: 10)
 
@@ -74,7 +74,7 @@ import CoreData // for NSManagedObjectContext
 
     @Test("Is nil overwritten properly") func addLocalizedExpertiseReplaceNil() {
         let expertise = Expertise.findCreateUpdateNonStandard(context: context, id: String.random(length: 25),
-                                                              name: [], usage: [])
+                                                              names: [], usages: [])
         let language = Language.findCreateUpdate(context: context, isoCode: "NL")
         let localizedName = String.random(length: 10)
 
@@ -96,7 +96,7 @@ import CoreData // for NSManagedObjectContext
         #expect(localizedExpertise1.usage == "overwritten")
         #expect(LocalizedExpertise.count(context: context,
                                          expertiseID: expertise.id,
-                                         languageIsoCode: language.isoCodeAllCaps) == 1)
+                                         languageIsoCode: language.isoCode) == 1)
     }
 
 }

@@ -26,11 +26,11 @@ import CoreData // for NSManagedObjectContext
 
     @Test("Create a random expertise for a random photographer") func addPhotographerExpertise() {
 
-        let expertiseID = String.random(length: 10).capitalized // internally expertise.id is capitalized
+        let expertiseID = String.random(length: 10).canonicalCase
         let photographerExpertise = PhotographerExpertise.findCreateUpdate(
             context: context,
             photographer: photographer,
-            expertise: Expertise.findCreateUpdateNonStandard(context: context, id: expertiseID, name: [], usage: []))
+            expertise: Expertise.findCreateUpdateNonStandard(context: context, id: expertiseID, names: [], usages: []))
         #expect(photographerExpertise.expertise.id == expertiseID)
         #expect(photographerExpertise.photographer === photographer)
         #expect(photographerExpertise.photographer.givenName == photographer.givenName)
@@ -40,11 +40,11 @@ import CoreData // for NSManagedObjectContext
 
     @Test("Attempt to create duplicate PhotographerExpertise") func duplicatePhotographerExpertise() {
 
-        let expertiseID = String.random(length: 10).capitalized // internally expertise.id is capitalized
+        let expertiseID = String.random(length: 10).canonicalCase // internally expertise.id is capitalized
         let photographerExpertise1 = PhotographerExpertise.findCreateUpdate(
             context: context,
             photographer: photographer,
-            expertise: Expertise.findCreateUpdateNonStandard(context: context, id: expertiseID, name: [], usage: []))
+            expertise: Expertise.findCreateUpdateNonStandard(context: context, id: expertiseID, names: [], usages: []))
         #expect(photographerExpertise1.expertise.id == expertiseID)
         #expect(photographerExpertise1.photographer === photographer)
         #expect(photographerExpertise1.photographer.givenName == photographer.givenName)
@@ -56,8 +56,8 @@ import CoreData // for NSManagedObjectContext
             context: context,
             photographer: photographer, // same photographer
             expertise: Expertise.findCreateUpdateNonStandard(context: context, id: expertiseID,
-                                                         name: [], usage: [])) // same expertise
-        #expect(photographerExpertise2.expertise.id == expertiseID)
+                                                         names: [], usages: [])) // same expertise
+        #expect(photographerExpertise2.expertise.id == expertiseID.canonicalCase)
         #expect(photographerExpertise2.photographer === photographer)
         #expect(photographerExpertise2.photographer.givenName == photographer.givenName)
         #expect(photographerExpertise2.photographer.infixName == photographer.infixName)

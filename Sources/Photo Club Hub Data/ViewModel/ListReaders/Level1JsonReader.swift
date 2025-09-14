@@ -11,27 +11,30 @@ import SwiftyJSON // for JSON struct
 
 private let organizationTypesToLoad: [OrganizationTypeEnum] = [.club, .museum] // types are loaded one-by-one
 
-// see XampleMin.level1.json and XampleMax.level1.json for syntax examples
+// see XampleMin.level1.json and XampleMax.level1.json for examples of input data
 
 public class Level1JsonReader {
 
     public init(bgContext: NSManagedObjectContext,
                 fileName: String = "root",  // can overrule the name for unit testing
-                isInTestBundle: Bool,
+                isBeingTested: Bool,
                 useOnlyInBundleFile: Bool = false // true can be used to avoid publishing a test file to GitHub
                ) {
         _ = FetchAndProcessFile(bgContext: bgContext,
-                                fileSelector: FileSelector(fileName: fileName, isInTestBundle: isInTestBundle),
+                                fileSelector: FileSelector(fileName: fileName, isBeingTested: isBeingTested),
                                 fileType: "json", fileSubType: "level1", // "root.level1.json"
                                 useOnlyInBundleFile: useOnlyInBundleFile,
-                                fileContentProcessor: readRootLevel1Json(bgContext:
-                                                                         jsonData:
-                                                                         fileSelector:))
+                                isBeingTested: isBeingTested,
+                                fileContentProcessor: Level1JsonReader.readRootLevel1Json(bgContext:
+                                                                                          jsonData:
+                                                                                          fileSelector:
+                                                                                          isBeingTested:))
     }
 
-    fileprivate func readRootLevel1Json(bgContext: NSManagedObjectContext,
-                                        jsonData: String,
-                                        fileSelector: FileSelector) {
+    @Sendable static fileprivate func readRootLevel1Json(bgContext: NSManagedObjectContext,
+                                                         jsonData: String,
+                                                         fileSelector: FileSelector,
+                                                         isBeingTested: Bool = false) {
 
         let fileName = fileSelector.fileName
         ifDebugPrint("\nWill read (\(fileName)).level1.json with a list of organizations in the background.")

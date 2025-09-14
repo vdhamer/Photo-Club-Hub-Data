@@ -60,20 +60,24 @@ extension Organization {
 		set { fullName_ = newValue }
 	}
 
-    // appends " \(town)" to fullName unless `town` is already included as a word in fullName
+    // Appends " \(town)" to \(fullName) unless \(town) is already part of \(fullName).
+    // The following cases are tested in OrganizationTest:
     // "Fotogroep Waalre" and "Aalst" returns "Fotogroep Waalre (Aalst)"
     // "Fotogroep Waalre" and "Waalre" returns "Fotogroep Waalre"
     // "Fotogroep Waalre" and "waalre" returns "Fotogroep Waalre"
     // "Fotogroep Waalre" and "to" returns "Fotogroep Waalre (to)"
     // "Fotogroep Waalre" and "Waal" returns "Fotogroep Waalre (Waal)" if you use NLP-based word matching
-    // "Fotoclub Den Dungen" and "Den Dungen" don't use NLP-based word matching because town looks like multiple words
+    // "Fotoclub Den Dungen" and "Den Dungen" returns "Fotoclub Den Dungen"
+    // "Fotokring Sint-Michelsgestel" and "Sint-Michelsgestel" returns "Fotoclub Sint-Michelsgestel"
     @objc public var fullNameTown: String { // @objc needed for SectionedFetchRequest's sectionIdentifier
         if fullName.containsWordUsingNLP(targetWord: town) {
             return fullName // fullname "Fotogroep Waalre" and town "Waalre" returns "Fotogroep Waalre"
         }
 
-        if fullName.contains(town) && town.contains(" ") {
-            return fullName // fullname "Fotoclub Den Dungen" and town "Den Dungen" returns "Fotoclub Den Dungen"
+        if fullName.contains(town) { // for "Fotoclub Den Dungen" and "Fotokring Sint-Michielsgestel"
+            if town.contains(" ") || town.contains("-") {
+                return fullName
+            }
         }
 
         return "\(fullName) (\(town))" // fullname "Fotogroep Aalst" with "Waalre" returns "Fotogroep Aalst (Waalre)"
@@ -83,9 +87,26 @@ extension Organization {
         OrganizationID(fullName: self.fullName, town: self.town)
     }
 
-    public var nickname: String {
+    public var nickName: String {
         get { return nickName_ ?? "Name?" }
         set { nickName_ = newValue }
+    }
+
+    public var contactEmail: String? {
+        get { // https://softwareengineering.stackexchange.com/questions/32578/sql-empty-string-vs-null-value
+            if contactEmail_ == "" || contactEmail_ == nil {
+                return nil
+            } else {
+                return contactEmail_!
+            }
+        }
+        set {
+            if newValue == "" {
+                contactEmail_ = nil
+            } else {
+                contactEmail_ = newValue
+            }
+        }
     }
 
 	public var town: String { // may be one word ("Rotterdam") or multiple words ("Den Bosch").
@@ -142,7 +163,7 @@ extension Organization {
         for lang in Locale.preferredLanguages {
             let langID = lang.split(separator: "-").first?.uppercased() ?? "EN"
             // now check if one of the user's preferences is available for this Remark
-            for localRemark in localizedRemarks where localRemark.language.isoCodeAllCaps == langID {
+            for localRemark in localizedRemarks where localRemark.language.isoCode == langID {
                 if localRemark.localizedString != nil {
                     return localRemark.localizedString!
                 }
@@ -150,7 +171,7 @@ extension Organization {
         }
 
         // second choice: most people speak English, at least let's pretend that is the case ;-)
-        for localizedRemark in localizedRemarks where localizedRemark.language.isoCodeAllCaps == "EN" {
+        for localizedRemark in localizedRemarks where localizedRemark.language.isoCode == "EN" {
             if localizedRemark.localizedString != nil {
                 return localizedRemark.localizedString!
             }
@@ -158,7 +179,7 @@ extension Organization {
 
         // third choice: use any translation available for this expertise
         if localizedRemarks.first != nil, localizedRemarks.first!.localizedString != nil {
-            return "\(localizedRemarks.first!.localizedString!) [\(localizedRemarks.first!.language.isoCodeAllCaps)]"
+            return "\(localizedRemarks.first!.localizedString!) [\(localizedRemarks.first!.language.isoCode)]"
         }
 
         // otherwise display an error message instead of a real remark
@@ -172,7 +193,7 @@ extension Organization {
 	// Find existing organization or create a new one
 	// Update new or existing organization's attributes
     public static func findCreateUpdate(context: NSManagedObjectContext, // can be foreground or background context
-                                        organizationTypeEnum: OrganizationTypeEnum,
+                                        organizationTypeEnum: OrganizationTypeEnum = OrganizationTypeEnum.club,
                                         idPlus: OrganizationIdPlus,
                                         coordinates: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0),
                                         removeOrganization: Bool = false, // can remove records for removed org's
@@ -199,12 +220,15 @@ extension Organization {
 		if let organization = organizations.first { // already exists, so make sure non-ID attributes are up to date
             print("\(organization.fullNameTown): Will try to update info for organization \(organization.fullName)")
             if organization.update(bgContext: context,
-                                   organizationTypeEnum: organizationTypeEnum, nickName: idPlus.nickname,
+                                   organizationTypeEnum: organizationTypeEnum,
+                                   nickName: idPlus.nickname,
                                    coordinates: coordinates,
                                    removeOrganization: removeOrganization,
                                    optionalFields: optionalFields,
                                    pinned: pinned) {
-                print("\(organization.fullNameTown): Updated info for organization \(organization.fullName)")
+                print("""
+                      \(organization.fullNameTown): Successfully updated existing organization \(organization.fullName)
+                      """)
             }
 			return organization
 		} else { // have to create PhotoClub object because it doesn't exist yet
@@ -242,8 +266,8 @@ extension Organization {
 
 		var modified: Bool = false
 
-        if self.nickname != nickName {
-            self.nickname = nickName
+        if self.nickName_  == nil, self.nickName_ != nickName {
+            self.nickName_ = nickName
             modified = true }
 
         if self.coordinates != coordinates {
@@ -279,7 +303,7 @@ extension Organization {
             let isoCode: String? = localizedRemark["language"].stringValue.uppercased() // e.g. "NL", "DE" or "PDC"
             let localizedRemarkNewValue: String? = localizedRemark["value"].stringValue
 
-            if isoCode != nil && localizedRemarkNewValue != nil { // nil could happens if JSON file not schema compliant
+            if isoCode != nil && localizedRemarkNewValue != nil { // nil could occur if JSON file isn't schema compliant
                 let language = Language.findCreateUpdate(context: bgContext,
                                                          isoCode: isoCode!) // find or construct the remark's Language
                 // language updates doesn't set modified flag
@@ -299,7 +323,7 @@ extension Organization {
 				try bgContext.save() // persist modifications in PhotoClub record
  			} catch {
                 print("Error: \(error)")
-                ifDebugFatalError("Update failed for club or museum \(fullName)",
+                ifDebugFatalError("Update failed for organization \"\(fullName)\"",
                                   file: #fileID, line: #line) // likely deprecation of #fileID in Swift 6.0
                 // in release mode, if .save() fails, just continue
                 return false

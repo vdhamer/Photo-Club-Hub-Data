@@ -44,7 +44,7 @@
         },
 
         {
-            "idString": "Black & White",
+            "idString": "Black & white",
             "name": [
                 { "language": "EN", "localizedString": "Black & White" },
                 { "language": "NL", "localizedString": "Zwart-wit" }
@@ -128,6 +128,20 @@
         },
 
         {
+            "idString": "Industrial-heritage",
+            "name": [
+                { "language": "EN", "localizedString": "Industrial heritage" },
+                { "language": "NL", "localizedString": "Industrieel erfgoed" }
+            ],
+            "optional": {
+                "usage":  [
+                    { "language": "EN", "localizedString": "Monuments from the industrial revolution (mills, machines, etc)." },
+                    { "language": "NL", "localizedString": "Monumenten van de industriele revolutie (fabrieken, machines, enz.)." }
+                ]
+            }
+        },
+
+        {
             "idString": "Landscape",
             "name": [
                 { "language": "EN", "localizedString": "Landscape" },
@@ -170,7 +184,7 @@
         },
 
         {
-            "idString": "Mixed-Media",
+            "idString": "Mixed-media",
             "name": [
                 { "language": "EN", "localizedString": "Mixed media" },
                 { "language": "NL", "localizedString": "Gemengde technieken" }
@@ -184,7 +198,7 @@
         },
 
         {
-            "idString": "Multiple-Exposure",
+            "idString": "Multiple-exposure",
             "name": [
                 { "language": "EN", "localizedString": "Multiple exposure" },
                 { "language": "NL", "localizedString": "Meervoudige opnamen" }
@@ -254,7 +268,7 @@
         },
 	
         {
-            "idString": "Self-Expression",
+            "idString": "Self-expression",
             "name": [
                 { "language": "EN", "localizedString": "Self-expression" },
                 { "language": "NL", "localizedString": "Zelfexpressie" }

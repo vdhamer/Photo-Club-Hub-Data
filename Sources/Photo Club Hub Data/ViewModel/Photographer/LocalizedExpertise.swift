@@ -72,14 +72,14 @@ extension LocalizedExpertise {
             localizedExpertises = try context.fetch(fetchRequest)
         } catch {
             ifDebugFatalError("Failed to fetch LocalizedExpertise for \(expertise.id) " +
-                              "in language \(language.isoCodeAllCaps): \(error)",
+                              "in language \(language.isoCode): \(error)",
                               file: #fileID, line: #line) // on release version, continue with empty `expertises` array
         }
 
         // are there multiple translations of the expertise into the same language? This shouldn't be the case.
         if localizedExpertises.count > 1 { // there is actually a Core Data constraint to prevent this
             ifDebugFatalError("Query returned multiple (\(localizedExpertises.count)) translations " +
-                              "of Expertise \(expertise.id) into \(language.isoCodeAllCaps)",
+                              "of Expertise \(expertise.id) into \(language.isoCode)",
                               file: #fileID, line: #line)
             // in release mode, log that there are multiple clubs, but continue using the first one.
         }
@@ -90,12 +90,12 @@ extension LocalizedExpertise {
                                          localizedName: localizedName, localizedUsage: localizedUsage) {
                 print("""
                       Updated translation of expertise \"\(expertise.id)\" into \
-                      \(language.isoCodeAllCaps) as \(localizedName ?? "nil")
+                      \(language.isoCode) as \(localizedName ?? "nil")
                       """)
                 LocalizedExpertise.save(context: context, errorText:
                                         "Could not update LocalizedExpertise " +
                                         "for \"\(localizedExpertise.expertise.id)\" " +
-                                        "for language \(localizedExpertise.language.isoCodeAllCaps)",
+                                        "for language \(localizedExpertise.language.isoCode)",
                                         if: Settings.extraCoreDataSaves)
             }
             return localizedExpertise
@@ -112,7 +112,7 @@ extension LocalizedExpertise {
             LocalizedExpertise.save(context: context, errorText:
                                     """
                                     Could not create LocalizedExpertise for \"\(localizedExpertise.expertise.id)\" \
-                                    for language \(localizedExpertise.language.isoCodeAllCaps)
+                                    for language \(localizedExpertise.language.isoCode)
                                     """,
                                     if: Settings.extraCoreDataSaves)
             return localizedExpertise
@@ -144,7 +144,7 @@ extension LocalizedExpertise {
              } catch {
                  ifDebugFatalError("""
                                    Update failed for LocalizedExpertise \
-                                   (\(self.expertise.id) | \(self.language.isoCodeAllCaps))
+                                   (\(self.expertise.id) | \(self.language.isoCode))
                                    """,
                                   file: #fileID, line: #line) // likely deprecation of #fileID in Swift 6.0
                 // in release mode, if save() fails, just continue
@@ -167,44 +167,61 @@ extension LocalizedExpertise {
         }
     }
 
-    // count total number of objects in CoreData database
+    /// Returns the total number of `LocalizedExpertise` objects in the Core Data database.
+    ///
+    /// - Parameter context: The `NSManagedObjectContext` used to perform the fetch.
+    /// - Returns: The total count of `LocalizedExpertise` records, or 0 if an error occurs.
     static func count(context: NSManagedObjectContext) -> Int {
-        var localizedExpertises: [LocalizedExpertise]! = []
 
-        let fetchRequest: NSFetchRequest<LocalizedExpertise> = LocalizedExpertise.fetchRequest()
-        let predicateAll = NSPredicate(format: "TRUEPREDICATE")
-        fetchRequest.predicate = predicateAll
+        let localizedExpertiseCount: Int = context.performAndWait {
+            let fetchRequest: NSFetchRequest<LocalizedExpertise> = LocalizedExpertise.fetchRequest()
+            let predicateAll = NSPredicate(format: "TRUEPREDICATE")
+            fetchRequest.predicate = predicateAll
 
-        context.performAndWait {
             do {
-                localizedExpertises = try context.fetch(fetchRequest)
+                return try context.fetch(fetchRequest).count
             } catch {
                 ifDebugFatalError("Failed to fetch list of all LocalizedExpertises: \(error)",
                                   file: #fileID, line: #line)
                 // on non-Debug version, continue with empty `expertises` array
+                return 0
             }
         }
-        return localizedExpertises.count
+
+        return localizedExpertiseCount
     }
 
-    // count number of objects with a given id
+    /// Returns the number of `LocalizedExpertise` objects in the Core Data database
+    /// matching the specified expertise and language ISO code.
+    ///
+    /// - Parameters:
+    ///   - context: The `NSManagedObjectContext` used to perform the fetch.
+    ///   - expertiseID: The unique identifier for the `Expertise` entity to match.
+    ///   - languageIsoCode: The ISO code for the Language to match.
+    /// - Returns: The count of `LocalizedExpertise` records matching both criteria, or 0 if an error occurs.
     static func count(context: NSManagedObjectContext, expertiseID: String, languageIsoCode: String) -> Int {
-        var localizedExpertises: [LocalizedExpertise]! = []
 
-        let fetchRequest: NSFetchRequest<LocalizedExpertise> = LocalizedExpertise.fetchRequest()
-        let predicateFormat: String = "expertise_.id_ = %@ && language_.isoCode_ = %@" // avoid localization
-        fetchRequest.predicate = NSPredicate(format: predicateFormat, argumentArray: [expertiseID, languageIsoCode])
+        let localizedExpertiseCount: Int = context.performAndWait {
+            let expertiseIDCanonical = expertiseID.canonicalCase
+            let fetchRequest: NSFetchRequest<LocalizedExpertise> = LocalizedExpertise.fetchRequest()
+            let predicateFormat: String = "expertise_.id_ = %@ && language_.isoCode_ = %@" // avoid localization
+            fetchRequest.predicate = NSPredicate(format: predicateFormat,
+                                                 argumentArray: [expertiseIDCanonical, languageIsoCode])
 
-        context.performAndWait {
             do {
-                localizedExpertises = try context.fetch(fetchRequest)
+                return try context.fetch(fetchRequest).count
             } catch {
-                ifDebugFatalError("Failed to fetch LocalizedExpertise \(expertiseID) for \(languageIsoCode): \(error)",
+                ifDebugFatalError("""
+                                  Failed to fetch LocalizedExpertise \(expertiseIDCanonical) \
+                                  for \(languageIsoCode): \(error)
+                                  """,
                                   file: #fileID, line: #line)
                 // on non-Debug version, continue with empty `expertises` array
+                return 0
             }
         }
-        return localizedExpertises.count
+
+        return localizedExpertiseCount
     }
 
 }

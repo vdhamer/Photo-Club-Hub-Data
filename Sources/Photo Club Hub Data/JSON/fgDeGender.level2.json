@@ -3,13 +3,12 @@
         "idPlus": {
             "town": "Eindhoven",
             "fullName": "Fotogroep de Gender",
-            "nickName": "FG deGender"
+            "nickName": "fgDeGender"
+        },
+        "coordinates": {
+            "latitude": 51.42398, "longitude": 5.4501
         },
         "optional": {
-            "coordinates": {
-                "latitude": 51.42398,
-                "longitude": 5.4501
-            },
             "website": "https://www.fcdegender.nl",
             "wikipedia": "https://nl.wikipedia.org/wiki/Gender_(beek)",
             "level2URL": "https://www.example.com/deGender.level2.json",
@@ -566,22 +565,6 @@
                     "fotobondNumber": 1620076
                 },
                 "expertises": [ "Experimental", "Portrait", "Multiple-Exposure" ]
-            }
-        },
-
-        {
-            "name": {
-                "givenName": "Pieter",
-                "infixName": "de",
-                "familyName": "Jong"
-            },
-            "optional": {
-                "website": "https://lockdown2020.myportfolio.com/about-pieter-de-jong",
-                "level3URL": "http://www.vdhamer.com/fgDeGender/Pieter_de_Jong/",
-                "status": {
-                    "isProspectiveMember": true
-                },
-                "expertises": [ "Street", "Travel" ]
             }
         },
 

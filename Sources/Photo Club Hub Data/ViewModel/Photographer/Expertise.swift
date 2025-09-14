@@ -23,12 +23,14 @@ extension Expertise {
             if id_ != nil { // shouldn't be nil in the first place
                 return id_!
             } else {
-                ifDebugFatalError("CoreData id_ for Expertise is nil", file: #fileID, line: #line)
+                ifDebugFatalError("id_ for Expertise in CoreData is nil", file: #fileID, line: #line)
                 return "No id for Expertise"
             }
         }
         set {
-            id_ = newValue.capitalized // ensure CoreData always contains string with first letter capitalized
+            // ensure CoreData always contains string in it's canonical form
+            // (e.g. "Black & white" even if file provided "black & white" or "Black & White"
+            id_ = newValue.canonicalCase
         }
     }
 
@@ -39,11 +41,12 @@ extension Expertise {
     fileprivate static func findCreateUpdate(context: NSManagedObjectContext, // can be foreground or background context
                                              id: String,
                                              isStandard: Bool?, // nil means don't change existing value
-                                             name: [JSON], // JSON equivalent of a dictionary with localized names
+                                             names: [JSON], // JSON equivalent of a dictionary with localized names
                                              usage: [JSON]
                                             ) -> Expertise {
 
         // execute fetchRequest to get expertise object for id=id. Query could return multiple - but shouldn't.
+        let id = id.canonicalCase
         let fetchRequest: NSFetchRequest<Expertise> = Expertise.fetchRequest()
         let predicateFormat: String = "id_ = %@" // avoid localization
         fetchRequest.predicate = NSPredicate(format: predicateFormat, argumentArray: [id])
@@ -62,7 +65,7 @@ extension Expertise {
         }
 
         if let expertise = expertises.first { // already exists, so update non-identifying attributes
-            if expertise.update(context: context, isStandard: isStandard, name: name, usage: usage) {
+            if expertise.update(context: context, newIsStandard: isStandard, name: names, usage: usage) {
                 if isStandard == nil {
                     ifDebugFatalError("Updated expertise \(expertise.id).isStandard to nil (which is suspicious)")
                 } else {
@@ -77,11 +80,11 @@ extension Expertise {
             // cannot use Expertise() initializer because we must use supplied context
             let entity = NSEntityDescription.entity(forEntityName: "Expertise", in: context)!
             let expertise = Expertise(entity: entity, insertInto: context)
-            expertise.id = id // immediately set it to a non-nil value
+            expertise.id = id // immediately set it to a non-nil value. The setter saves a canonicalCase version.
             _ = expertise.update(context: context,
-                               isStandard: isStandard,
-                               name: name, // ignore whether update made changes
-                               usage: usage)
+                                 newIsStandard: isStandard,
+                                 name: names, // ignore whether update made changes
+                                 usage: usage)
             if Settings.extraCoreDataSaves {
                 Expertise.save(context: context, errorText: "Could not save Expertise \"\(expertise.id)\"")
             }
@@ -95,20 +98,20 @@ extension Expertise {
     // Update existing attributes or fill the new object
     public static func findCreateUpdateStandard(context: NSManagedObjectContext, // can be foreground or background
                                                 id: String,
-                                                name: [JSON], // array mapping languages to localizedNames
-                                                usage: [JSON]
+                                                names: [JSON], // array mapping languages to localizedNames
+                                                usages: [JSON]
     					       ) -> Expertise {
-        findCreateUpdate(context: context, id: id, isStandard: true, name: name, usage: usage)
+        findCreateUpdate(context: context, id: id, isStandard: true, names: names, usage: usages)
     }
 
     // Find existing non-standard Expertise object or create a new one.
     // Update existing attributes or fill the new object
     public static func findCreateUpdateNonStandard(context: NSManagedObjectContext, // can be foreground or background
                                                    id: String,
-                                                   name: [JSON], // array mapping languages to localizedNames
-                                                   usage: [JSON]
+                                                   names: [JSON], // array mapping languages to localizedNames
+                                                   usages: [JSON]
     						  ) -> Expertise {
-        findCreateUpdate(context: context, id: id, isStandard: false, name: name, usage: usage)
+        findCreateUpdate(context: context, id: id, isStandard: false, names: names, usage: usages)
     }
 
     // Find existing Expertise object or create a new one without changing the Standard flag.
@@ -118,22 +121,23 @@ extension Expertise {
                                               name: [JSON], // array mapping languages to localizedNames
                                               usage: [JSON]
                                              ) -> Expertise {
-        findCreateUpdate(context: context, id: id, isStandard: nil, name: name, usage: usage)
+        findCreateUpdate(context: context, id: id, isStandard: nil, names: name, usage: usage)
     }
 
     // Update non-identifying attributes/properties within an existing instance of class Expertise if needed.
     // Returns whether an update was needed.
     fileprivate func update(context: NSManagedObjectContext,
-                            isStandard: Bool?, // nil means don't change
+                            newIsStandard: Bool?, // nil means don't change
                             name: [JSON], // empty array means do not change
                             usage: [JSON]
     ) -> Bool {
 
-        var updated: Bool = false
+        var updated: Bool = false // keep track if anything changed
 
-        if isStandard != nil, self.isStandard != isStandard {
-            self.isStandard = isStandard!
-            updated = true
+        if newIsStandard == true, // if nil, don't change. If false, don't change.
+           self.isStandard == false { // if already true, no need to change
+                self.isStandard = true
+                updated = true
         }
 
         for localizedExpertise in name {
@@ -179,12 +183,7 @@ extension Expertise {
 
     func delete(context: NSManagedObjectContext) { // for testing?
         context.delete(self)
-        do {
-            try context.save()
-        } catch {
-            context.rollback()
-            ifDebugFatalError("Could not save the deletion of Expertise \"\(self.id)\"")
-        }
+        Expertise.save(context: context, errorText: "Could not save the deletion of Expertise \"\(self.id)\"")
     }
 
     static func save(context: NSManagedObjectContext, errorText: String? = nil) {
@@ -200,68 +199,70 @@ extension Expertise {
 
     // count number of Expertises with a given id
     static func count(context: NSManagedObjectContext, expertiseID: String) -> Int {
-        var expertises: [Expertise]! = []
 
-        context.performAndWait {
+        let expertiseCount: Int = context.performAndWait {
             let fetchRequest: NSFetchRequest<Expertise> = Expertise.fetchRequest()
             let predicateFormat: String = "id_ = %@" // avoid localization
-            let predicate = NSPredicate(format: predicateFormat, argumentArray: [expertiseID])
+            let predicate = NSPredicate(format: predicateFormat, argumentArray: [expertiseID.canonicalCase])
             fetchRequest.predicate = predicate
             do {
-                expertises = try context.fetch(fetchRequest)
+                return try context.fetch(fetchRequest).count
             } catch {
-                ifDebugFatalError("Failed to fetch Expertise \(expertiseID): \(error)", file: #fileID, line: #line)
+                ifDebugFatalError("Failed to fetch Expertise \(expertiseID.canonicalCase): \(error)",
+                                  file: #fileID, line: #line)
+                return 0
             }
         }
-        return expertises.count
+
+        return expertiseCount
     }
 
     // count total number of Expertise objects/records
     // there are ways to count without fetching all records, but this func is only used for testing
     static func count(context: NSManagedObjectContext) -> Int {
-        var expertises: [Expertise]! = []
 
-        context.performAndWait {
+        let expertiseCount: Int = context.performAndWait {
             let fetchRequest: NSFetchRequest<Expertise> = Expertise.fetchRequest()
             let predicateAll = NSPredicate(format: "TRUEPREDICATE")
             fetchRequest.predicate = predicateAll
 
             do {
-                expertises = try context.fetch(fetchRequest)
+                return try context.fetch(fetchRequest).count
             } catch {
-                ifDebugFatalError("Failed to fetch all Expertises: \(error)", file: #fileID, line: #line)
+                ifDebugFatalError("Error fetching all Expertises: \(error)", file: #fileID, line: #line)
+                return 0
             }
         }
 
-        return expertises.count
+        return expertiseCount
     }
 
     @MainActor
     // get array with list of all Expertises
     static func getAll(context: NSManagedObjectContext) -> [Expertise] {
-        var expertises: [Expertise]! = []
 
-        context.performAndWait {
+        let allExpertises: [Expertise] = context.performAndWait {
             let fetchRequest: NSFetchRequest<Expertise> = Expertise.fetchRequest()
             let predicateAll = NSPredicate(format: "TRUEPREDICATE")
             fetchRequest.predicate = predicateAll
             fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id_", ascending: true)]
 
             do {
-                expertises = try context.fetch(fetchRequest)
+                return try context.fetch(fetchRequest) // returns to fill allExpertises
             } catch {
                 ifDebugFatalError("Failed to fetch all Expertises: \(error)", file: #fileID, line: #line)
+                return [] // returns to fill allExpertises
             }
         }
 
-        return expertises
+        return allExpertises
     }
 
     var localizedExpertises: Set<LocalizedExpertise> {
         (localizedExpertises_ as? Set<LocalizedExpertise>) ?? []
     }
 
-    // Priority system to choose the most appropriate LocalizedExpertise for a given Expertise.
+    // Priority system to choose the most appropriate localized version of a given Expertise.
     // The choice depends on available translations and the current language preferences set on the device.
     public var selectedLocalizedExpertise: LocalizedExpertiseResult {
         // don't use Locale.current.language.languageCode because this only returns languages supported by the app
@@ -269,13 +270,13 @@ extension Expertise {
         for lang in Locale.preferredLanguages {
             let langID = lang.split(separator: "-").first?.uppercased() ?? "EN"
             // now check if one of the user's preferences is available for this Remark
-            for localizedExpertise in localizedExpertises where localizedExpertise.language.isoCodeAllCaps == langID {
+            for localizedExpertise in localizedExpertises where localizedExpertise.language.isoCode == langID {
                 return LocalizedExpertiseResult(localizedExpertise: localizedExpertise, id: self.id)
             }
         }
 
-        // second choice: most people speak English, at least let's pretend that is the case ;-)
-        for localizedExpertise in localizedExpertises where localizedExpertise.language.isoCodeAllCaps == "EN" {
+        // second choice: most users can speak English, at least let's assume that is the case ;-)
+        for localizedExpertise in localizedExpertises where localizedExpertise.language.isoCode == "EN" {
             return LocalizedExpertiseResult(localizedExpertise: localizedExpertise, id: self.id)
         }
 

@@ -14,38 +14,48 @@ public class Level0JsonReader {
 
     public init(bgContext: NSManagedObjectContext,
                 fileName: String = "root",  // can overrule the name for unit testing
-                isInTestBundle: Bool,
+                isBeingTested: Bool,
                 useOnlyInBundleFile: Bool = false // true can be used to avoid publishing a test file to GitHub
                ) {
-        _ = FetchAndProcessFile(bgContext: bgContext,
-                                fileSelector: FileSelector(fileName: fileName, isInTestBundle: isInTestBundle),
-                                fileType: "json", fileSubType: "level0", // "root.level0.json"
-                                useOnlyInBundleFile: useOnlyInBundleFile,
-                                fileContentProcessor: readRootLevel0Json(bgContext:
-                                                                         jsonData:
-                                                                         fileSelector:))
+        _ = FetchAndProcessFile(
+            bgContext: bgContext,
+            fileSelector: FileSelector(fileName: fileName, isBeingTested: isBeingTested),
+            fileType: "json", fileSubType: "level0", // "root.level0.json"
+            useOnlyInBundleFile: useOnlyInBundleFile,
+            isBeingTested: isBeingTested,
+            fileContentProcessor: Level0JsonReader.readRootLevel0Json(bgContext:
+                                                                      jsonData:
+                                                                      fileSelector:
+                                                                      isBeingTested:)
+        )
     }
 
-    fileprivate func readRootLevel0Json(bgContext: NSManagedObjectContext,
-                                        jsonData: String,
-                                        fileSelector: FileSelector) {
+    // Marked as @Sendable to satisfy concurrency safety requirements.
+    @Sendable static fileprivate func readRootLevel0Json(bgContext: NSManagedObjectContext,
+                                                         jsonData: String,
+                                                         fileSelector: FileSelector,
+                                                         isBeingTested: Bool) {
 
         let fileName: String = fileSelector.fileName
-        ifDebugPrint("\nWill read Level 0 file (\(fileName)) with standard expertises and languages in background.")
+        ifDebugPrint("\nStarting background read of \(fileName).level0.json to get standard Expertises and Languages.")
 
         // hand the data to SwiftyJSON to parse
         let jsonRoot = JSON(parseJSON: jsonData) // get entire JSON file
 
-        // parse Experises section of file
+        // MARK: - process Experises section of Level0 file
+
         let jsonExpertises: [JSON] = jsonRoot["expertises"].arrayValue
 
-        parseExpertises(bgContext: bgContext, jsonExpertises: jsonExpertises)
+        Level0JsonReader.parseExpertises(bgContext: bgContext, jsonExpertises: jsonExpertises)
         print("\(jsonExpertises.count) Expertises found")
 
-        // parse Language section of file
+        // MARK: - process Languages section of Level0 file
+
         let jsonLanguages: [JSON] = jsonRoot["languages"].arrayValue
 
-        parseLanguages(bgContext: bgContext, jsonLanguages: jsonLanguages)
+        Level0JsonReader.parseLanguages(bgContext: bgContext, jsonLanguages: jsonLanguages)
+
+        // MARK: - save Expertises and Languages
 
         do { // saving may not be necessary because every organization is saved separately
             if bgContext.hasChanges { // optimization recommended by Apple
@@ -62,7 +72,41 @@ public class Level0JsonReader {
         ifDebugPrint("Completed readRootLevel0Json() in background")
     }
 
-    private func parseLanguages(bgContext: NSManagedObjectContext, jsonLanguages: [JSON]) {
+    private static func parseExpertises(bgContext: NSManagedObjectContext, jsonExpertises: [JSON]) {
+        for jsonExpertise in jsonExpertises {
+            guard jsonExpertise["idString"].exists() else {
+                ifDebugFatalError("JSON Expertise block is missing an idString field", file: #fileID, line: #line)
+                continue  // if idString field doesn't exist, skip the Expertise
+            }
+            let idString = jsonExpertise["idString"].stringValue.canonicalCase
+
+            guard jsonExpertise["name"].exists() else {
+                ifDebugFatalError("JSON Expertise doesn't have any localized names", file: #fileID, line: #line)
+                continue  // if name doesn't exist, skip the expertise
+            }
+            let jsonExpertiseNames = jsonExpertise["name"].arrayValue // dictionary of localized names for the expertise
+
+            // Must insist on having at least one language for which jsonExpertise has a localized name
+            guard jsonExpertiseNames.count > 0,
+                  jsonExpertiseNames[0]["language"].exists(),
+                  jsonExpertiseNames[0]["localizedString"].exists() else {
+                ifDebugFatalError("Expertise doesn't have any localized representations", file: #fileID, line: #line)
+                continue  // if it doesn't exist, skip the expertise (note that it even skips the "usage" array)
+            }
+
+            let jsonExpertiseOptionals = jsonExpertise["optional"] // rest will be empty if not found
+            let jsonUsages = jsonExpertiseOptionals["usage"].arrayValue
+
+            // Expertises from the root.level1.json file are by definition Standard
+            let expertise = Expertise.findCreateUpdateStandard(context: bgContext,
+                                                               id: idString,
+                                                               names: jsonExpertiseNames,
+                                                               usages: jsonUsages)
+            print("Expertise <\(expertise.id)> with \(jsonExpertiseNames.count) localized name(s) found")
+        }
+    }
+
+    private static func parseLanguages(bgContext: NSManagedObjectContext, jsonLanguages: [JSON]) {
         for jsonLanguage in jsonLanguages {
             guard jsonLanguage["isoCode"].exists(),
                   jsonLanguage["languageNameEN"].exists() else {
@@ -76,41 +120,7 @@ public class Level0JsonReader {
             let language = Language.findCreateUpdate(context: bgContext,
                                                      isoCode: isoCode,
                                                      nameENOptional: languageNameEN)
-            print("Language <\(language.isoCodeAllCaps)> found")
+            print("Language <\(language.isoCode)> found")
         }
     }
-
-    private func parseExpertises(bgContext: NSManagedObjectContext, jsonExpertises: [JSON]) {
-        for jsonExpertise in jsonExpertises {
-            guard jsonExpertise["idString"].exists() else {
-                ifDebugFatalError("Expertise doesn't have an idString", file: #fileID, line: #line)
-                continue  // if it doesn't exist, skip the expertise
-            }
-            let idString = jsonExpertise["idString"].stringValue
-
-            guard jsonExpertise["name"].exists() else {
-                ifDebugFatalError("Expertise doesn't have localized representations", file: #fileID, line: #line)
-                continue  // if it doesn't exist, skip the expertise
-            }
-            let jsonExpertiseName = jsonExpertise["name"].arrayValue // dictionary of localized names for the expertise
-
-            // we insist on having at least one language for which jsonExpertise has a localized name
-            guard jsonExpertiseName.count > 0,
-                  jsonExpertiseName[0]["language"].exists(),
-                  jsonExpertiseName[0]["localizedString"].exists() else {
-                ifDebugFatalError("Expertise doesn't have any localized representations", file: #fileID, line: #line)
-                continue  // if it doesn't exist, skip the expertise (note that it even skips the "usage" array)
-            }
-
-            let jsonExpertiseOptionals = jsonExpertise["optional"] // rest will be empty if not found
-            let jsonUsage = jsonExpertiseOptionals["usage"].arrayValue
-
-            let expertise = Expertise.findCreateUpdateStandard(context: bgContext,
-                                                               id: idString,
-                                                               name: jsonExpertiseName,
-                                                               usage: jsonUsage)
-            print("Expertise <\(expertise.id)> with \(jsonExpertiseName.count) localized name(s) found")
-        }
-    }
-
 }

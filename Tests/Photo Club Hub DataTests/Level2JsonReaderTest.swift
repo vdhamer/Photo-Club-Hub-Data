@@ -25,23 +25,26 @@ import CoreData // for NSManagedObjectContext
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataExpertisesLanguages(context: bgContext) // This test doesn't have Expertises
+        Model.deleteCoreDataExpertisesAndLanguages(viewContext: bgContext) // This test doesn't have Expertises
         #expect(Expertise.count(context: bgContext) == 0)
 
         // note that club XampleMin may already be loaded
         // note that XampleMinMembersProvider runs asynchronously (via bgContext.perform {})
-        let randomTown = String.random(length: 10)
-        _ = XampleMinMembersProvider(bgContext: bgContext, synchronousWithRandomTown: true, randomTown: randomTown)
+        let randomTownForTesting = String.random(length: 10)
+        _ = XampleMinMembersProvider(bgContext: bgContext,
+                                     isBeingTested: true,
+                                     useOnlyInBundleFile: true,
+                                     randomTownForTesting: randomTownForTesting)
 
         let idPlus = OrganizationIdPlus(fullName: "Xample Club Min",
-                                        town: randomTown, // unique town to keep this separate from normal loading
+                                        town: randomTownForTesting, // town to keep this separate from normal club data
                                         nickname: "XampleMin")
 
         let predicateFormat: String = "town_ = %@" // avoid localization
         // Note that organizationType is not an identifying attribute.
         // This implies that you cannot have 2 organizations with the same Name and Town, but of a different type.
         let predicate = NSPredicate(format: predicateFormat,
-                                    argumentArray: [ randomTown ] )
+                                    argumentArray: [ randomTownForTesting ] )
         let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
         fetchRequest.predicate = predicate
         let organizations: [Organization] = (try? context.fetch(fetchRequest)) ?? []
@@ -54,7 +57,7 @@ import CoreData // for NSManagedObjectContext
             #expect(organizations[0].organizationType.organizationTypeName == OrganizationTypeEnum.club.rawValue)
             #expect(organizations[0].fullName == idPlus.fullName)
             #expect(organizations[0].town == idPlus.town)
-            #expect(organizations[0].nickname == idPlus.nickname)
+            #expect(organizations[0].nickName == idPlus.nickname)
         }
 
     }
@@ -67,23 +70,26 @@ import CoreData // for NSManagedObjectContext
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataExpertisesLanguages(context: bgContext) // This test does have Expertises
+        Model.deleteCoreDataExpertisesAndLanguages(viewContext: bgContext) // This test does have Expertises
         #expect(Expertise.count(context: bgContext) == 0)
 
         // note that club XampleMax may already be loaded
         // note that XampleMaxMembersProvider runs asynchronously (via bgContext.perform {})
-        let randomTown = String.random(length: 10)
-        _ = XampleMaxMembersProvider(bgContext: bgContext, synchronousWithRandomTown: true, randomTown: randomTown)
+        let randomTownForTesting = String.random(length: 10)
+        _ = XampleMaxMembersProvider(bgContext: bgContext,
+                                     isBeingTested: true,
+                                     useOnlyInBundleFile: true,
+                                     randomTownForTesting: randomTownForTesting)
 
         let idPlus = OrganizationIdPlus(fullName: "Xample Club With Maximal Data",
-                                        town: randomTown, // unique town to keep this separate from normal loading
+                                        town: randomTownForTesting, // town to distinguish this from normal club data
                                         nickname: "XampleMax")
 
         let predicateFormat: String = "town_ = %@" // avoid localization
         // Note that organizationType is not an identifying attribute.
         // This implies that you cannot have 2 organizations with the same Name and Town, but of a different type.
         let predicate = NSPredicate(format: predicateFormat,
-                                    argumentArray: [ randomTown ] )
+                                    argumentArray: [ randomTownForTesting ] )
         let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
         fetchRequest.predicate = predicate
         let organizations: [Organization] = (try? context.fetch(fetchRequest)) ?? []
@@ -96,7 +102,7 @@ import CoreData // for NSManagedObjectContext
             #expect(organizations[0].organizationType.organizationTypeName == OrganizationTypeEnum.club.rawValue)
             #expect(organizations[0].fullName == idPlus.fullName)
             #expect(organizations[0].town == idPlus.town)
-            #expect(organizations[0].nickname == idPlus.nickname)
+            #expect(organizations[0].nickName == idPlus.nickname)
         }
     }
 
@@ -108,26 +114,27 @@ import CoreData // for NSManagedObjectContext
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataExpertisesLanguages(context: bgContext)
+        Model.deleteCoreDataExpertisesAndLanguages(viewContext: bgContext)
 
         // note that club fgDeGender may already be loaded
         // note that fgDeGenderMembersProvider runs asynchronously (via bgContext.perform {})
-        let randomTown = String.random(length: 10)
+        let randomTownForTesting = String.random(length: 10)
         _ = FotogroepDeGenderMembersProvider(bgContext: bgContext, // The club has Expertises
-                                             synchronousWithRandomTown: true,
-                                             randomTown: randomTown)
+                                             isBeingTested: true,
+                                             useOnlyInBundleFile: true,
+                                             randomTownForTesting: randomTownForTesting)
 
         let predicateFormat: String = "town_ = %@" // avoid localization
         // Note that organizationType is not an identifying attribute.
         // This implies that you cannot have 2 organizations with the same Name and Town, but of a different type.
         let predicate = NSPredicate(format: predicateFormat,
-                                    argumentArray: [ randomTown ] )
+                                    argumentArray: [ randomTownForTesting ] )
         let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
         fetchRequest.predicate = predicate
         let organizations: [Organization] = (try? context.fetch(fetchRequest)) ?? []
 
         let idPlus = OrganizationIdPlus(fullName: "Fotogroep de Gender",
-                                        town: randomTown, // unique town to keep this separate from normal loading
+                                        town: randomTownForTesting, // town to distinguish this from normal club data
                                         nickname: "fgDeGender")
 
         #expect(organizations.count == 1)
@@ -135,7 +142,7 @@ import CoreData // for NSManagedObjectContext
             #expect(organizations[0].organizationType.organizationTypeName == OrganizationTypeEnum.club.rawValue)
             #expect(organizations[0].fullName == idPlus.fullName)
             #expect(organizations[0].town == idPlus.town)
-            #expect(organizations[0].nickname == idPlus.nickname)
+            #expect(organizations[0].nickName == idPlus.nickname)
             #expect(organizations[0].fotobondNumber == 1620)
         }
 
@@ -152,22 +159,24 @@ import CoreData // for NSManagedObjectContext
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataExpertisesLanguages(context: bgContext) // This test does have Expertises
+        Model.deleteCoreDataExpertisesAndLanguages(viewContext: bgContext) // This test does have Expertises
         #expect(Expertise.count(context: bgContext) == 0)
 
         // note that club fgDeGender may already be loaded
         // note that fgDeGenderMembersProvider runs asynchronously (via bgContext.perform {})
-        let randomTownG = String.random(length: 10)
+        let randomTownForTestingG = String.random(length: 10)
         _ = FotogroepDeGenderMembersProvider(bgContext: bgContext,
-                                             synchronousWithRandomTown: true,
-                                             randomTown: randomTownG)
+                                             isBeingTested: true,
+                                             useOnlyInBundleFile: true,
+                                             randomTownForTesting: randomTownForTestingG)
         #expect(Expertise.count(context: bgContext) == 21)
         #expect(PhotographerExpertise.count(context: bgContext) == 14)
 
-        let randomTownW = String.random(length: 10)
+        let randomTownForTestingW = String.random(length: 10)
         _ = FotogroepWaalreMembersProvider(bgContext: bgContext,
-                                           synchronousWithRandomTown: true,
-                                           randomTown: randomTownW)
+                                           isBeingTested: true,
+                                           useOnlyInBundleFile: true,
+                                           randomTownForTesting: randomTownForTestingW)
 
         #expect(Expertise.count(context: bgContext) == 21)
         #expect(PhotographerExpertise.count(context: bgContext) == 42)

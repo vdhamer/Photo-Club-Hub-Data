@@ -1,13 +1,13 @@
 //
-//  XampleMaxMembersProvider.swift
+//  FotokringSintMichielsgestelMembersProvider.swift
 //  Photo Club Hub
 //
-//  Created by Peter van den Hamer on 17/07/2021.
+//  Created by Peter van den Hamer on 10/09/2025.
 //
 
 import CoreData // for PersistenceController
 
-final public class XampleMaxMembersProvider: Sendable {
+final public class FotokringStMichielsgestelMembersProvider: Sendable {
 
     public init(bgContext: NSManagedObjectContext,
                 isBeingTested: Bool,
@@ -37,11 +37,11 @@ final public class XampleMaxMembersProvider: Sendable {
 
     fileprivate func insertOnlineMemberData(bgContext: NSManagedObjectContext,
                                             isBeingTested: Bool,
-                                            town: String = "Rotterdam",
+                                            town: String = "Sint-Michielsgestel",
                                             useOnlyInBundleFile: Bool) {
-        let idPlus = OrganizationIdPlus(fullName: "Xample Club With Maximal Data",
+        let idPlus = OrganizationIdPlus(fullName: "Fotokring Sint-Michielsgestel",
                                         town: town,
-                                        nickname: "XampleMax")
+                                        nickname: "fkGestel")
 
         let club = Organization.findCreateUpdate(context: bgContext,
                                                  organizationTypeEnum: .club,

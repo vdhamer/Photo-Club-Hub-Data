@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  MemberPortfolio+refreshFirstImageTest.swift
 //  Photo Club Hub Data
 //
 //  Created by Peter van den Hamer on 26/05/2025.
@@ -20,11 +20,14 @@ import CoreData // for NSMergePolicy
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        let randomTown = String.random(length: 10)
-        _ = XampleMinMembersProvider(bgContext: bgContext, synchronousWithRandomTown: true, randomTown: randomTown)
+        let randomTownForTesting = String.random(length: 10)
+        _ = XampleMinMembersProvider(bgContext: bgContext,
+                                     isBeingTested: true,
+                                     useOnlyInBundleFile: false,
+                                     randomTownForTesting: randomTownForTesting)
 
         let idPlus = OrganizationIdPlus(fullName: "Xample Club With Minimal Data",
-                                        town: randomTown, // unique town to keep this separate from normal loading
+                                        town: randomTownForTesting, // new town to distinguish from normal club data
                                         nickname: "XampleMin")
 
         let club = Organization.findCreateUpdate(context: bgContext, organizationTypeEnum: .club, idPlus: idPlus)
