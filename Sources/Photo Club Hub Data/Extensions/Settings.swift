@@ -14,8 +14,11 @@ struct Settings {
         fatalError("init() is not available. Settings only holds a few static computer properties.")
     }
 
-    static let userDefaultsKey: String = "dataResetPending282b4646" // must match id of Settings toggle in Root.plist
-    private static let prevUserDefaultsKeys: Set<String> = ["dataResetPending280b4644",
+    static let userDefaultsKey: String = "dataResetPending284b4650" // must match id of Settings toggle in Root.plist
+    private static let prevUserDefaultsKeys: Set<String> = ["dataResetPending283b4649",
+                                                            "dataResetPending282b4647",
+                                                            "dataResetPending282b4646",
+                                                            "dataResetPending280b4644",
                                                             "dataResetPending280",
                                                             "dataResetPending272",
                                                             "dataResetPending"]
@@ -58,6 +61,13 @@ struct Settings {
         // Instructs the app whether to load XampleMax.level2.json and XampleMin.level2.json
         // It will typically be used by people creating new level2.json files to see what the example files look like
         UserDefaults.standard.bool(forKey: "loadTestClubs") // if the key is missing, this returns false
+    }
+
+    static var errorOnCoreDataMerge: Bool { // controlled by toggle in Settings
+        // Instructs the app to set CoreData NSManagedObjectContext.mergePolicy to NSMergePolicy.error
+        // This causes the app to stop when a uniqueness constraint violation or a merging issue in encountered.
+        // Setting this Bool to true only does something if the app is in Debug mode. So does nothing for end users.
+        UserDefaults.standard.bool(forKey: "errorOnCoreDataMerge") // if the key is missing, this returns false
     }
 
 }
