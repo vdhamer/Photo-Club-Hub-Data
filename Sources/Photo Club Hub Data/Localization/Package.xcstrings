@@ -1,36 +1,325 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Expertises: %@" : {
-      "comment" : "Hint when providing too many expertises",
+    "admin" : {
+      "comment" : "Administrative role of member within a club. Used as part of concatenations.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Expertises: %@"
+            "value" : "admin"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Expertises: %@"
+            "value" : "admin"
           }
         }
       }
     },
-    "Unofficial expertise. It has no translations yet." : {
-      "comment" : "Hint for expertise without localization",
+    "and" : {
+      "comment" : "To generate strings like \"secretary and admin\"",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unofficial expertise. It has no translations yet."
+            "value" : "and"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dit is nog geen officieel expertise, en heeft geen vertalingen."
+            "value" : "en"
+          }
+        }
+      }
+    },
+    "chairman" : {
+      "comment" : "Administrative role of member within a club. Used as part of concatenations.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "chairman"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "voorzitter"
+          }
+        }
+      }
+    },
+    "clubs" : {
+      "comment" : "Mode for the Clubs page: show photo clubs as sections.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "clubs"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "clubs"
+          }
+        }
+      }
+    },
+    "deceased" : {
+      "comment" : "Relationship status of member within a club. Used as prefix.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "deceased"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "overleden"
+          }
+        }
+      }
+    },
+    "external coach" : {
+      "comment" : "Relationship status of member within a club. Used in concatenations.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "external coach"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "externe mentor"
+          }
+        }
+      }
+    },
+    "former" : {
+      "comment" : "Relationship status of member within a club. Used as prefex.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "former"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "voormalig"
+          }
+        }
+      }
+    },
+    "honorary member" : {
+      "comment" : "Relationship status of member within a club. Used in concatenations.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "honorary member"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "erelid"
+          }
+        }
+      }
+    },
+    "member" : {
+      "comment" : "Default status of member within a club. Used in concatenations.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "member"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lid"
+          }
+        }
+      }
+    },
+    "museums" : {
+      "comment" : "Mode for the Clubs page: show museums as sections.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "museums"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "musea"
+          }
+        }
+      }
+    },
+    "No remark currently available for %@ %@." : {
+      "comment" : "Shown below map if there is no usable remark in the OrganzationList.json file.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "No remark currently available for %1$@ %2$@."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen opmerking beschikbaar voor %1$@ %2$@."
+          }
+        }
+      }
+    },
+    "of2" : {
+      "comment" : "<person> of <photo club>",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "of"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "van"
+          }
+        }
+      }
+    },
+    "other" : {
+      "comment" : "Administrative role of member within a club. Used as part of concatenations.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "other"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bestuurslid"
+          }
+        }
+      }
+    },
+    "prospective member" : {
+      "comment" : "Relationship status of member within a club. Used in concatenations.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "prospective member"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "aspirantlid"
+          }
+        }
+      }
+    },
+    "secretary" : {
+      "comment" : "Administrative role of member within a club. Used as part of concatenations.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "secretary"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "secretaris"
+          }
+        }
+      }
+    },
+    "Too many expertises" : {
+      "comment" : "Shown when too many expertises are found",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Too many expertises"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teveel expertises"
+          }
+        }
+      }
+    },
+    "treasurer" : {
+      "comment" : "Administrative role of member within a club. Used as part of concatenations.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "treasurer"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "penningmeester"
+          }
+        }
+      }
+    },
+    "unknowns" : {
+      "comment" : "Organization type is not known. Used for debugging.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "unknowns"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "onbekenden"
+          }
+        }
+      }
+    },
+    "vice-chairman" : {
+      "comment" : "Administrative role of member within a club. Used as part of concatenations.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vice-chairman"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vicevoorzitter"
           }
         }
       }
