@@ -31,6 +31,7 @@ import CoreData // for NSManagedObjectContext
         // note that club XampleMin may already be loaded
         // note that XampleMinMembersProvider runs asynchronously (via bgContext.perform {})
         let randomTownForTesting = String.random(length: 10)
+
         _ = XampleMinMembersProvider(bgContext: bgContext,
                                      isBeingTested: true,
                                      useOnlyInBundleFile: true,

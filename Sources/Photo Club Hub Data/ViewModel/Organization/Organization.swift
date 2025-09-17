@@ -193,7 +193,7 @@ extension Organization {
 	// Find existing organization or create a new one
 	// Update new or existing organization's attributes
     public static func findCreateUpdate(context: NSManagedObjectContext, // can be foreground or background context
-                                        organizationTypeEnum: OrganizationTypeEnum = OrganizationTypeEnum.club,
+                                        organizationTypeEnum: OrganizationTypeEnum,
                                         idPlus: OrganizationIdPlus,
                                         coordinates: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0),
                                         removeOrganization: Bool = false, // can remove records for removed org's
