@@ -38,7 +38,8 @@ let package = Package(
 
                 // following are behind a switch in Photo Club Hub iOS app
                 .copy("JSON/XampleMin.level2.json"),
-                .copy("JSON/XampleMax.level2.json")
+                .copy("JSON/XampleMax.level2.json"),
+                .process("PhotoClubHubData.xcstrings")
             ]
         ),
         .testTarget(
