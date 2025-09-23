@@ -13,7 +13,7 @@ import CoreData // for NSMergePolicy
 
     let imageForUnknownClub: String = "http://www.vdHamer.com/fgWaalre/Empty_Website/config.xml"
 
-    @Test("") func urlOfImageIndex_unknownClub() {
+    @Test("Refresh featured image") func urlOfImageIndex_unknownClub() {
 
         let bgContext = PersistenceController.shared.container.newBackgroundContext()
         bgContext.name = "RefreshFirstImageTests"
