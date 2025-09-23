@@ -87,7 +87,7 @@
       }
     },
     "external coach" : {
-      "comment" : "Relationship status of member within a club. Used in concatenations.",
+      "comment" : "Relationship status of member within a club.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -121,7 +121,7 @@
       }
     },
     "honorary member" : {
-      "comment" : "Relationship status of member within a club. Used in concatenations.",
+      "comment" : "Relationship status of member within a club.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -138,7 +138,7 @@
       }
     },
     "member" : {
-      "comment" : "Default status of member within a club. Used in concatenations.",
+      "comment" : "Default status of member within a club.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -223,7 +223,7 @@
       }
     },
     "prospective member" : {
-      "comment" : "Relationship status of member within a club. Used in concatenations.",
+      "comment" : "Relationship status of member within a club.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
