@@ -22,7 +22,7 @@ import CoreData // for NSMergePolicy
 
         let randomTownForTesting = String.random(length: 10)
         _ = XampleMinMembersProvider(bgContext: bgContext,
-                                     isBeingTested: false, // TODO should be true
+                                     isBeingTested: true,
                                      useOnlyInBundleFile: false,
                                      randomTownForTesting: randomTownForTesting)
 
