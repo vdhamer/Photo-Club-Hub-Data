@@ -16,13 +16,13 @@ import CoreData // for NSMergePolicy
     @Test("Refresh featured image") func urlOfImageIndex_unknownClub() {
 
         let bgContext = PersistenceController.shared.container.newBackgroundContext()
-        bgContext.name = "RefreshFirstImageTests"
+        bgContext.name = "RefreshFeaturedImageTests"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
         let randomTownForTesting = String.random(length: 10)
         _ = XampleMinMembersProvider(bgContext: bgContext,
-                                     isBeingTested: true,
+                                     isBeingTested: false, // TODO should be true
                                      useOnlyInBundleFile: false,
                                      randomTownForTesting: randomTownForTesting)
 

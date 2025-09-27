@@ -57,7 +57,7 @@ public struct LocalizedExpertiseResultLists {
             let moreExpertise = Expertise.findCreateUpdateNonStandard(
                                           context: moc,
                                           id: String(localized: "Too many expertises",
-                                                     table: "PhotoClubHubData",
+                                                     table: "PhotoClubHubData", bundle: Bundle.module,
                                                      comment: "Shown when too many expertises are found"),
                                           names: [],
                                           usages: [] )
