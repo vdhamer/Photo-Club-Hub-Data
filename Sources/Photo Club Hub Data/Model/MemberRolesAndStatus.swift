@@ -24,32 +24,32 @@ public enum MemberRole {
         case .admin:
             return String(localized: "admin",
                           table: table,
-                          bundle: Bundle.module,
+                          bundle: Bundle.photoClubHubDataModule,
                           comment: "Administrative role of member within a club.")
         case .chairman:
             return String(localized: "chairman",
                           table: table,
-                          bundle: Bundle.module,
+                          bundle: Bundle.photoClubHubDataModule,
                           comment: "Administrative role of member within a club.")
         case .secretary:
             return String(localized: "secretary",
                           table: table,
-                          bundle: Bundle.module,
+                          bundle: Bundle.photoClubHubDataModule,
                           comment: "Administrative role of member within a club.")
         case .treasurer:
             return String(localized: "treasurer",
                           table: table,
-                          bundle: Bundle.module,
+                          bundle: Bundle.photoClubHubDataModule,
                           comment: "Administrative role of member within a club.")
         case .viceChairman: // used in fgWaalre
             return String(localized: "vice-chairman",
                           table: table,
-                          bundle: Bundle.module,
+                          bundle: Bundle.photoClubHubDataModule,
                           comment: "Administrative role of member within a club.")
         case .other:  // used in fgDeGender
             return String(localized: "other",
                           table: table,
-                          bundle: Bundle.module,
+                          bundle: Bundle.photoClubHubDataModule,
                           comment: "Administrative role of member within a club.")
         }
     }
@@ -83,37 +83,33 @@ public enum MemberStatus {
     }
 
     private func localizedString2() -> String {
+        let table = "PhotoClubHubData"
+
         switch self {
         case .coach:
             return String(localized: "external coach",
-                          table: "PhotoClubHubData",
-                          bundle: Bundle.module,
+                          table: table, bundle: Bundle.photoClubHubDataModule,
                           comment: "Relationship status of member within a club.")
         case .deceased:
             return String(localized: "deceased",
-                          table: "PhotoClubHubData",
-                          bundle: Bundle.module,
+                          table: table, bundle: Bundle.photoClubHubDataModule,
                           comment: "Relationship status of member within a club. Used as prefix.")
         case .former:
             return String(localized: "former",
-                          table: "PhotoClubHubData",
-                          bundle: Bundle.module,
+                          table: table, bundle: Bundle.photoClubHubDataModule,
                           comment: "Relationship status of member within a club. Used as prefex.")
         case .honorary:
             return String(localized: "honorary member",
-                          table: "PhotoClubHubData",
-                          bundle: Bundle.module,
+                          table: table, bundle: Bundle.photoClubHubDataModule,
                           comment: "Relationship status of member within a club.")
         case .current:
             return String(localized: "member",
-                          table: "PhotoClubHubData",
-                          bundle: Bundle.module,
+                          table: table, bundle: Bundle.photoClubHubDataModule,
                           comment: "Default status of member within a club.")
 
         case .prospective:
             return String(localized: "prospective member",
-                          table: "PhotoClubHubData",
-                          bundle: Bundle.module,
+                          table: table, bundle: Bundle.photoClubHubDataModule,
                           comment: "Relationship status of member within a club.")
         }
     }
@@ -130,6 +126,20 @@ extension MemberStatus: Comparable {
             return lhs.localizedString() < rhs.localizedString()
     }
 }
+
+// Temporary helper function that works both in a standalone app and within the PhotoClubHubData package.
+// This can be removed when both Photo Club Hub and Photo Club Hub HTML both use the PhotoClubHubData package.
+extension Bundle {
+    static var photoClubHubDataModule: Bundle {
+        #if SWIFT_PACKAGE
+        return .module
+        #else
+        // Bundle where this source file lives (works for app and framework targets)
+        return Bundle(for: _PhotoClubHubDataBundleToken.self)
+        #endif
+    }
+}
+private final class _PhotoClubHubDataBundleToken {} // dummy class, only used to determine what current bundle is
 
 // MARK: - MemberRoleAndStatus
 
