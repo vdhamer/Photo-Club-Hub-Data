@@ -19,7 +19,9 @@ public enum MemberRole {
     case viceChairman
     case other
 
-    public func localizedString(table: String) -> String {
+    public func localizedString() -> String {
+        let table: String = "PhotoClubHubData"
+
         switch self {
         case .admin:
             return String(localized: "admin",
@@ -28,6 +30,11 @@ public enum MemberRole {
                           comment: "Administrative role of member within a club.")
         case .chairman:
             return String(localized: "chairman",
+                          table: table,
+                          bundle: Bundle.photoClubHubDataModule,
+                          comment: "Administrative role of member within a club.")
+        case .other:  // used in fgDeGender
+            return String(localized: "other",
                           table: table,
                           bundle: Bundle.photoClubHubDataModule,
                           comment: "Administrative role of member within a club.")
@@ -46,24 +53,19 @@ public enum MemberRole {
                           table: table,
                           bundle: Bundle.photoClubHubDataModule,
                           comment: "Administrative role of member within a club.")
-        case .other:  // used in fgDeGender
-            return String(localized: "other",
-                          table: table,
-                          bundle: Bundle.photoClubHubDataModule,
-                          comment: "Administrative role of member within a club.")
         }
     }
 }
 
 extension MemberRole: CaseIterable, Identifiable {
     public var id: String { // switch to self?
-        self.localizedString(table: "PhotoClubHubData").capitalized
+        self.localizedString().capitalized
     }
 }
 
 extension MemberRole: Comparable {
     public static func < (lhs: MemberRole, rhs: MemberRole) -> Bool {
-        return lhs.localizedString(table: "PhotoClubHubData") < rhs.localizedString(table: "PhotoClubHubData")
+        return lhs.localizedString() < rhs.localizedString()
     }
 }
 
@@ -83,7 +85,7 @@ public enum MemberStatus {
     }
 
     private func localizedString2() -> String {
-        let table = "PhotoClubHubData"
+        let table: String = "PhotoClubHubData"
 
         switch self {
         case .coach:
@@ -106,7 +108,6 @@ public enum MemberStatus {
             return String(localized: "member",
                           table: table, bundle: Bundle.photoClubHubDataModule,
                           comment: "Default status of member within a club.")
-
         case .prospective:
             return String(localized: "prospective member",
                           table: table, bundle: Bundle.photoClubHubDataModule,
