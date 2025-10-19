@@ -7,6 +7,7 @@
 
 extension MemberPortfolio { // computed properties related to roles of members in their club
 
+    // typicala value: "Member" or "Secretary and member"
     var roleDescription: String {
         var prefixList = [String]()
         var suffixList = [String]()
