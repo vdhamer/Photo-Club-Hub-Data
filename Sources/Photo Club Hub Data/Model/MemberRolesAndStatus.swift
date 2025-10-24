@@ -10,77 +10,88 @@ import Foundation // for Bundle
 
 // MARK: - MemberRole
 
-public enum MemberRole {
-    // a Member can have 0, 1 or more of these MemberRoles at the same time
-    case admin // rawValue not used because string needs localization
+/// A role a club member can hold within their photo club.
+///
+/// A member can have zero or more roles concurrently.
+/// - The enum's `rawValue` serves as a  stable identifier.
+/// - Use`displayName` for localized presentation.
+public enum MemberRole: String {
+    /// Site administrator responsible for managing the club website.
+    case admin
+    /// Club chairman.
     case chairman
+    /// Club secretary.
     case secretary
+    /// Club treasurer.
     case treasurer
-    case viceChairman
+    /// Vice chairman.
+    case viceChairman // Assists the chairman
+    /// Other/unspecified role used by some clubs.
     case other
+}
 
-    public var localizedString: String {
-        let table: String = "PhotoClubHubData"
+extension MemberRole {
+    public var displayName: String { // localized
+        let localizationTable: String = "PhotoClubHubData"
+        let localizationBundle: Bundle = Bundle.photoClubHubDataModule
 
         switch self {
         case .admin:
-            return String(localized: "admin",
-                          table: table,
-                          bundle: Bundle.photoClubHubDataModule,
+            return String(localized: "admin", table: localizationTable, bundle: localizationBundle,
                           comment: "Administrative role of member within a club.")
         case .chairman:
-            return String(localized: "chairman",
-                          table: table,
-                          bundle: Bundle.photoClubHubDataModule,
+            return String(localized: "chairman", table: localizationTable, bundle: localizationBundle,
                           comment: "Administrative role of member within a club.")
-        case .other:  // used in fgDeGender
-            return String(localized: "other",
-                          table: table,
-                          bundle: Bundle.photoClubHubDataModule,
+        case .other:  // some clubs like fgDeGender use this
+            return String(localized: "other", table: localizationTable, bundle: localizationBundle,
                           comment: "Administrative role of member within a club.")
         case .secretary:
-            return String(localized: "secretary",
-                          table: table,
-                          bundle: Bundle.photoClubHubDataModule,
+            return String(localized: "secretary", table: localizationTable, bundle: localizationBundle,
                           comment: "Administrative role of member within a club.")
         case .treasurer:
-            return String(localized: "treasurer",
-                          table: table,
-                          bundle: Bundle.photoClubHubDataModule,
+            return String(localized: "treasurer", table: localizationTable, bundle: localizationBundle,
                           comment: "Administrative role of member within a club.")
-        case .viceChairman: // used in fgWaalre
-            return String(localized: "vice-chairman",
-                          table: table,
-                          bundle: Bundle.photoClubHubDataModule,
+        case .viceChairman: // some clubs like fgWaalre use this
+            return String(localized: "vice-chairman", table: localizationTable, bundle: localizationBundle,
                           comment: "Administrative role of member within a club.")
         }
     }
 }
 
-extension MemberRole: CaseIterable, Identifiable {
-    public var id: String { // switch to self?
-        self.localizedString.capitalized
-    }
+extension MemberRole: CaseIterable, Identifiable, Codable {
+    public var id: String { rawValue } // stable, locale-independent identifier
 }
 
 extension MemberRole: Comparable {
     public static func < (lhs: MemberRole, rhs: MemberRole) -> Bool {
-        return lhs.localizedString < rhs.localizedString
+        return lhs.displayName < rhs.displayName // is sorted based on locale's displayName, not on rawValue
     }
 }
 
 // MARK: - MemberStatus
 
-public enum MemberStatus {
-    // a Member can have multiple of these special statusses
-    case coach // rawValue not used because string needs localization
-    case deceased // careful: isDeceased belongs to member.photographer.deceased rather than member.isdeceased
+/// The status a club member can hold within their photo club.
+///
+/// A member can have zero or more statusses concurrently.
+/// - The enum's `rawValue` serves as a  stable identifier.
+/// - Use`displayName` for localized presentation.
+public enum MemberStatus: String {
+    /// Photography coaches may guide the club in certain projects
+    case coach
+    /// Photographer has died. Stored as member.photographer.isDeceased rather than as member.isDeceased.
+    case deceased
+    /// Ex-member of this club.
     case former
+    /// Honorary club member.
     case honorary
+    /// Current  club member.
     case current
+    /// Aspiring member.
     case prospective
+}
 
-    public var localizedString: String {
+extension MemberStatus {
+    public var displayName: String {
         let table: String = "PhotoClubHubData"
 
         switch self {
@@ -112,15 +123,13 @@ public enum MemberStatus {
     }
 }
 
-extension MemberStatus: CaseIterable, Identifiable {
-    public var id: String {
-        self.localizedString
-    }
+extension MemberStatus: CaseIterable, Identifiable, Codable {
+    public var id: String { rawValue } // stable, locale-independent identifier
 }
 
 extension MemberStatus: Comparable {
     public static func < (lhs: MemberStatus, rhs: MemberStatus) -> Bool {
-            return lhs.localizedString < rhs.localizedString
+            return lhs.displayName < rhs.displayName // is sorted based on locale's displayName, not on rawValue
     }
 }
 
