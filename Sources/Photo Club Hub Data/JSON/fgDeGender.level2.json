@@ -88,9 +88,6 @@
             "optional": {
                 "membershipStartDate": "2025-04-14",
                 "level3URL": "https://www.fcDeGender.nl/portfolios/Annet_Kars/",
-                "status": {
-                    "isProspectiveMember": false
-                },
                 "expertises": [ "Bird", "Landscape" ]
             }
         },
@@ -692,9 +689,6 @@
             "optional": {
                 "membershipStartDate": "2025-04-14",
                 "level3URL": "https://www.fcDeGender.nl/portfolios/Willem_Kars/",
-                "status": {
-                    "isProspectiveMember": false
-                },
                 "expertises": [ "Bird", "Landscape" ]
             }
         },
