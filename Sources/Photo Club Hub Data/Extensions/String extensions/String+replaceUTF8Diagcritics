@@ -1,0 +1,20 @@
+//
+//  String+replaceDiagcritics.swift
+//  Photo Club Hub Data
+//
+//  Created by Peter van den Hamer on 26/11/2025.
+//
+
+import Foundation
+
+// Converts strings containing diacritic marks like "é"
+// to their non-diacritic that avoids Unicode UTF-8 characters directly in strings.
+// This is done to support web servers that may (accidentally) not support UTF-8 in HTML strings.
+
+extension String {
+    var replacingDiacritics: String {
+        var string = self
+        string = string.replacingOccurrences(of: "ü", with: "&#xFC;")
+        return string
+    }
+}
