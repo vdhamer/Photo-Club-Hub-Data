@@ -1,6 +1,40 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "🏵️" : {
+      "comment" : "Expertise icon when expertise is supported",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "&#x1F3F5;"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "&#x1F3F5;"
+          }
+        }
+      }
+    },
+    "🪲" : {
+      "comment" : "Expertise icon when expertise is not supported aka temporary",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "&#x1FAB2;"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "&#x1FAB2;"
+          }
+        }
+      }
+    },
     "admin" : {
       "comment" : "Administrative role of member within a club. Used as part of concatenations.",
       "localizations" : {
