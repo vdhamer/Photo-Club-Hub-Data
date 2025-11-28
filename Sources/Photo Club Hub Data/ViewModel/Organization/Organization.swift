@@ -141,7 +141,7 @@ extension Organization {
     private var level2URL: URL? {
         get {
             // use a default unless level2URL points to the club's own website
-            let defaultURL: URL? = URL(string: "http://www.vdhamer.com/\(self.nickName)/")
+            let defaultURL: URL? = URL(string: "http://www.vdhamer.com/\(self.nickName)/index.html")
             guard let defaultURL else {
                 ifDebugFatalError("Bad URL: \(defaultURL?.absoluteString ?? "nil")")
                 return nil
@@ -155,8 +155,6 @@ extension Organization {
 
             guard self.level2URL_ != nil else { return defaultURL } // nobody provided a URL
             guard let website: String = self.organizationWebsite?.absoluteString else { return defaultURL }
-            print("website: \(website)") // TODO
-            print("level2URL_: \(self.level2URL_!.absoluteString)")
             guard self.level2URL_!.absoluteString.lowercased().contains(website.lowercased()) else { return defaultURL }
 
             return level2URL_ // initial files don't reach this point when Website is (still) a dummy value
@@ -167,13 +165,7 @@ extension Organization {
     public var level2URLDir: URL? {
         let url: URL? = level2URL
         guard url != nil else { return nil }
-        print("level2URL: \(url!)")
-        print("level2URLDir: \(url!.deletingLastPathComponent())") // TODO
-        if url!.absoluteString.last != "/"  { // file or directory?
-            return url!.deletingLastPathComponent()
-        } else {
-            return url!
-        }
+        return url!.deletingLastPathComponent()
     }
 
     var coordinates: CLLocationCoordinate2D {
