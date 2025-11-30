@@ -1,5 +1,5 @@
 //
-//  String+replaceUTF8Diagcritics.swift
+//  String+replaceUTF8Diacritics.swift
 //  Photo Club Hub Data
 //
 //  Created by Peter van den Hamer on 26/11/2025.
@@ -25,7 +25,7 @@ extension String {
         }
 
         // a - character family that can be typed on Apple systems by long-pressing this key
-        string = string.replacingOccurrences(of: "à", with: "&#xe0;")
+        string = string.replacingOccurrences(of: "à", with: "&#xE0;")
         string = string.replacingOccurrences(of: "á", with: "&#xE1;")
         string = string.replacingOccurrences(of: "â", with: "&#xE2;")
         string = string.replacingOccurrences(of: "ã", with: "&#xE3;")
@@ -75,7 +75,7 @@ extension String {
         string = string.replacingOccurrences(of: "ı", with: "&#x131;")
 
         // k - character family that can be typed on Apple systems by long-pressing this key
-        string = string.replacingOccurrences(of: "ħ", with: "&#x137;")
+        string = string.replacingOccurrences(of: "ķ", with: "&#x137;")
 
         // k - character family that can be typed on Apple systems by long-pressing this key
         string = string.replacingOccurrences(of: "ł", with: "&#x142;")
@@ -114,7 +114,7 @@ extension String {
         string = string.replacingOccurrences(of: "ť", with: "&#x165;")
         string = string.replacingOccurrences(of: "ț", with: "&#x21B;")
 
-        // u - character family that can be typed on Apple sy\u{stems by long-pressing this key
+        // u - character family that can be typed on Apple systems by long-pressing this key
         string = string.replacingOccurrences(of: "ù", with: "&#xF9;")
         string = string.replacingOccurrences(of: "ú", with: "&#xFA;")
         string = string.replacingOccurrences(of: "û", with: "&#xFB;")
@@ -128,7 +128,7 @@ extension String {
         // w - character family that can be typed on Apple systems by long-pressing this key
         string = string.replacingOccurrences(of: "ŵ", with: "&#x175;")
 
-        // w - character family that can be typed on Apple systems by long-pressing this key
+        // y - character family that can be typed on Apple systems by long-pressing this key
         string = string.replacingOccurrences(of: "ý", with: "&#xFD;")
         string = string.replacingOccurrences(of: "ÿ", with: "&#xFF;")
         string = string.replacingOccurrences(of: "ŷ", with: "&#x177;")
