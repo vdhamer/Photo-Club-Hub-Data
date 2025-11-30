@@ -16,13 +16,8 @@ extension String {
     public var replacingUTF8Diacritics: String {
         var string = self
 
-        var safeString = self
-        // https://forums.swift.org/t/removing-characterset-characters-from-a-string-seems-hard/47935/2
-        safeString.unicodeScalars.removeAll(where: { !CharacterSet.urlUserAllowed.contains($0) &&
-                                                     !CharacterSet.whitespaces.contains($0)})
-        if safeString == self {
-            return self // fast track for "safe" strings without embedded Unicode characters
-        }
+        // fast return of unchanged strings that are ASCII only
+        if self.unicodeScalars.allSatisfy({ $0.isASCII }) { return self }
 
         // a - character family that can be typed on Apple systems by long-pressing this key
         string = string.replacingOccurrences(of: "à", with: "&#xE0;")
@@ -77,7 +72,7 @@ extension String {
         // k - character family that can be typed on Apple systems by long-pressing this key
         string = string.replacingOccurrences(of: "ķ", with: "&#x137;")
 
-        // k - character family that can be typed on Apple systems by long-pressing this key
+        // i - character family that can be typed on Apple systems by long-pressing this key
         string = string.replacingOccurrences(of: "ł", with: "&#x142;")
         string = string.replacingOccurrences(of: "ļ", with: "&#x13C;")
         string = string.replacingOccurrences(of: "ľ", with: "&#x13E;")
