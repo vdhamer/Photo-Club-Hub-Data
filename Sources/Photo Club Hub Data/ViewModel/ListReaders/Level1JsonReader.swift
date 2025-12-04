@@ -62,7 +62,7 @@ public class Level1JsonReader {
                 let organizationWebsite = URL(string: jsonOrganizationOptionals["website"].stringValue)
                 let level2URL = URL(string: jsonOrganizationOptionals["level2URL"].stringValue)
                 let wikipedia = URL(string: jsonOrganizationOptionals["wikipedia"].stringValue)
-                let fotobondNumber = jsonOrganizationOptionals["nlSpecific"]["fotobondNumber"].int16Value
+                let fotobondClubNumberID = jsonOrganizationOptionals["nlSpecific"]["fotobondNumber"].int16Value
                 let contactEmail = jsonOrganizationOptionals["contactEmail"].stringValue
                 let localizedRemarks = jsonOrganizationOptionals["remark"].arrayValue
                 _ = Organization.findCreateUpdate(context: bgContext,
@@ -73,7 +73,7 @@ public class Level1JsonReader {
                                                       organizationWebsite: organizationWebsite,
                                                       level2URL: level2URL,
                                                       wikipedia: wikipedia,
-                                                      fotobondNumber: fotobondNumber, // Int16
+                                                      fotobondClubNumber: FotobondClubNumber(id: fotobondClubNumberID),
                                                       contactEmail: contactEmail,
                                                       localizedRemarks: localizedRemarks)
                                                   )
