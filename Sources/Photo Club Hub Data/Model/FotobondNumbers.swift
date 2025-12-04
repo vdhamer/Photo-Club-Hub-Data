@@ -13,7 +13,7 @@
 public struct FotobondClubNumber: Equatable {
     /// Raw Fotobond club number (0101...9999). Nil if no valid number found in JSON data.
     let id: Int16?
-    
+
     public init(id: Int16?) {
         self.id = id
     }
@@ -30,7 +30,7 @@ public struct FotobondClubNumber: Equatable {
 public struct FotobondMemberNumber: Equatable {
     /// Raw Fotobond member number (0...2,147,483,647).
     let id: Int32?
-    
+
     public init(id: Int32?) {
         self.id = id
 
