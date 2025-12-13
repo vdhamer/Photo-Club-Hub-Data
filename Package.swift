@@ -32,7 +32,7 @@ let package = Package(
                 .copy("JSON/fcBellusImago.level2.json"),
                 .copy("JSON/fcEricamera.level2.json"),
                 .copy("JSON/fcDenDungen.level2.json"),
-                .copy("JSON/IndividueelBO.level2.json"),
+                .copy("JSON/Persoonlijk16.level2.json"),
                 .copy("JSON/fgOirschot.level2.json"),
                 .copy("JSON/fkGestel.level2.json"),
 
