@@ -36,6 +36,8 @@ let package = Package(
                 .copy("JSON/fgOirschot.level2.json"),
                 .copy("JSON/fkGestel.level2.json"),
 
+                .copy("JSON/Persoonlijk03.level2.json"),
+
                 // following are behind a switch in Photo Club Hub iOS app
                 .copy("JSON/XampleMin.level2.json"),
                 .copy("JSON/XampleMax.level2.json"),
