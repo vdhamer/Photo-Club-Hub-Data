@@ -21,7 +21,9 @@ extension MemberPortfolio {
 
     public func refreshFirstImage() {
 
-        if isUsingJuiceBox { return } // does this club use JuiceBox Pro's XML file for this member's portfolio?
+        if isUsingJuiceBox == false {
+            return
+        } // does this club use JuiceBox Pro's XML file for this member's portfolio?
 
         guard let urlOfImageIndex else { // nil should already have been ruled out by isUsingJuiceBox() and returning
             ifDebugFatalError("urlOfImageInex is nil")
@@ -51,13 +53,6 @@ extension MemberPortfolio {
         ifDebugPrint("\(organization.fullNameTown): completed refreshFirstImage() \(urlOfImageIndex.absoluteString)")
     }
 
-    private var isUsingJuiceBox: Bool {
-        if urlOfImageIndex == nil { return false } // no data for finding JuiceBox XML file
-        if MemberPortfolio.clubsFullyUsingJuiceBox.contains(organization.id) { return true }
-        if MemberPortfolio.clubsPartiallyUsingJuiceBox.contains(organization.id) && isFormerMember { return true }
-        return false
-    }
-
     // remove a suffix like "#myanchor" if present, and append "config.xml"
     private var urlOfImageIndex: URL? {
         let url: URL? = URL(string: self.level3URL.absoluteString)
@@ -71,6 +66,14 @@ extension MemberPortfolio {
         } else {
             return url.appendingPathComponent("config.xml")
         }
+    }
+
+    private var isUsingJuiceBox: Bool {
+        print("Refreshing thumbnail for \(self.photographer.fullNameFirstLast) of \(self.organization.fullName)")
+        if urlOfImageIndex == nil { return false } // return if there is no data for finding JuiceBox XML file
+        if MemberPortfolio.clubsFullyUsingJuiceBox.contains(organization.id) { return true }
+        if MemberPortfolio.clubsPartiallyUsingJuiceBox.contains(organization.id) && isFormerMember { return true }
+        return false
     }
 
     private func parseXMLContent(xmlContent: String, member: MemberPortfolio) { // sample data
