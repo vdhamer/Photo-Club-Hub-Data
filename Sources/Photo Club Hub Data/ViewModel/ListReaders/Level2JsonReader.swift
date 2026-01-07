@@ -5,10 +5,8 @@
 //  Created by Peter van den Hamer on 13/07/2024.
 //
 
-// import SwiftyJSON // now used as a single file
 import CoreData // for NSManagedObjectContext
 import SwiftyJSON // for JSON struct
-import CoreLocation // for CLLocationCoordinate2D
 
 // see XampleMin.level2.json and XampleMax.level2.json for example data files
 
@@ -18,7 +16,8 @@ public class Level2JsonReader { // normally running on a background thread
     public init(bgContext: NSManagedObjectContext,
                 organizationIdPlus: OrganizationIdPlus,
                 isBeingTested: Bool,
-                useOnlyInBundleFile: Bool = false // true avoids fetching the latest version from GitHub
+                useOnlyInBundleFile: Bool = false, // true avoids fetching the latest version from GitHub
+                includeFilePath: [String] = [] // captures recursion path like ["root","museums","museumsNL"]
                ) {
         _ = FetchAndProcessFile( // FetchAndProcessFile fetches jsonData and passes it to readRootLevel2Json()
                                 bgContext: bgContext,
@@ -28,17 +27,18 @@ public class Level2JsonReader { // normally running on a background thread
                                 fileSubType: "level2", // "fgDeGender.level2.json"
                                 useOnlyInBundleFile: useOnlyInBundleFile,
                                 isBeingTested: isBeingTested,
-                                fileContentProcessor: Level2JsonReader.readRootLevel2Json(bgContext:
-                                                                                          jsonData:
-                                                                                          fileSelector:
-                                                                                          isBeingTested:)
-                               )
+                                includeFilePath: includeFilePath,
+                                fileContentProcessor: Level2JsonReader.readRootLevel2Json
+        )
     }
 
+    // swiftlint:disable:next function_parameter_count
     @Sendable static private func readRootLevel2Json(bgContext: NSManagedObjectContext,
                                                      jsonData: String,
                                                      fileSelector: FileSelector,
-                                                     isBeingTested: Bool) {
+                                                     useOnlyInBundleFile: Bool,
+                                                     isBeingTested: Bool,
+                                                     includeFilePath: [String]) {
 
         guard fileSelector.organizationIdPlus != nil else { // need expected id of a club
             fatalError("Missing `targetIdorganizationIdPlus` in readRootLevel2Json()")

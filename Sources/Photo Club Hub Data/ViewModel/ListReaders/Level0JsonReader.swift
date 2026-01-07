@@ -15,7 +15,8 @@ public class Level0JsonReader {
     public init(bgContext: NSManagedObjectContext,
                 fileName: String = "root",  // can overrule the name for unit testing
                 isBeingTested: Bool,
-                useOnlyInBundleFile: Bool = false // true can be used to avoid publishing a test file to GitHub
+                useOnlyInBundleFile: Bool = false, // true can be used to avoid publishing a test file to GitHub
+                includeFilePath: [String] = [] // captures recursion path like ["root","museums","museumsNL"]
                ) {
         _ = FetchAndProcessFile(
             bgContext: bgContext,
@@ -23,18 +24,18 @@ public class Level0JsonReader {
             fileType: "json", fileSubType: "level0", // "root.level0.json"
             useOnlyInBundleFile: useOnlyInBundleFile,
             isBeingTested: isBeingTested,
-            fileContentProcessor: Level0JsonReader.readRootLevel0Json(bgContext:
-                                                                      jsonData:
-                                                                      fileSelector:
-                                                                      isBeingTested:)
+            includeFilePath: includeFilePath,
+            fileContentProcessor: Level0JsonReader.readRootLevel0Json
         )
     }
 
-    // Marked as @Sendable to satisfy concurrency safety requirements.
+    // swiftlint:disable:next function_parameter_count
     @Sendable static private func readRootLevel0Json(bgContext: NSManagedObjectContext,
                                                      jsonData: String,
                                                      fileSelector: FileSelector,
-                                                     isBeingTested: Bool) {
+                                                     useOnlyInBundleFile: Bool,
+                                                     isBeingTested: Bool,
+                                                     includeFilePath: [String]) {
 
         let fileName: String = fileSelector.fileName
         ifDebugPrint("\nStarting background read of \(fileName).level0.json to get supported Expertises and Languages.")

@@ -20,12 +20,15 @@ struct FetchAndProcessFile {
          fileType: String, fileSubType: String,
          useOnlyInBundleFile: Bool,
          isBeingTested: Bool,
+         includeFilePath: [String],
          fileContentProcessor: @Sendable @escaping (_ bgContext: NSManagedObjectContext,
                                                     _ jsonData: String,
                                                     _ selectFile: FileSelector,
-                                                    _ isBeingTested: Bool) -> Void) {
+                                                    _ useOnlyInBundleFile: Bool,
+                                                    _ isBeingTested: Bool,
+                                                    _ includeFilePath: [String]) -> Void) {
         bgContext.perform { [self] in // run on requested background thread
-            let nameWithSubtype = (fileSelector.fileName) + "." + fileSubType // e.g. "root.level0"
+            let nameWithSubtype = (fileSelector.fileName) + "." + fileSubType // e.g. "root.level1"
 
             var bundle: Bundle = Bundle.module // overwritten by Test Bundle if fileSelector.isBeingTested
 
@@ -45,8 +48,8 @@ struct FetchAndProcessFile {
             let fileInBundleURL: URL? = bundle.url(forResource: nameWithSubtype, withExtension: fileType)
             guard fileInBundleURL != nil else {
                 fatalError("""
-                           Failed to find URL to the file \
-                           \(fileSelector.fileName).\(fileSubType).\(fileType) because fileInBundleURL is nil.
+                           Failed to find internal URL for \
+                           \(fileSelector.fileName).\(fileSubType).\(fileType). Might be a filename or branch problem.
                            """)
             }
 
@@ -58,7 +61,7 @@ struct FetchAndProcessFile {
                 fileInBundleURL: fileInBundleURL!, // forced unwrap is safe (due to guard statement above)
                 useOnlyInBundleFile: useOnlyInBundleFile
             )
-            fileContentProcessor(bgContext, data, fileSelector, isBeingTested)
+            fileContentProcessor(bgContext, data, fileSelector, useOnlyInBundleFile, isBeingTested, includeFilePath)
         }
     }
 

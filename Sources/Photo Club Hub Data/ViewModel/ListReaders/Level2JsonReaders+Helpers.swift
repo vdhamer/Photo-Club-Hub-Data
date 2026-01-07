@@ -79,7 +79,7 @@ extension Level2JsonReader {
                                               organizationWebsite: clubWebsite,
                                               wikipedia: wikipedia,
                                               fotobondClubNumber: FotobondClubNumber(id: fotobondClubNumberID),
-//                                              maintainerEmail: maintainerEmail, // TODO
+                                              maintainerEmail: maintainerEmail,
                                               localizedRemarks: localizedRemarks
                                               )
         )
