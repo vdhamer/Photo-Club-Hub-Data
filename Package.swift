@@ -25,7 +25,22 @@ let package = Package(
             resources: [
                 // copying can probably also be done with a single copy command at directory level
                 .copy("JSON/root.level0.json"),
+
+                .copy("JSON/clubsNL.level1.json"),
+                .copy("JSON/clubsNL03.level1.json"),
+                .copy("JSON/clubsNL16.level1.json"),
+                .copy("JSON/clubsXamples.level1.json"),
+                .copy("JSON/museums.level1.json"),
+                .copy("JSON/museumsAU.level1.json"),
+                .copy("JSON/museumsDE.level1.json"),
+                .copy("JSON/museumsGB.level1.json"),
+                .copy("JSON/museumsJP.level1.json"),
+                .copy("JSON/museumsNL.level1.json"),
+                .copy("JSON/museumsUS.level1.json"),
+                .copy("JSON/recursionA.level1.json"),
+                .copy("JSON/recursionB.level1.json"),
                 .copy("JSON/root.level1.json"),
+                .copy("JSON/root_.level1.json"),
 
                 .copy("JSON/fgDeGender.level2.json"),
                 .copy("JSON/fgWaalre.level2.json"),
