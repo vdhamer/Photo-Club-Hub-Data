@@ -32,6 +32,7 @@ let package = Package(
                 .copy("JSON/clubsXamples.level1.json"),
                 .copy("JSON/museums.level1.json"),
                 .copy("JSON/museumsAU.level1.json"),
+                .copy("JSON/museumsCN.level1.json"),
                 .copy("JSON/museumsDE.level1.json"),
                 .copy("JSON/museumsGB.level1.json"),
                 .copy("JSON/museumsJP.level1.json"),
@@ -42,6 +43,7 @@ let package = Package(
                 .copy("JSON/root.level1.json"),
                 .copy("JSON/root_.level1.json"),
 
+                .copy("JSON/fcVeghel.level2.json"),
                 .copy("JSON/fgDeGender.level2.json"),
                 .copy("JSON/fgWaalre.level2.json"),
                 .copy("JSON/fcBellusImago.level2.json"),
