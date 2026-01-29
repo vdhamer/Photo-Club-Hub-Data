@@ -52,6 +52,8 @@ let package = Package(
                 .copy("JSON/Persoonlijk16.level2.json"),
                 .copy("JSON/fgOirschot.level2.json"),
                 .copy("JSON/fkGestel.level2.json"),
+                .copy("JSON/ffcShot71.level2.json"),
+                .copy("JSON/fegGemert.level2.json"),
 
                 .copy("JSON/Persoonlijk03.level2.json"),
 
