@@ -441,7 +441,7 @@
 
         {
             "idPlus": {
-                "town": "Duerne",
+                "town": "Deurne",
                 "fullName": "Fotoclub Optika",
                 "nickName": "fcOptika"
             },
@@ -1757,8 +1757,7 @@
                 ],
                 "nlSpecific": {
                     "fotobondNumber": 1601
-                },
-                "maintainerEmail": "dick.mandemaker@live.nl"
+                }
             }
         },
 

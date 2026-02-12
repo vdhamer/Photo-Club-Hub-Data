@@ -25,19 +25,605 @@
             "nlSpecific": {
                 "fotobondNumber": 1601
             },
-            "maintainerEmail": "dick.mandemaker@live.nl"
+            "maintainerEmail": "h.michiels@home.nl"
         }
     },
 
-
+    
     "members": [
+        {
+            "name": {
+                "givenName": "Aart",
+                "infixName": "",
+                "familyName": "Kleinendorst"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/aart-kleinendorst/Fotos_Aart-4.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/aart-kleinendorst",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601095
+                }
+            }
+        },
 
         {
-          "name": {"givenName": "Dick", "infixName": "", "familyName": "Mandemaker"},
-          "optional": {
+            "name": {
+                "givenName": "Ad",
+                "infixName": "",
+                "familyName": "Kennis"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/ad-kennis/ad-foto-01.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/ad-kennis",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601088
+                }
+            }
+        },
 
-          }
+        {
+            "name": {
+                "givenName": "Angelique",
+                "infixName": "van",
+                "familyName": "Haaren - van de Kaa"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/angelique/1.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/angelique",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601086
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Anouschka",
+                "infixName": "",
+                "familyName": "Hendriks"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/anouschka-hendriks/1-1.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/anouschka-hendriks",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601096
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Anton",
+                "infixName": "",
+                "familyName": "Sweere"
+            },
+            "optional": {
+                "featuredImage": "",
+                "level3URL": "",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601111
+                }
+            }
+        },
+        
+        {
+            "name": {
+                "givenName": "Astrid",
+                "infixName": "",
+                "familyName": "Sjoerdsma - van der Weide"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/astrid-sjoerdsma-van-der-weide/DSC_0076bewerkt1.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/astrid-sjoerdsma-van-der-weide",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601097
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Bert",
+                "infixName": "",
+                "familyName": "Ketelaars"
+            },
+            "optional": {
+                "featuredImage": "",
+                "level3URL": "",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601082
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Dick",
+                "infixName": "",
+                "familyName": "Mandemaker"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/dick-mandemaker/2.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/dick-mandemaker",
+                "membershipStartDate": "",
+                "expertises": ["Drone", "Sport"],
+                "nlSpecific": {
+                    "fotobondNumber": 1601099
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Dora",
+                "infixName": "van de",
+                "familyName": "Loo"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/dora-van-de-loo/1-1.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/dora-van-de-loo",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601110
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Ed",
+                "infixName": "",
+                "familyName": "Hegemans"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/ed-hegemans/1.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/ed-hegemans",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601098
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Elena",
+                "infixName": "",
+                "familyName": "Wendelin"
+            },
+            "optional": {
+                "featuredImage": "",
+                "level3URL": "",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601085
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Eveline",
+                "infixName": "van den",
+                "familyName": "Tillaart - van Ham"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/eveline-van-den-tillaart-van-ham/Eveline-01.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/eveline-van-den-tillaart-van-ham",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601105
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Frans",
+                "infixName": "",
+                "familyName": "Geenevasen"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/frans-geenevasen/1.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/frans-geenevasen",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601101
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Gerard",
+                "infixName": "",
+                "familyName": "Holtkamp"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/gerard_h/Bol.sur_.mer_.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/gerard-holtkamp",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601083
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Gerard",
+                "infixName": "van",
+                "familyName": "Leiden"
+            },
+            "optional": {
+                "featuredImage": "",
+                "level3URL": "",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601013
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Hans",
+                "infixName": "van",
+                "familyName": "Nielen"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/hans-van-nielen/1-1.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/hans-van-nielen",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601093
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Hans",
+                "infixName": "",
+                "familyName": "Rijkers"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/hans/1-3.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/hans",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601063
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Harry",
+                "infixName": "",
+                "familyName": "Michiels"
+            },
+            "optional": {
+                "featuredImage": "https://fotoclubveghel.nl/wp-content/gallery/harry-michiels/5.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/harry-michiels",
+                "membershipStartDate": "",
+                "expertises": ["Autosport"],
+                "nlSpecific": {
+                    "fotobondNumber": 1601107
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Harry",
+                "infixName": "van",
+                "familyName": "Zutphen"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/harry-van-zutphen/FCV-Dansen-30-bij-30-cm-DSC_0923.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/harry-van-zutphen",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601050
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Henk",
+                "infixName": "van der",
+                "familyName": "Pas"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/henk_vd_p/2013019-Eindh-Torenallee-verbinding-toren-2-en-3-0168.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/henk-van-der-pas",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601080
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Henk",
+                "infixName": "van",
+                "familyName": "Nunen"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/henk_van_n/HvN1-121125.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/henk-van-nunen",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601081
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Henk",
+                "infixName": "",
+                "familyName": "Rotteveel"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/henk-rotteveel/1_DSC6678.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/henk-rotteveel",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601091
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Huibert",
+                "infixName": "van",
+                "familyName": "Aarle"
+            },
+            "optional": {
+                "featuredImage": "",
+                "level3URL": "",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601109
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Leo",
+                "infixName": "van",
+                "familyName": "Kuik"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/leo-van-kuik/1.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/leo-van-kuik",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601100
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Mark",
+                "infixName": "",
+                "familyName": "Rovers"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/mark/Een-nieuwe-dag-Mark.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/mark-rovers",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601072
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Mia",
+                "infixName": "",
+                "familyName": "Rooijmans"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/miarooijmans/1-1.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/mia-rooijmans",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601047
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Mirjam",
+                "infixName": "",
+                "familyName": "Evers"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/mirjamevers/1-2.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/mirjam-evers",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601069
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Peter",
+                "infixName": "",
+                "familyName": "Rovers"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/peterrovers/DSC01038-Marko-Site.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/peter-rovers",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601067
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Rina",
+                "infixName": "de",
+                "familyName": "Haas"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/rina-de-haas/1.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/rina-de-haas",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601106
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Suzanne",
+                "infixName": "",
+                "familyName": "Gruijters"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/suzanne/1.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/suzanne",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601071
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Theo",
+                "infixName": "de",
+                "familyName": "Vrede"
+            },
+            "optional": {
+                "featuredImage": "",
+                "level3URL": "",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601103
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Tjeu",
+                "infixName": "",
+                "familyName": "Timmermans"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/tjeutimmermans/1.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/tjeu-timmermans",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601087
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Tonnie",
+                "infixName": "",
+                "familyName": "Verhoeven"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/tonnie/foto-1.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/tonnie",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601052
+                }
+            }
+        },
+        
+        {
+            "name": {
+                "givenName": "Toon",
+                "infixName": "",
+                "familyName": "Bekkers"
+            },
+            "optional": {
+                "featuredImage": "",
+                "level3URL": "",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601045
+                }
+            }
+        },
+
+        {
+            "name": {
+                "givenName": "Wim",
+                "infixName": "van de",
+                "familyName": "Ven"
+            },
+            "optional": {
+                "featuredImage": "https://www.fotoclubveghel.nl/wp-content/gallery/wim-van-de-ven/naamloos-2.jpg",
+                "level3URL": "https://www.fotoclubveghel.nl/wim-van-de-ven",
+                "membershipStartDate": "",
+                "expertises": [],
+                "nlSpecific": {
+                    "fotobondNumber": 1601034
+                }
+            }
         }
-
     ]
 }
