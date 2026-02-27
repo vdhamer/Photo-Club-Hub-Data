@@ -37,6 +37,7 @@
     },
     "admin" : {
       "comment" : "Administrative role of member within a club. Used as part of concatenations.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -71,6 +72,7 @@
     },
     "chairman" : {
       "comment" : "Administrative role of member within a club. Used as part of concatenations.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -105,6 +107,7 @@
     },
     "deceased" : {
       "comment" : "Relationship status of member within a club. Used as prefix.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -122,6 +125,7 @@
     },
     "external coach" : {
       "comment" : "Relationship status of member within a club.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -139,6 +143,7 @@
     },
     "former" : {
       "comment" : "Relationship status of member within a club. Used as prefex.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -156,6 +161,7 @@
     },
     "honorary member" : {
       "comment" : "Relationship status of member within a club.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -173,6 +179,7 @@
     },
     "member" : {
       "comment" : "Default status of member within a club.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -241,6 +248,7 @@
     },
     "other" : {
       "comment" : "Administrative role of member within a club. Used as part of concatenations.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -258,6 +266,7 @@
     },
     "prospective member" : {
       "comment" : "Relationship status of member within a club.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -275,6 +284,7 @@
     },
     "secretary" : {
       "comment" : "Administrative role of member within a club. Used as part of concatenations.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -309,6 +319,7 @@
     },
     "treasurer" : {
       "comment" : "Administrative role of member within a club. Used as part of concatenations.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -343,6 +354,7 @@
     },
     "vice-chairman" : {
       "comment" : "Administrative role of member within a club. Used as part of concatenations.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
