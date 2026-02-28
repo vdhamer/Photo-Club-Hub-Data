@@ -29,7 +29,7 @@ let package = Package(
                 .copy("JSON/clubsNL.level1.json"),
                 .copy("JSON/clubsNL03.level1.json"),
                 .copy("JSON/clubsNL16.level1.json"),
-                .copy("JSON/clubsXamples.level1.json"),
+                .copy("JSON/clubTemplates.level1.json"),
                 .copy("JSON/museums.level1.json"),
                 .copy("JSON/museumsAU.level1.json"),
                 .copy("JSON/museumsCN.level1.json"),
@@ -58,8 +58,8 @@ let package = Package(
                 .copy("JSON/Persoonlijk03.level2.json"),
 
                 // following are behind a switch in Photo Club Hub iOS app
-                .copy("JSON/XampleMin.level2.json"),
-                .copy("JSON/XampleMax.level2.json"),
+                .copy("JSON/TemplateMin.level2.json"),
+                .copy("JSON/TemplateMax.level2.json"),
                 .process("PhotoClubHubData.xcstrings")
             ]
         ),
@@ -70,7 +70,12 @@ let package = Package(
                 .copy("JSON/empty.level0.json"),
                 .copy("JSON/abstractExpertise.level0.json"),
                 .copy("JSON/language.level0.json"),
-                .copy("JSON/languages.level0.json")
+                .copy("JSON/languages.level0.json"),
+                .copy("JSON/TemplateMin.level2.json"),
+                .copy("JSON/TemplateMax.level2.json"),
+                .copy("JSON/fgDeGender.level2.json"),
+                .copy("JSON/root.level0.json"),
+                .copy("JSON/fgWaalre.level2.json")
             ]
         )
     ]

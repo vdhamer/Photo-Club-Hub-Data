@@ -1,5 +1,5 @@
 //
-//  XampleMaxMembersProvider.swift
+//  TemplateMinMembersProvider.swift
 //  Photo Club Hub
 //
 //  Created by Peter van den Hamer on 17/07/2021.
@@ -7,11 +7,11 @@
 
 import CoreData // for PersistenceController
 
-final public class XampleMaxMembersProvider: Sendable {
+final public class TemplateMinMembersProvider: Sendable {
 
     public init(bgContext: NSManagedObjectContext,
                 isBeingTested: Bool,
-                useOnlyInBundleFile: Bool = false,
+                useOnlyInBundleFile: Bool,
                 randomTownForTesting: String? = nil) {
 
         if isBeingTested {
@@ -37,11 +37,11 @@ final public class XampleMaxMembersProvider: Sendable {
 
     private func insertOnlineMemberData(bgContext: NSManagedObjectContext,
                                         isBeingTested: Bool,
-                                        town: String = "Rotterdam",
+                                        town: String = "Amsterdam",
                                         useOnlyInBundleFile: Bool) {
-        let idPlus = OrganizationIdPlus(fullName: "Xample Club With Maximal Data",
+        let idPlus = OrganizationIdPlus(fullName: "Template Club With Minimal Data",
                                         town: town,
-                                        nickname: "XampleMax")
+                                        nickname: "TemplateMin")
 
         let club = Organization.findCreateUpdate(context: bgContext,
                                                  organizationTypeEnum: .club,

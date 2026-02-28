@@ -4,8 +4,8 @@
         {
             "idPlus": {
                 "town": "Rotterdam",
-                "fullName": "Xample Club With Maximal Data",
-                "nickName": "XampleMax"
+                "fullName": "Template Club With Maximal Data",
+                "nickName": "TemplateMax"
             },
             "coordinates": {
                 "latitude": 51.92275, "longitude": 4.47972
@@ -13,7 +13,7 @@
             "optional": {
                 "website": "https://www.rotterdam.nl/stadhuis",
                 "wikipedia": "https://en.wikipedia.org/wiki/Rotterdam",
-                "level2URL": "https://www.example.com/XampleMax.level2.json",
+                "level2URL": "https://www.example.com/TemplateMax.level2.json",
                 "remark": [
                     {
                         "language": "EN",
@@ -24,7 +24,7 @@
                         "value": "Deze beschrijving van de club overschrijft een beschrijving in root.level1.json."
                     }
                 ],
-                "maintainerEmail": "admin@xamplemax.nl",
+                "maintainerEmail": "admin@TemplateMax.nl",
                 "nlSpecific": {
                     "fotobondNumber": 9999
                 }

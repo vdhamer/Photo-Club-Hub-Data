@@ -14,8 +14,10 @@ struct Settings {
         fatalError("init() is not available. Settings only holds a few static computer properties.")
     }
 
-    static let userDefaultsKey: String = "dataResetPending290b4655" // must match id of Settings toggle in Root.plist
-    private static let prevUserDefaultsKeys: Set<String> = ["dataResetPending288b4654",
+    static let userDefaultsKey: String = "dataResetPending292b4657" // must match id of Settings toggle in Root.plist
+    private static let prevUserDefaultsKeys: Set<String> = ["dataResetPending291b4656",
+                                                            "dataResetPending290b4655",
+                                                            "dataResetPending288b4654",
                                                             "dataResetPending286b4652",
                                                             "dataResetPending285b4651",
                                                             "dataResetPending284b4650",
@@ -61,10 +63,10 @@ struct Settings {
         UserDefaults.standard.bool(forKey: "extraCoreDataSaves") // here we are happy with missing key -> false
     }
 
-    static var showTestClubs: Bool { // controlled by toggle in Settings
-        // Instructs the app whether to load XampleMax.level2.json and XampleMin.level2.json
+    static var showTemplateClubs: Bool { // controlled by toggle in Settings
+        // Instructs the app whether to load TemplateMax.level2.json and TemplateMin.level2.json
         // It will typically be used by people creating new level2.json files to see what the example files look like
-        UserDefaults.standard.bool(forKey: "showTestClubs") // if the key is missing, this returns false
+        UserDefaults.standard.bool(forKey: "showTemplateClubs") // if the key is missing, this returns false
     }
 
     static var errorOnCoreDataMerge: Bool { // controlled by toggle in Settings
