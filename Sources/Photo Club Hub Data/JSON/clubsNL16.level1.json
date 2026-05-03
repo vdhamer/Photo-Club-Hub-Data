@@ -1330,8 +1330,9 @@
                 "longitude": 5.25568
             },
             "optional": {
-                "website": "https://fotogroepoirschot.nl/",
+                "website": "https://www.fotogroepoirschot.nl/",
                 "level2URL": "https://www.example.com/fgOirschot.level2.json",
+                "maintainerEmail": "penningmeester@fotogroepoirschot.nl",
                 "remark": [
                     {
                         "language": "EN",
@@ -2006,6 +2007,32 @@
                 "nlSpecific": {
                     "fotobondNumber": 1678
                 }
+            }
+        },
+
+        {
+            "idPlus": {
+                "town": "Waalwijk",
+                "fullName": "Fotoclub Waalwijk",
+                "nickName": "fcWaalwijk"
+            },
+            "coordinates": {
+                "latitude": 51.69437,
+                "longitude": 5.09274
+            },
+            "optional": {
+                "website": "https://www.fotoclubwaalwijk.nl",
+                "level2URL": "https://www.example.com/fcWaalwijk.level2.json",
+                "remark": [
+                    {
+                        "language": "EN",
+                        "value": "The club has roughly 25 members and meets biweekly."
+                    },
+                    {
+                        "language": "NL",
+                        "value": "De club komt om de 2 weken bijeen in verenigingsgebouw De Ouwe Toren in Waalwijk."
+                    }
+                ]
             }
         },
 
