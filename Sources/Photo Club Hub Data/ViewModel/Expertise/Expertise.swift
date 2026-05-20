@@ -34,7 +34,18 @@ extension Expertise {
         }
     }
 
-    // MARK: - find or create
+    // MARK: - find _without_ creating
+
+    // Returns existing Expertise object for a given canonical identifier. Returns `nil` if not found.
+    // Unlike `findCreateUpdate`, this does not create a new entity for unknown identifiers.
+    public static func find(context: NSManagedObjectContext, expertiseIdString: String) -> Expertise? {
+        let idString = expertiseIdString.capitalizingFirstLetter()
+        let fetchRequest: NSFetchRequest<Expertise> = Expertise.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id_ = %@", argumentArray: [idString])
+        return try? context.fetch(fetchRequest).first
+    }
+
+    // MARK: - find, create or update
 
     // Find existing Expertise object or create a new one.
     // Update existing attributes or fill the new object

@@ -63,16 +63,18 @@ extension Language {
         set { languageNameEN_ = newValue.capitalizingFirstLetter() }
     }
 
-    // MARK: - find, create, update
+    // MARK: - find _without_ creating
 
     // Returns existing Language object for a given ISO code. Returns nil if not found.
-    // Unlike findCreateUpdate, this doesn't create new entity if ISO code is "new" due to a typo.
+    // Unlike `findCreateUpdate`, this does not create a new entity for unknown identifiers.
     public static func find(context: NSManagedObjectContext, isoCode: String) -> Language? {
         let isoCode = isoCode.uppercased()
         let fetchRequest: NSFetchRequest<Language> = Language.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "isoCode_ = %@", argumentArray: [isoCode])
         return try? context.fetch(fetchRequest).first
     }
+
+    // MARK: - find, create, update
 
     // Find existing Language object or create a new one.
     // Update existing attributes or fill the new object
