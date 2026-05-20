@@ -279,7 +279,15 @@ extension Expertise {
 
     // Priority system to choose the most appropriate localized version of a given Expertise.
     // The choice depends on available translations and the current language preferences set on the device.
-    public var selectedLocalizedExpertise: LocalizedExpertiseResult {
+    // An explicit isoCode (e.g. "nl") takes priority over the device's Locale.preferredLanguages.
+    public func selectedLocalizedExpertise(isoCode: String? = nil) -> LocalizedExpertiseResult {
+        // zeroth choice: use explicit language if provided (for multi-page generation, and maybe for testing)
+        if let isoCode = isoCode?.uppercased() {
+            for localizedExpertise in localizedExpertises where localizedExpertise.language.isoCode == isoCode {
+                return LocalizedExpertiseResult(localizedExpertise: localizedExpertise, id: self.id)
+            }
+        }
+
         // don't use Locale.current.language.languageCode because this only returns languages supported by the app
         // first choice: accomodate user's language preferences according to Apple's Locale API
         for lang in Locale.preferredLanguages {

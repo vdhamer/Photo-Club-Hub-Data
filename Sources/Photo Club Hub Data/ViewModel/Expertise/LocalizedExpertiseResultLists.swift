@@ -27,8 +27,8 @@ public struct LocalizedExpertiseResultLists {
 
         // Step 1. Translate expertises to appropriate language
         var translated: [LocalizedExpertiseResult] = [] // start with empty array
-        for photographerExpertise in photographerExpertises {
-            translated.append(photographerExpertise.expertise.selectedLocalizedExpertise()) // choose suitable language
+        for photographerExpertise in photographerExpertises { // choose suitable language
+            translated.append(photographerExpertise.expertise.selectedLocalizedExpertise())
         }
 
         // Step 2. Sort based on selected language.  Has special behavior for expertises without translation
