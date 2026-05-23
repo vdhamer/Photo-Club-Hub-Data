@@ -46,7 +46,7 @@ extension Language {
 
     // MARK: - getters and setters
 
-    var isoCode: String {
+    public var isoCode: String {
         get {
             let result = isoCode_?.uppercased() ?? "??"
             if result != isoCode_ {
