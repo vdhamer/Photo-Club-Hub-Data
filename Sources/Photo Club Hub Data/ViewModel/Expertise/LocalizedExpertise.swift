@@ -224,4 +224,9 @@ extension LocalizedExpertise {
         return localizedExpertiseCount
     }
 
+    /// Returns whether a `LocalizedExpertise` exists in Core Data for the given expertise ID and language ISO code.
+    public static func exists(context: NSManagedObjectContext, expertiseID: String, languageIsoCode: String) -> Bool {
+        count(context: context, expertiseID: expertiseID, languageIsoCode: languageIsoCode) > 0
+    }
+
 }
