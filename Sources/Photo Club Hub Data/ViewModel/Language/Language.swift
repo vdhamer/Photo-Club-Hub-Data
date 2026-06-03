@@ -16,12 +16,12 @@ extension Language {
 
     private static var code2Name: [String: String] {
         [
-            "DE": "German",
-            "EN": "English",
-            "ES": "Spanish",
-            "FR": "French",
-            "NL": "Dutch",
-            "PL": "Polish"
+            "de": "German",
+            "en": "English",
+            "es": "Spanish",
+            "fr": "French",
+            "nl": "Dutch",
+            "pl": "Polish"
         ]
     }
 
@@ -30,7 +30,7 @@ extension Language {
         for language in code2Name {
             _ = Language.findCreateUpdate(
                 context: context, // requires @MainActor
-                isoCode: language.key, // converted to all caps within findCreateUpdate
+                isoCode: language.key, // normalized to lowercase within findCreateUpdate
                 nameENOptional: language.value // e.g. "English"
             )
         }
@@ -48,13 +48,13 @@ extension Language {
 
     public var isoCode: String {
         get {
-            let result = isoCode_?.uppercased() ?? "??"
+            let result = isoCode_?.lowercased() ?? "??"
             if result != isoCode_ {
-                isoCode_ = result // update version in CoreData
+                isoCode_ = result // self-heal: normalize any legacy uppercase value in CoreData ("shouldn't exist")
             }
             return result
         } set {
-            isoCode_ = newValue.uppercased()
+            isoCode_ = newValue.lowercased()
         }
     }
 
@@ -68,7 +68,7 @@ extension Language {
     // Returns existing Language object for a given ISO code. Returns nil if not found.
     // Unlike `findCreateUpdate`, this does not create a new entity for unknown identifiers.
     public static func find(context: NSManagedObjectContext, isoCode: String) -> Language? {
-        let isoCode = isoCode.uppercased()
+        let isoCode = isoCode.lowercased()
         let fetchRequest: NSFetchRequest<Language> = Language.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "isoCode_ = %@", argumentArray: [isoCode])
         return try? context.fetch(fetchRequest).first
@@ -82,7 +82,7 @@ extension Language {
                                  isoCode: String,
                                  nameENOptional: String? = nil
                                 ) -> Language {
-        let isoCode = isoCode.uppercased() // "en" -> "EN" in case we don't receive uppercase input
+        let isoCode = isoCode.lowercased() // "EN" -> "en" — ISO 639-1 codes are lowercase in the standard
         let predicateFormat: String = "isoCode_ = %@" // avoid localization
         let predicate = NSPredicate(format: predicateFormat, argumentArray: [isoCode])
         let fetchRequest: NSFetchRequest<Language> = Language.fetchRequest()
@@ -174,16 +174,16 @@ extension Language {
 
         let languageCount: Int = context.performAndWait {
 
-            let isoCodeAllCaps = isoCode.uppercased()
+            let isoCodeLowercased = isoCode.lowercased()
             let fetchRequest: NSFetchRequest<Language> = Language.fetchRequest()
             let predicateFormat: String = "isoCode_ = %@" // avoid localization
-            let predicate = NSPredicate(format: predicateFormat, argumentArray: [isoCodeAllCaps])
+            let predicate = NSPredicate(format: predicateFormat, argumentArray: [isoCodeLowercased])
             fetchRequest.predicate = predicate
 
             do {
                 return try context.fetch(fetchRequest).count
             } catch {
-                ifDebugFatalError("Failed to fetch Language \(isoCodeAllCaps): \(error)", file: #fileID, line: #line)
+                ifDebugFatalError("Failed to fetch Language \(isoCodeLowercased): \(error)", file: #fileID, line: #line)
                 // on non-Debug version, continue with empty `languages` array
                 return 0
             }

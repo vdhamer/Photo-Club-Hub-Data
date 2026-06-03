@@ -291,15 +291,17 @@ extension Expertise {
         // don't use Locale.current.language.languageCode because this only returns languages supported by the app
         // first choice: accomodate user's language preferences according to Apple's Locale API
         for lang in Locale.preferredLanguages {
-            let langID = lang.split(separator: "-").first?.uppercased() ?? "EN"
+            let langID = lang.split(separator: "-").first?.lowercased() ?? "en"
             // now check if one of the user's preferences is available for this Remark
-            for localizedExpertise in localizedExpertises where localizedExpertise.language.isoCode == langID {
+            for localizedExpertise in localizedExpertises
+                where localizedExpertise.language.isoCode == langID && localizedExpertise.name_ != nil {
                 return LocalizedExpertiseResult(localizedExpertise: localizedExpertise, id: self.id)
             }
         }
 
         // second choice: most users can speak English, at least let's assume that is the case ;-)
-        for localizedExpertise in localizedExpertises where localizedExpertise.language.isoCode == "EN" {
+        for localizedExpertise in localizedExpertises
+            where localizedExpertise.language.isoCode == "en" && localizedExpertise.name_ != nil {
             return LocalizedExpertiseResult(localizedExpertise: localizedExpertise, id: self.id)
         }
 
