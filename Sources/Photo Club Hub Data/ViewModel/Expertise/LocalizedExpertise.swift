@@ -129,7 +129,7 @@ extension LocalizedExpertise {
 
         var modified: Bool = false
 
-        if let localizedName, self.name != localizedName {
+        if let localizedName, name_ != localizedName {
             self.name = localizedName
             modified = true
         }
