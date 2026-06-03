@@ -27,7 +27,8 @@ extension LocalizedExpertise {
             if let name = name_ {
                 return name
             } else {
-                fatalError("Error because LocalizedExpertise.name_ is nil") // something is really wrong if this happens
+                ifDebugFatalError("Error because LocalizedExpertise.name_ is nil") // something is wrong if this happens
+                return self.expertise.id
             }
         }
         set {
