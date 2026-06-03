@@ -282,8 +282,9 @@ extension Expertise {
     // An explicit isoCode (e.g. "nl") takes priority over the device's Locale.preferredLanguages.
     public func selectedLocalizedExpertise(isoCode: String? = nil) -> LocalizedExpertiseResult {
         // zeroth choice: use explicit language if provided (for multi-page generation, and maybe for testing)
-        if let isoCode = isoCode?.uppercased() {
-            for localizedExpertise in localizedExpertises where localizedExpertise.language.isoCode == isoCode {
+        if let isoCode = isoCode?.lowercased() {
+            for localizedExpertise in localizedExpertises
+                where localizedExpertise.language.isoCode == isoCode && localizedExpertise.name_ != nil {
                 return LocalizedExpertiseResult(localizedExpertise: localizedExpertise, id: self.id)
             }
         }
@@ -305,9 +306,9 @@ extension Expertise {
             return LocalizedExpertiseResult(localizedExpertise: localizedExpertise, id: self.id)
         }
 
-        // third choice: use arbitrary (first) translation available for this expertise
-        if localizedExpertises.first != nil {
-            return LocalizedExpertiseResult(localizedExpertise: localizedExpertises.first!, id: self.id)
+        // third choice: use arbitrary (first) named translation available for this expertise
+        if let first = localizedExpertises.first(where: { $0.name_ != nil }) {
+            return LocalizedExpertiseResult(localizedExpertise: first, id: self.id)
         }
 
         return LocalizedExpertiseResult(localizedExpertise: nil, id: self.id)
