@@ -13,7 +13,7 @@ public struct LocalizedExpertiseResult {
     public var delimiterToAppend: String // normally "," but can be set to ""
     public var customHint: String? // used to overrule standard Ignite hint
 
-    public var name: String { localizedExpertise?.name ?? id } // localized name or (if no translations) generic id
+    public var name: String { localizedExpertise?.name_ ?? id } // localized name or (if no translations) generic id
     var isSupported: Bool { localizedExpertise != nil }
 
     public init(localizedExpertise: LocalizedExpertise?,
