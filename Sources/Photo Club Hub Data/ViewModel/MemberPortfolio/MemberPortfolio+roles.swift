@@ -5,6 +5,8 @@
 //  Created by Peter van den Hamer on 20/10/2023.
 //
 
+import Foundation // for Bundle
+
 extension MemberPortfolio { // computed properties related to roles of members in their club
 
     // typicala value: "Member" or "Secretary and member"
@@ -13,6 +15,7 @@ extension MemberPortfolio { // computed properties related to roles of members i
         var suffixList = [String]()
         var result: String = ""
         let andLocalized = String(localized: "and", table: "PhotoClubHubData",
+                                  bundle: Bundle.photoClubHubDataModule,
                                   comment: "To generate strings like \"secretary and admin\"")
 
         if photographer.isDeceased {
@@ -48,8 +51,11 @@ extension MemberPortfolio { // computed properties related to roles of members i
         return result.trimmingCharacters(in: .whitespacesAndNewlines).capitalizingFirstLetter()
     }
 
-    var roleDescriptionOfClubTown: String {
-        let of2 = String(localized: "of2", table: "PhotoClubHubData", comment: "<person> of <photo club>")
+    public var roleDescriptionOfClubTown: String {
+        let of2 = String(localized: "of2",
+                         table: "PhotoClubHubData",
+                         bundle: Bundle.photoClubHubDataModule,
+                         comment: "<person> of <photo club>")
         return "\(roleDescription) \(of2) \(self.organization.fullNameTown)"
     }
 
