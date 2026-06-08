@@ -10,9 +10,9 @@ import Foundation // for Bundle
 
 // MARK: - MemberRole
 
-/// A role a club member can hold within their photo club.
+/// A role a club member can hold within a photo club.
 ///
-/// A member can have zero or more roles concurrently.
+/// A member can have zero or more roles within one club simultaneously (e.g. Vice-chairman and Admin).
 /// - The enum's `rawValue` serves as a  stable identifier.
 /// - Use`displayName` for localized presentation.
 public enum MemberRole: String {
@@ -30,8 +30,27 @@ public enum MemberRole: String {
     case other
 }
 
+/// Localized display names for `MemberRole`.
+///
+/// Two variants are provided so a role can be rendered either in the system locale
+/// (for normal app UI) or in a caller-supplied bundle (for generating multilingual HTML
+/// pages, where each page needs its own language regardless of the system locale).
 extension MemberRole {
-    public var displayName: String { // localized
+    /// The role's localized display name in the system locale. Set using e.g. Settings or `Edit Scheme...`.
+    ///
+    /// Resolves strings against the `PhotoClubHubData` table in the package's own
+    /// resource bundle. Use this for in-app UI; use `displayName(bundle:)` when generating
+    /// content for a specific target language.
+    public var displayNameForAppUI: String { displayNameForHTML(languageBundle: .photoClubHubDataModule) }
+
+    /// The role's localized display name in the language of the supplied bundle.
+    ///
+    /// Pass a language-specific `.lproj` sub-bundle (typically obtained via
+    /// `Bundle.photoClubHubDataModuleForLanguage(_:)`) to render the role in a chosen
+    /// language rather than the system locale.
+    /// - Parameter bundle: The bundle to resolve `PhotoClubHubData` strings against.
+    /// - Returns: The role's localized display name.
+    public func displayNameForHTML(languageBundle: Bundle) -> String {
         let localizationTable: String = "PhotoClubHubData"
         let localizationBundle: Bundle = Bundle.photoClubHubDataModule
 
@@ -58,10 +77,24 @@ extension MemberRole {
     }
 }
 
+/// Standard collection / identity / serialization conformances for `MemberRole`.
+///
+/// - `CaseIterable` lets UI code (e.g. pickers) iterate all defined roles.
+/// - `Identifiable` lets `MemberRole` be used directly in SwiftUI lists and `ForEach`.
+/// - `Codable` enables JSON round-tripping through the enum's `rawValue`.
 extension MemberRole: CaseIterable, Identifiable, Codable {
-    public var id: String { rawValue } // stable, locale-independent identifier
+    /// Stable, locale-independent identifier using the enum's `rawValue`.
+    ///
+    /// Safe to persist or send over the wire: it does not change when the user's
+    /// locale changes, unlike `displayNameForAppUI`.
+    public var id: String { rawValue }
 }
 
+/// Ordering for `MemberRole`, used (in iOS app) when rendering sorted lists of roles.
+///
+/// Roles are compared by their localized `displayNameForAppUI` rather than by `rawValue`,
+/// so a sorted list reads naturally in the user's current language. Note that this
+/// means the sort order is locale-dependent and not stable across languages.
 extension MemberRole: Comparable {
     public static func < (lhs: MemberRole, rhs: MemberRole) -> Bool {
         return lhs.displayName < rhs.displayName // is sorted based on locale's displayName, not on rawValue
