@@ -51,31 +51,36 @@ extension MemberRole {
     /// - Parameter bundle: The bundle to resolve `PhotoClubHubData` strings against.
     /// - Returns: The role's localized display name.
     public func displayNameForHTML(languageBundle: Bundle) -> String {
-        let localizationTable: String = "PhotoClubHubData"
         switch self {
         case .admin:
             return String(localized: "admin",
-                          table: localizationTable, bundle: languageBundle,
+                          table: "PhotoClubHubData",
+                          bundle: languageBundle,
                           comment: "Administrative role of member within a club.")
         case .chairman:
             return String(localized: "chairman",
-                          table: localizationTable, bundle: languageBundle,
+                          table: "PhotoClubHubData",
+                          bundle: languageBundle,
                           comment: "Administrative role of member within a club.")
         case .other:  // some clubs like fgDeGender use this
             return String(localized: "other",
-                          table: localizationTable, bundle: languageBundle,
+                          table: "PhotoClubHubData",
+                          bundle: languageBundle,
                           comment: "Administrative role of member within a club.")
         case .secretary:
             return String(localized: "secretary",
-                          table: localizationTable, bundle: languageBundle,
+                          table: "PhotoClubHubData",
+                          bundle: languageBundle,
                           comment: "Administrative role of member within a club.")
         case .treasurer:
             return String(localized: "treasurer",
-                          table: localizationTable, bundle: languageBundle,
+                          table: "PhotoClubHubData",
+                          bundle: languageBundle,
                           comment: "Administrative role of member within a club.")
         case .viceChairman: // some clubs like fgWaalre use this
             return String(localized: "vice-chairman",
-                          table: localizationTable, bundle: languageBundle,
+                          table: "PhotoClubHubData",
+                          bundle: languageBundle,
                           comment: "Administrative role of member within a club.")
         }
     }
@@ -148,31 +153,36 @@ extension MemberStatus {
     /// - Parameter languageBundle: The bundle to resolve `PhotoClubHubData` strings against.
     /// - Returns: The status's localized display name.
     public func displayNameForHTML(languageBundle: Bundle) -> String {
-        let table: String = "PhotoClubHubData"
         switch self {
         case .coach:
             return String(localized: "external coach",
-                          table: table, bundle: languageBundle,
+                          table: "PhotoClubHubData",
+                          bundle: languageBundle,
                           comment: "Relationship status of member within a club.")
         case .deceased:
             return String(localized: "deceased",
-                          table: table, bundle: languageBundle,
+                          table: "PhotoClubHubData",
+                          bundle: languageBundle,
                           comment: "Relationship status of member within a club. Used as prefix.")
         case .former:
             return String(localized: "former",
-                          table: table, bundle: languageBundle,
+                          table: "PhotoClubHubData",
+                          bundle: languageBundle,
                           comment: "Relationship status of member within a club. Used as prefex.")
         case .honorary:
             return String(localized: "honorary member",
-                          table: table, bundle: languageBundle,
+                          table: "PhotoClubHubData",
+                          bundle: languageBundle,
                           comment: "Relationship status of member within a club.")
         case .current:
             return String(localized: "member",
-                          table: table, bundle: languageBundle,
+                          table: "PhotoClubHubData",
+                          bundle: languageBundle,
                           comment: "Default status of member within a club.")
         case .prospective:
             return String(localized: "prospective member",
-                          table: table, bundle: languageBundle,
+                          table: "PhotoClubHubData",
+                          bundle: languageBundle,
                           comment: "Relationship status of member within a club.")
         }
     }
