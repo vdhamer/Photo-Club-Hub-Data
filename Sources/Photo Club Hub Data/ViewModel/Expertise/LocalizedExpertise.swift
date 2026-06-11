@@ -155,7 +155,7 @@ extension LocalizedExpertise {
         return modified
     }
 
-    // MARK: - utilities
+    // MARK: - save
 
     static func save(context: NSManagedObjectContext, errorText: String? = nil, if condition: Bool = true) {
         if context.hasChanges, condition {
@@ -167,6 +167,8 @@ extension LocalizedExpertise {
             }
         }
     }
+
+    // MARK: - counts
 
     /// Returns the total number of `LocalizedExpertise` objects in the Core Data database.
     ///
@@ -200,34 +202,55 @@ extension LocalizedExpertise {
     ///   - expertiseID: The unique identifier for the `Expertise` entity to match.
     ///   - languageIsoCode: The ISO code for the Language to match.
     /// - Returns: The count of `LocalizedExpertise` records matching both criteria, or 0 if an error occurs.
-    static func count(context: NSManagedObjectContext, expertiseID: String, languageIsoCode: String) -> Int {
-
-        let localizedExpertiseCount: Int = context.performAndWait {
+    private static func count(context: NSManagedObjectContext, expertiseID: String, languageIsoCode: String) -> Int {
+        context.performAndWait {
             let expertiseIDCanonical = expertiseID.canonicalCase
             let fetchRequest: NSFetchRequest<LocalizedExpertise> = LocalizedExpertise.fetchRequest()
             let predicateFormat: String = "expertise_.id_ = %@ && language_.isoCode_ = %@" // avoid localization
             fetchRequest.predicate = NSPredicate(format: predicateFormat,
                                                  argumentArray: [expertiseIDCanonical, languageIsoCode])
-
             do {
-                return try context.fetch(fetchRequest).count
+                return try context.count(for: fetchRequest)
             } catch {
                 ifDebugFatalError("""
-                                  Failed to fetch LocalizedExpertise \(expertiseIDCanonical) \
+                                  Failed to count LocalizedExpertise \(expertiseIDCanonical) \
                                   for \(languageIsoCode): \(error)
                                   """,
                                   file: #fileID, line: #line)
-                // on non-Debug version, continue with empty `expertises` array
                 return 0
             }
         }
-
-        return localizedExpertiseCount
     }
 
     /// Returns whether a `LocalizedExpertise` exists in Core Data for the given expertise ID and language ISO code.
     public static func exists(context: NSManagedObjectContext, expertiseID: String, languageIsoCode: String) -> Bool {
         count(context: context, expertiseID: expertiseID, languageIsoCode: languageIsoCode) > 0
+    }
+
+    /// Returns the number of `LocalizedExpertise` objects in the Core Data database in the specified language.
+    ///
+    /// - Parameters:
+    ///   - context: The `NSManagedObjectContext` used to perform the fetch.
+    ///   - languageIsoCode: The ISO code for the Language to match.
+    /// - Returns: The count of `LocalizedExpertise` records matching both criteria, or 0 if an error occurs.
+    private static func count(context: NSManagedObjectContext, languageIsoCode: String) -> Int {
+        context.performAndWait {
+            let fetchRequest: NSFetchRequest<LocalizedExpertise> = LocalizedExpertise.fetchRequest()
+            let predicateFormat: String = "language_.isoCode_ = %@" // avoid localization
+            fetchRequest.predicate = NSPredicate(format: predicateFormat, argumentArray: [languageIsoCode])
+            do {
+                return try context.count(for: fetchRequest)
+            } catch {
+                ifDebugFatalError("Failed to count LocalizedExpertises for \(languageIsoCode): \(error)",
+                                  file: #fileID, line: #line)
+                return 0
+            }
+        }
+    }
+
+    /// Returns whether a `LocalizedExpertise` exists in Core Data for the given language ISO code.
+    public static func exists(context: NSManagedObjectContext, languageIsoCode: String) -> Bool {
+        count(context: context, languageIsoCode: languageIsoCode) > 0
     }
 
 }
