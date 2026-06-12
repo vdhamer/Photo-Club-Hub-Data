@@ -9,7 +9,7 @@ import CoreData // for NSManagedObjectContext
 
 let maxExpertisesPerMember: Int = 2
 
-// Used to provide the UI with pairs of lists with Exertise records with localized names
+// Used to provide the UI and HTML with pairs of lists with Exertise records with localized names
 public struct LocalizedExpertiseResultLists {
 
     public var supported = LocalizedExpertiseResultList(isSupported: true, list: [])
