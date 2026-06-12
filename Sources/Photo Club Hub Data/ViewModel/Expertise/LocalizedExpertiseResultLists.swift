@@ -20,7 +20,12 @@ public struct LocalizedExpertiseResultLists {
         temporary = LocalizedExpertiseResultList(isSupported: false, list: temporaryList)
     }
 
-    public init(moc: NSManagedObjectContext, _ photographerExpertises: Set<PhotographerExpertise>) {
+    // `isoCode` selects the language of the localized names. When nil (e.g. the iOS app), the device's
+    // system language is used; HTML generation passes the target page's language so each (club × language)
+    // page renders its expertise tags in the correct language (see ticket #216).
+    public init(moc: NSManagedObjectContext,
+                isoCode: String? = nil,
+                _ photographerExpertises: Set<PhotographerExpertise>) {
 
         // Use init(supportedList:temporaryList) to get access to the icons
         var resultLERLs = LocalizedExpertiseResultLists.init(supportedList: [], temporaryList: [])
@@ -28,7 +33,7 @@ public struct LocalizedExpertiseResultLists {
         // Step 1. Translate expertises to appropriate language
         var translated: [LocalizedExpertiseResult] = [] // start with empty array
         for photographerExpertise in photographerExpertises { // choose suitable language
-            translated.append(photographerExpertise.expertise.selectedLocalizedExpertise())
+            translated.append(photographerExpertise.expertise.selectedLocalizedExpertise(isoCode: isoCode))
         }
 
         // Step 2. Sort based on selected language.  Has special behavior for expertises without translation
@@ -54,26 +59,7 @@ public struct LocalizedExpertiseResultLists {
 
         // Step 5. warn if there are more expertises than allowed
         if sorted.count > maxExpertisesPerMember { // if list overflows, add a warning
-            let moreExpertise = Expertise.findCreateUpdateTemporary(
-                                          context: moc,
-                                          id: String(localized: "Too many expertises",
-                                                     table: "PhotoClubHubData", bundle: Bundle.photoClubHubDataModule,
-                                                     comment: "Shown when too many expertises are found"),
-                                          names: [],
-                                          usages: [] )
-            let moreLocalizedExpertise: LocalizedExpertiseResult = moreExpertise.selectedLocalizedExpertise()
-            resultLERLs.temporary.list.append(LocalizedExpertiseResult(
-                                                    localizedExpertise: moreLocalizedExpertise.localizedExpertise,
-                                                    id: moreExpertise.id,
-                                                    customHint: customHint(localizedExpertiseResults: sorted))
-                                                )
-            do { // new expertises are loaded by Level0Loader or Level2Loader. This pseudo-expertise is an exception.
-                if moc.hasChanges {
-                    try moc.save()
-                }
-            } catch {
-                ifDebugFatalError("Failed to save \"too many expertises\" as an Expertise: \(error)")
-            }
+            resultLERLs.temporary.list.append(makeOverflowWarning(moc: moc, isoCode: isoCode, sorted: sorted))
         }
 
         // Step 6. remove delimeter after last element
@@ -86,6 +72,30 @@ public struct LocalizedExpertiseResultLists {
 
         self.supported.list = resultLERLs.supported.list
         self.temporary.list = resultLERLs.temporary.list
+    }
+
+    // Builds the "Too many expertises" warning element shown when a member has more expertises than allowed.
+    private func makeOverflowWarning(moc: NSManagedObjectContext,
+                                     isoCode: String?,
+                                     sorted: [LocalizedExpertiseResult]) -> LocalizedExpertiseResult {
+        let moreExpertise = Expertise.findCreateUpdateTemporary(
+                                      context: moc,
+                                      id: String(localized: "Too many expertises",
+                                                 table: "PhotoClubHubData", bundle: Bundle.photoClubHubDataModule,
+                                                 comment: "Shown when too many expertises are found"),
+                                      names: [],
+                                      usages: [] )
+        let moreLocalizedExpertise = moreExpertise.selectedLocalizedExpertise(isoCode: isoCode)
+        do { // new expertises are loaded by Level0Loader or Level2Loader. This pseudo-expertise is an exception.
+            if moc.hasChanges {
+                try moc.save()
+            }
+        } catch {
+            ifDebugFatalError("Failed to save \"too many expertises\" as an Expertise: \(error)")
+        }
+        return LocalizedExpertiseResult(localizedExpertise: moreLocalizedExpertise.localizedExpertise,
+                                        id: moreExpertise.id,
+                                        customHint: customHint(localizedExpertiseResults: sorted))
     }
 
     private func customHint(localizedExpertiseResults: [LocalizedExpertiseResult]) -> String {
