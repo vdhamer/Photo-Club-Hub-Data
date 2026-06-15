@@ -82,7 +82,7 @@ extension Language {
                                  isoCode: String,
                                  nameENOptional: String? = nil
                                 ) -> Language {
-        let isoCode = isoCode.lowercased() // "EN" -> "en" — ISO 639-1 codes are lowercase in the standard
+        let isoCode = isoCode.lowercased() // "EN" → "en" — ISO 639-1 codes are lowercase in the standard
         let predicateFormat: String = "isoCode_ = %@" // avoid localization
         let predicate = NSPredicate(format: predicateFormat, argumentArray: [isoCode])
         let fetchRequest: NSFetchRequest<Language> = Language.fetchRequest()
