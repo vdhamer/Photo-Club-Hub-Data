@@ -95,7 +95,8 @@ public struct LocalizedExpertiseResultLists {
         }
         return LocalizedExpertiseResult(localizedExpertise: moreLocalizedExpertise.localizedExpertise,
                                         id: moreExpertise.id,
-                                        customHint: customHint(localizedExpertiseResults: sorted))
+                                        customHint: customHint(localizedExpertiseResults: sorted),
+                                        isNavigable: false) // no ExpertisePage exists for this synthetic warning
     }
 
     private func customHint(localizedExpertiseResults: [LocalizedExpertiseResult]) -> String {
