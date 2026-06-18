@@ -126,8 +126,8 @@ extension Organization {
             The value of Town is not localized and is the original value provided by the user.
             Localization may return a slightly different town: Tokyo → suburb of Tokyo (because "Tokyo" is not used).
         */
-        get { return localizedTown_ ?? "ErrorTown" }
-        set { localizedTown_ = newValue}
+        get { return localizedTownDepr_ ?? "ErrorTown" }
+        set { localizedTownDepr_ = newValue}
     }
 
     var localizedCountry: String {
@@ -137,8 +137,8 @@ extension Organization {
          During this reverseGeolocation, the string is automatically adapted to the current locale.
          Example: Paris returns localizedCountry="Frankrijk" if the device is set to Dutch.
          */
-        get { return localizedCountry_ ?? "ErrorCountry" }
-        set { localizedCountry_ = newValue}
+        get { return localizedCountryDepr_ ?? "ErrorCountry" }
+        set { localizedCountryDepr_ = newValue}
     }
 
     var level2URL: URL? {
