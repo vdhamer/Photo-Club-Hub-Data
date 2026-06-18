@@ -27,11 +27,13 @@ public struct Model {
         let forcedDataRefresh = "Forced clearing of CoreData expertises "
 
         do { // order is important to avoid problems with referential integrity
-            try deleteEntitiesOfOneType("LocalizedRemark", viewContext: viewContext)
             try deleteEntitiesOfOneType("LocalizedExpertise", viewContext: viewContext)
             try deleteEntitiesOfOneType("PhotographerExpertise", viewContext: viewContext)
             try deleteEntitiesOfOneType("Expertise", viewContext: viewContext)
-            try deleteEntitiesOfOneType("Language", viewContext: viewContext)
+            // "Language", "Organization", and "LocalizedAddress"  are preserved (not cleared)
+            // so that "LocalizedAddress" rows can persist between app launches.
+            // Level0JsonReader inserts Language records from root.level0.json on every launch.
+            // "Obsolete" Language/Organization/LocalizedAddress records can persist. There is a "issue" for this.
 
             print(forcedDataRefresh + "was successful.")
         } catch {
@@ -46,8 +48,13 @@ public struct Model {
         let forcedDataRefreshText = "Forced clearing of CoreData organizations "
 
         do { // order is important to avoid problems with referential integrity
+            try deleteEntitiesOfOneType("LocalizedRemark", viewContext: viewContext)
             try deleteEntitiesOfOneType("MemberPortfolio", viewContext: viewContext)
-            try deleteEntitiesOfOneType("Organization", viewContext: viewContext)
+            // Language", "Organization", and "LocalizedAddress" are preserved (not cleared)
+            // so that "LocalizedAddress" rows survive between launches.
+            // Level1JsonReader inserts Organization records from *.level1.json on every launch.
+            // "Obsolete" Language/Organization/LocalizedAddress records can persist. There is a "issue" for this.
+
             try deleteEntitiesOfOneType("Photographer", viewContext: viewContext)
 
             try deleteEntitiesOfOneType("OrganizationType", viewContext: viewContext)
