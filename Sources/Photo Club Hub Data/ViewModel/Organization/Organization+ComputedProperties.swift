@@ -171,7 +171,7 @@ extension Organization {
         return url!.deletingLastPathComponent()
     }
 
-    var coordinates: CLLocationCoordinate2D {
+    public var coordinates: CLLocationCoordinate2D {
         get { return CLLocationCoordinate2D(latitude: latitude_, longitude: longitude_) }
         set {
             latitude_ = newValue.latitude
@@ -181,6 +181,14 @@ extension Organization {
 
     var localizedRemarks: Set<LocalizedRemark> {
         (localizedRemarks_ as? Set<LocalizedRemark>) ?? []
+    }
+
+    public var localizedAddresses: Set<LocalizedAddress> {
+        (localizedAddresses_ as? Set<LocalizedAddress>) ?? []
+    }
+
+    public func localizedAddress(for language: Language) -> LocalizedAddress? {
+        localizedAddresses.first { $0.language_ == language } // is that language available? else nil.
     }
 
     // Priority system to choose an item's remark in the appropriate language.
