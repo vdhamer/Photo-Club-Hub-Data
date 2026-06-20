@@ -27,7 +27,7 @@ private let isBeingTested = true
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataExpertisesAndLanguages(viewContext: bgContext)
+        Model.deleteCoreDataObjects(viewContext: bgContext, deleteScope: .expertisesOnly)
         #expect(Expertise.count(context: bgContext) == 0)
         #expect(LocalizedExpertise.count(context: bgContext) == 0)
         #expect(PhotographerExpertise.count(context: bgContext) == 0)
@@ -49,7 +49,7 @@ private let isBeingTested = true
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataExpertisesAndLanguages(viewContext: bgContext)
+        Model.deleteCoreDataObjects(viewContext: bgContext, deleteScope: .expertisesOnly)
         #expect(Expertise.count(context: bgContext) == 0) // returns 3 instead of zero, why??
         #expect(LocalizedExpertise.count(context: bgContext) == 0)
         #expect(PhotographerExpertise.count(context: bgContext) == 0) // returns 3 instead of zero, why??
@@ -74,7 +74,7 @@ private let isBeingTested = true
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataExpertisesAndLanguages(viewContext: bgContext) // This test doesn't have Expertises
+        Model.deleteCoreDataObjects(viewContext: bgContext, deleteScope: .expertisesOnly) // test doesn't use Expertises
         #expect(Expertise.count(context: bgContext) == 0)
 
         _ = Level0JsonReader(bgContext: bgContext, // read root.Level0.json file
@@ -92,7 +92,7 @@ private let isBeingTested = true
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataExpertisesAndLanguages(viewContext: bgContext)
+        Model.deleteCoreDataObjects(viewContext: bgContext, deleteScope: .expertisesOnly)
         #expect(Language.count(context: bgContext, isoCode: "UR") == 0)
         #expect(LocalizedRemark.count(context: bgContext) == 0)
         #expect(LocalizedExpertise.count(context: bgContext) == 0)
@@ -115,7 +115,7 @@ private let isBeingTested = true
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataExpertisesAndLanguages(viewContext: bgContext)
+        Model.deleteCoreDataObjects(viewContext: bgContext, deleteScope: .expertisesOnly)
         #expect(Language.count(context: bgContext, isoCode: "UR") == 0)
         #expect(LocalizedRemark.count(context: bgContext) == 0)
         #expect(LocalizedExpertise.count(context: bgContext) == 0)
