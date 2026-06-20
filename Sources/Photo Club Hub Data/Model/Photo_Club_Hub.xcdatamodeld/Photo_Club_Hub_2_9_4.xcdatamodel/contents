@@ -38,8 +38,8 @@
     <entity name="LocalizedAddress" representedClassName="LocalizedAddress" syncable="YES" codeGenerationType="class">
         <attribute name="localizedCountry_" attributeType="String" defaultValueString="Country?"/>
         <attribute name="localizedTown_" attributeType="String" defaultValueString="Town?"/>
-        <attribute name="prevLatitude_" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="prevLongitude_" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="prevLatitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="prevLongitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="language_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Language" inverseName="localizedAddresses_" inverseEntity="Language"/>
         <relationship name="organization_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Organization" inverseName="localizedAddresses_" inverseEntity="Organization"/>
         <uniquenessConstraints>
