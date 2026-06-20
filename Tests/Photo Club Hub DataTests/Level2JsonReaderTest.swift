@@ -25,7 +25,7 @@ import CoreData // for NSManagedObjectContext
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataObjects(viewContext: bgContext, deleteScope: .expertisesOnly) // test doesn't use Expertises
+        Model.deleteCoreDataObjects(viewContext: bgContext, deletionScope: .expertisesOnly)
         #expect(Expertise.count(context: bgContext) == 0)
 
         // note that club TemplateMin may already be loaded
@@ -71,7 +71,7 @@ import CoreData // for NSManagedObjectContext
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataObjects(viewContext: bgContext, deleteScope: .expertisesOnly)
+        Model.deleteCoreDataObjects(viewContext: bgContext, deletionScope: .expertisesOnly)
         #expect(Expertise.count(context: bgContext) == 0)
 
         // note that club TemplateMax may already be loaded
@@ -115,7 +115,7 @@ import CoreData // for NSManagedObjectContext
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataObjects(viewContext: bgContext, deleteScope: .expertisesOnly)
+        Model.deleteCoreDataObjects(viewContext: bgContext, deletionScope: .expertisesOnly)
         #expect(Expertise.count(context: bgContext) == 0)
 
         // note that club fgDeGender may already be loaded
@@ -161,7 +161,7 @@ import CoreData // for NSManagedObjectContext
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataObjects(viewContext: bgContext, deleteScope: .expertisesOnly) // remove Expertises
+        Model.deleteCoreDataObjects(viewContext: bgContext, deletionScope: .expertisesOnly) // remove Expertises
         #expect(Expertise.count(context: bgContext) == 0)
 
         // note that club fgDeGender may already be loaded
