@@ -7,61 +7,50 @@
 
 import CoreData // for NSManagedObject
 
-/// Methods for deleting (all) Core Data objects per type
+/// Contains only method for deleting Core Data objects across various/all tables
 public struct Model {
 
-    /// Deletes all relevant Core Data objects in the correct order to avoid issues with referential integrity.
-    /// - Parameter viewContext: The managed object context to operate on. For now this has to be the main thread.
-    @MainActor public static func deleteAllCoreDataObjects(viewContext: NSManagedObjectContext) {
-        // order is important to avoid problems with referential integrity
-        deleteCoreDataExpertisesAndLanguages(viewContext: viewContext) // performs its own save()
-        deleteCoreDataPhotographersClubs(viewContext: viewContext) // performs its own save()
-        if #available(iOS 18, macOS 15, *) { // uses Mutext feature of iOS 18
-            Level1JsonReader.level1History.clear()
-        }
+    /// Controls which entities `deleteAllCoreDataObjects` removes.
+    public enum DeletionScope {
+        case expertisesOnly // deletes Expertise, LocalizedExpertise, PhotographerExpertise only
+        case standard       // avoids deleting Language, Organization, OrganizationType, LocalizedAddress
+        case all            // deletes all objects from all CoreData tables
     }
 
-    /// Deletes all Core Data objects related to expertises and languages.
-    /// - Parameter viewContext: The managed object context to operate on. For now this has to be the main thread.
-    @MainActor static func deleteCoreDataExpertisesAndLanguages(viewContext: NSManagedObjectContext) {
-        let forcedDataRefresh = "Forced clearing of CoreData expertises "
-
-        do { // order is important to avoid problems with referential integrity
+    /// Deletes all relevant Core Data objects in order of dependencies to avoid issues with referential integrity.
+    ///
+    /// - Parameters:
+    ///   - viewContext: The managed object context to operate on. For now this has to be the main thread.
+    ///   - scope: Whether to preserve or also delete Organization, Language, and LocalizedAddress.
+    @MainActor public static func deleteCoreDataObjects(viewContext: NSManagedObjectContext,
+                                                        deletionScope: DeletionScope) {
+        do {
+            // order is important to avoid violating database referential integrity constraints
             try deleteEntitiesOfOneType("LocalizedExpertise", viewContext: viewContext)
             try deleteEntitiesOfOneType("PhotographerExpertise", viewContext: viewContext)
             try deleteEntitiesOfOneType("Expertise", viewContext: viewContext)
-            // "Language", "Organization", and "LocalizedAddress"  are preserved (not cleared)
-            // so that "LocalizedAddress" rows can persist between app launches.
-            // Level0JsonReader inserts Language records from root.level0.json on every launch.
-            // "Obsolete" Language/Organization/LocalizedAddress records can persist. There is a "issue" for this.
+            if deletionScope == .expertisesOnly {
+                try viewContext.save()
+                return }
 
-            print(forcedDataRefresh + "was successful.")
-        } catch {
-            ifDebugFatalError(forcedDataRefresh + "FAILED: \(error)")
-        }
-    }
-
-    /// Deletes all Core Data objects related to photographers and clubs.
-    /// - Parameter viewContext: The managed object context to operate on. For now this has to be the main thread.
-    @MainActor
-    private static func deleteCoreDataPhotographersClubs(viewContext: NSManagedObjectContext) { // delete certain tables
-        let forcedDataRefreshText = "Forced clearing of CoreData organizations "
-
-        do { // order is important to avoid problems with referential integrity
             try deleteEntitiesOfOneType("LocalizedRemark", viewContext: viewContext)
             try deleteEntitiesOfOneType("MemberPortfolio", viewContext: viewContext)
-            // Language", "Organization", and "LocalizedAddress" are preserved (not cleared)
-            // so that "LocalizedAddress" rows survive between launches.
-            // Level1JsonReader inserts Organization records from *.level1.json on every launch.
-            // "Obsolete" Language/Organization/LocalizedAddress records can persist. There is a "issue" for this.
-
             try deleteEntitiesOfOneType("Photographer", viewContext: viewContext)
 
-            try deleteEntitiesOfOneType("OrganizationType", viewContext: viewContext)
+            if deletionScope == .all {
+                // LocalizedAddress references both Organization and Language, so it must be deleted before either.
+                try deleteEntitiesOfOneType("LocalizedAddress", viewContext: viewContext)
+                try deleteEntitiesOfOneType("Organization", viewContext: viewContext)
+                try deleteEntitiesOfOneType("OrganizationType", viewContext: viewContext)
+                try deleteEntitiesOfOneType("Language", viewContext: viewContext)
+            }
 
-            print(forcedDataRefreshText + "was successful.")
+            try viewContext.save()
         } catch {
-            ifDebugFatalError(forcedDataRefreshText + "FAILED: \(error)")
+            ifDebugFatalError("Error during forced clearing of CoreData tables: \(error)")
+        }
+        if #available(iOS 18, macOS 15, *) { // uses Mutext feature of iOS 18
+            Level1JsonReader.level1History.clear() // array used to avoiding cycles in level 1 "include" files
         }
     }
 
