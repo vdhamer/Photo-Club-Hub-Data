@@ -202,7 +202,7 @@ extension LocalizedExpertise {
     ///   - expertiseID: The unique identifier for the `Expertise` entity to match.
     ///   - languageIsoCode: The ISO code for the Language to match.
     /// - Returns: The count of `LocalizedExpertise` records matching both criteria, or 0 if an error occurs.
-    private static func count(context: NSManagedObjectContext, expertiseID: String, languageIsoCode: String) -> Int {
+    static func count(context: NSManagedObjectContext, expertiseID: String, languageIsoCode: String) -> Int {
         context.performAndWait {
             let expertiseIDCanonical = expertiseID.canonicalCase
             let fetchRequest: NSFetchRequest<LocalizedExpertise> = LocalizedExpertise.fetchRequest()
