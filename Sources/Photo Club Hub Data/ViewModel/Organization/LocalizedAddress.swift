@@ -10,6 +10,11 @@ import CoreLocation // for CLLocationCoordinate2D
 
 extension LocalizedAddress { // expose computed properties (some related to handling optionals)
 
+    // Computed (not stored) so each access returns a fresh NSPredicate: NSPredicate isn't Sendable,
+    // so a `static let` would be rejected under the package's strict concurrency checking.
+    public static var allPredicate: NSPredicate { NSPredicate(format: "TRUEPREDICATE") }
+    public static var nonePredicate: NSPredicate { NSPredicate(format: "FALSEPREDICATE") } // not used yet
+
     @available(*, unavailable) // blocks use of initialization: LocalizedAddress()
     convenience init() {
         fatalError("init() is not available. Use .findCreateUpdate instead.")
