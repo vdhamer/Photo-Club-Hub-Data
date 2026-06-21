@@ -14,13 +14,23 @@ import MapKit               // for MKReverseGeocodingRequest
 ///
 /// Lives in the `Photo Club Hub Data` package so both the macOS site generator and the iOS app can
 /// share the caching behaviour: a pair is only sent to Apple's geocoder when its coordinates have
-/// changed since the previous run, and results survive across launches.
+/// changed since the previous run, and results survive across app launches.
+///
+/// Currently requires macOS 26 / iOS 26 because it relies on `MKReverseGeocodingRequest`;
+/// callers on older deployment targets must add a fallback as the entire type is wrapped in `if #available`.
+@available(macOS 26.0, iOS 26.0, *)
 public struct OrganizationGeocoder: Sendable {
 
-    static private let maxAttempts = 3
-    static private let cooldownSeconds = 60 // server allows 50 requests every 60 seconds
+    private let maxAttempts: Int
+    private let cooldownSeconds: Int // server allows 50 "free" requests (per device?) every 60 seconds
 
-    public init() {}
+    /// - Parameters:
+    ///   - maxAttempts: how often a single (organization × language) pair is retried before being dropped.
+    ///   - cooldownSeconds: pause after a failed call, sized to the geocoding server's rate-limit window.
+    public init(maxAttempts: Int = 3, cooldownSeconds: Int = 60) {
+        self.maxAttempts = maxAttempts
+        self.cooldownSeconds = cooldownSeconds
+    }
 
     /// A Sendable snapshot of a `(Organization × Language)` pair that needs reverse-geocoding.
     ///
@@ -40,17 +50,18 @@ public struct OrganizationGeocoder: Sendable {
     /// Reverse-geocodes every (organization × language) pair whose coordinates changed since the last geocoding run.
     ///
     /// Results are stored in `LocalizedAddress` rows in CoreData. On subsequent launches the rows survive
-    /// (Organization, Language, and LocalizedAddress are not cleared on launch)
+    /// (Organization, Language, and LocalizedAddress are not cleared on launch of this or the iOS app)
     /// so geocoding is skipped for unchanged coordinates.
     ///
     /// The work list is drained until empty: a successfully geocoded (or definitively empty) item is removed,
-    /// while a failed item is re-queued and retried after a 60 s cooldown. Apple's geocoder is rate-limited,
-    /// so the cooldown limits wasted calls to roughly one per minute while a throttle window is open. Each item
-    /// is retried at most `maxAttempts` times before being dropped, guaranteeing the loop terminates even if a
-    /// coordinate fails permanently.
+    /// while a failed item is re-queued and retried after a 60 s cooldown.
+    ///
+    /// Apple's geocoder is rate-limited, so the cooldown limits wasted calls to roughly one per minute
+    /// while a throttle window is open. Each item is retried at most `maxAttempts` times before being dropped,
+    /// guaranteeing the loop terminates even if a coordinate fails permanently.
     public func geocodeChangedAddresses() async {
         let bgContext = PersistenceController.shared.container.newBackgroundContext()
-        bgContext.name = "reverse geocoding"
+        bgContext.name = "reverse geocoding of organizations"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
@@ -58,12 +69,15 @@ public struct OrganizationGeocoder: Sendable {
         var queue: [GeocodeWorkItem] = buildWorkItems(bgContext: bgContext)
         if !queue.isEmpty {
             print("Reverse Geocoding \(queue.count) (organization × language) pair(s)...")
+        } else {
+            print("No organizations found that require reverse geocoding.")
         }
 
         while !queue.isEmpty {
             var item = queue.removeFirst()
             do {
                 guard let addressStrings = try await reverseGeocode(item) else { continue } // no placemark: drop item
+
                 let coords = CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)
                 let organizationObjectID = item.organizationObjectID // immutable copy so the closure
                 let languageObjectID = item.languageObjectID         // doesn't capture the mutable `item`
@@ -89,17 +103,17 @@ public struct OrganizationGeocoder: Sendable {
             } catch {
                 item.attemptCount += 1
                 print("Geocoding failed for \(item.organizationName) [\(item.languageCode)]: \(error)")
-                guard item.attemptCount < Self.maxAttempts else {
+                guard item.attemptCount < self.maxAttempts else {
                     print("""
                           Dropping \(item.organizationName) [\(item.languageCode)] \
-                          after \(Self.maxAttempts) attempts.
+                          after \(self.maxAttempts) attempts.
                           """)
                     continue
                 }
                 queue.append(item) // re-queue for retry after the cooldown
                 saveBatch(bgContext: bgContext)
-                print("Geocoding rate-limit pause (\(Self.cooldownSeconds) s)...")
-                try? await Task.sleep(for: .seconds(Self.cooldownSeconds))
+                print("Geocoding rate-limit pause (\(self.cooldownSeconds) s)...")
+                try? await Task.sleep(for: .seconds(self.cooldownSeconds))
             }
         }
 
@@ -114,7 +128,7 @@ public struct OrganizationGeocoder: Sendable {
             do {
                 try bgContext.save()
             } catch {
-                print("Failed to save geocoding results: \(error)")
+                print("Saving of geocoding results failed: \(error)")
             }
         }
     }
@@ -130,11 +144,14 @@ public struct OrganizationGeocoder: Sendable {
             orgRequest.predicate = NSPredicate(format: "TRUEPREDICATE")
             let organizations: [Organization] = (try? bgContext.fetch(orgRequest)) ?? []
 
-            // Only languages with expertise translations are used on the website.
+            // Only languages with Expertise translations get pages on the website.
             // Filtering here avoids a nested performAndWait inside the language loop.
             let langRequest: NSFetchRequest<Language> = Language.fetchRequest()
             langRequest.predicate = NSPredicate(format: "localizedExpertises_.@count > 0")
             let languages = (try? bgContext.fetch(langRequest)) ?? []
+            if languages.isEmpty {
+                ifDebugFatalError("No languages found for which reverse geoencoding is required.")
+            }
 
             var items: [GeocodeWorkItem] = []
             for org in organizations {
@@ -144,8 +161,8 @@ public struct OrganizationGeocoder: Sendable {
                         items.append(GeocodeWorkItem(
                             organizationObjectID: org.objectID,
                             languageObjectID: language.objectID,
-                            latitude: org.latitude_,
-                            longitude: org.longitude_,
+                            latitude: org.coordinates.latitude,
+                            longitude: org.coordinates.longitude,
                             languageCode: language.isoCode,
                             organizationName: org.fullName
                         ))
@@ -168,8 +185,8 @@ public struct OrganizationGeocoder: Sendable {
                 if let error { cont.resume(throwing: error); return }
                 cont.resume(returning: items?.first.map { mapItem in
                     LocalizedAddressStrings(
-                        localizedTown: mapItem.addressRepresentations?.cityName ?? "",
-                        localizedCountry: mapItem.addressRepresentations?.regionName ?? ""
+                        localizedTown: mapItem.addressRepresentations?.cityName ?? "⏳",
+                        localizedCountry: mapItem.addressRepresentations?.regionName ?? "⏳"
                     )
                 })
             }
