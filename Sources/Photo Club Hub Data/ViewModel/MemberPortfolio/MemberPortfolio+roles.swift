@@ -41,10 +41,11 @@ extension MemberPortfolio { // computed properties related to roles of members i
         for prefix in prefixList {
             result.append(prefix + " ")
         }
+
         for (index, element) in suffixList.enumerated() {
-            result.append(element + " ")
-            if index < suffixList.count - 1 {
-                result.append(andLocalized + " ")
+            result.append(element + " ") // example "secretary "
+            if index < suffixList.count-1 {
+                result.append(andLocalized + " ") // example "secretary and " unless there are no elements left
             }
         }
         return result.trimmingCharacters(in: .whitespacesAndNewlines).capitalizingFirstLetter()
