@@ -100,8 +100,8 @@
         <attribute name="isMapScrollLocked" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" elementID="isScrollLocked"/>
         <attribute name="latitude_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="level2URL_" optional="YES" attributeType="URI" elementID="memberListURL_"/>
-        <attribute name="localizedCountryDepr_" attributeType="String" defaultValueString="Country?"/>
-        <attribute name="localizedTownDepr_" attributeType="String" defaultValueString="Town?"/>
+        <attribute name="localizedCountryDepr_" attributeType="String" defaultValueString="Country?" renamingIdentifier="localizedCountry_"/>
+        <attribute name="localizedTownDepr_" attributeType="String" defaultValueString="Town?" renamingIdentifier="localizedTown_"/>
         <attribute name="longitude_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="maintainerEmail_" optional="YES" attributeType="String" elementID="contactEmail"/>
         <attribute name="nickName_" optional="YES" attributeType="String" elementID="shortName_"/>
