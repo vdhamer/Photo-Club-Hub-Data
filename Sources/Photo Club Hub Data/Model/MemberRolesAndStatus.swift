@@ -238,7 +238,7 @@ extension Bundle {
     }
 }
 
-private final class _PhotoClubHubDataBundleToken {} // dummy class used only to determine what the current bundle is
+private final class _PhotoClubHubDataBundleToken {} // used only to determine what the current bundle is
 
 // MARK: - MemberRoleAndStatus
 
