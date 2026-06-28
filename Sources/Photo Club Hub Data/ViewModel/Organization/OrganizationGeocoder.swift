@@ -22,7 +22,7 @@ import MapKit               // for MKReverseGeocodingRequest
 public struct OrganizationGeocoder: Sendable {
 
     private let maxAttempts: Int
-    private let cooldownSeconds: Int // server allows 50 "free" requests (per device?) every 60 seconds
+    private let cooldownSeconds: Int // server allows 50 requests (bacame 25??) every 60 seconds
 
     /// - Parameters:
     ///   - maxAttempts: how often a single (organization × language) pair is retried before being dropped.
