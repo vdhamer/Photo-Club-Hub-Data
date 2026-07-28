@@ -50,7 +50,7 @@ extension Level1JsonReader {
 
             let bgContext = PersistenceController.shared.container.newBackgroundContext()
             bgContext.name = "Level 1 loader for \(includeName)"
-            if isDebug && Settings.errorOnCoreDataMerge {
+            if inDebugMode && Settings.errorOnCoreDataMerge {
                 bgContext.mergePolicy = NSMergePolicy.error // to force detection of Core Data merge issues
             } else {
                 bgContext.mergePolicy = NSMergePolicy.mergeByPropertyStoreTrump // .mergeByPropertyObjectTrump better?
