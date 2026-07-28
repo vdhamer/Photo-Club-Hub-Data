@@ -52,7 +52,7 @@ import CoreData // for NSManagedObjectContext
                                                                       localizedUsage: localizedUsage)
         LocalizedExpertise.save(context: context) // probably not needed, but sloppy not to commit this change
 
-        #expect(localizedExpertise.language.isoCode == "EN")
+        #expect(localizedExpertise.language.isoCode == "en")
         #expect(localizedExpertise.language.nameEN == "English")
     }
 

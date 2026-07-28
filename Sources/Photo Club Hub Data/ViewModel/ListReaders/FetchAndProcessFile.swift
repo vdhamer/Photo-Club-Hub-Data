@@ -105,9 +105,20 @@ struct FetchAndProcessFile {
             return url // Search oder #1
         }
 
-        let searchDirs = [Bundle.main.resourceURL, // "../Build/Products/Debug/Photo%20Club%20Hub%20HTML.app"
-                          Bundle.main.bundleURL.deletingLastPathComponent()]
-                         .compactMap { $0 } // ..Build/Products/Debug"
+        // When unit tests run under the standalone `xctest` tool, Bundle.main is that tool, so the test
+        // resources live in the loaded `.xctest` bundle's nested `<Package>_<Target>.bundle` instead.
+        // Reach it via the `.xctest` bundle (a build product in DerivedData) rather than Bundle.allBundles
+        // as a whole: allBundles also lists frameworks packaged inside Xcode.app, and enumerating the
+        // resource bundles it lists trips the macOS privacy (TCC) "would like to access data from other apps" prompt.
+        var searchDirs = [Bundle.main.resourceURL, // "../Build/Products/Debug/Photo%20Club%20Hub%20HTML.app"
+                          Bundle.main.bundleURL.deletingLastPathComponent()] // ..Build/Products/Debug"
+                         .compactMap { $0 }
+        for testBundle in Bundle.allBundles where testBundle.bundleURL.pathExtension == "xctest" {
+            if let resourceURL = testBundle.resourceURL {
+                searchDirs.append(resourceURL) // holds the nested <Package>_<Target>.bundle
+            }
+            searchDirs.append(testBundle.bundleURL.deletingLastPathComponent()) // sibling standalone bundle
+        }
         for dir in searchDirs {
             guard let entries = try? FileManager.default.contentsOfDirectory( at: dir,
                                                                               includingPropertiesForKeys: nil)
