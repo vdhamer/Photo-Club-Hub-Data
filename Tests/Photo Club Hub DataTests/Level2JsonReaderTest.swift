@@ -11,25 +11,34 @@ import CoreData // for NSManagedObjectContext
 
 @MainActor @Suite("Tests the Level 2 JSON reader") struct Level2JsonReaderTests {
 
-    private let context: NSManagedObjectContext
+    private let testPersistenceController: PersistenceController
+    private let viewContext: NSManagedObjectContext
 
     init () {
-        context = PersistenceController.shared.container.viewContext
+        // Each test gets its own private in-memory store, so the app's concurrent background
+        // data-loading into PersistenceController.shared can't pollute the Expertise/PhotographerExpertise
+        // counts below. Swift Testing creates a fresh suite instance (and thus a fresh init) per test, so
+        // the store is effectively per-test — no deletion or cross-test isolation needed.
+        testPersistenceController = PersistenceController(inMemory: true) // inMemory is important for isolation
+        viewContext = testPersistenceController.container.viewContext
+        viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+
+        // The empty store lacks several constant records the app seeds at launch; seed them here.
+        // Providers create .club organizations that reference OrganizationType, so both are needed.
+        // Must run on the main-queue viewContext (initConstants does a bare `save()`). See #749.
+        Language.initConstants(context: viewContext)
+        OrganizationType.initConstants(context: viewContext)
     }
 
     // Read TemplateMin.level2.json and check for parsing errors.
-    // Clears all CoreData expertises. Runs on background thread, adding bunch of extra complexity ;-(
     @Test("Parse TemplateMin.level2.json") func templateMinParse() async {
-        let bgContext = PersistenceController.shared.container.newBackgroundContext()
-        bgContext.name = "TemplateMin"
+        let bgContext = testPersistenceController.container.newBackgroundContext()
+        bgContext.name = "TemplateMinTest"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataObjects(viewContext: bgContext, deletionScope: .expertisesOnly)
-        #expect(Expertise.count(context: bgContext) == 0)
+        #expect(Expertise.count(context: bgContext) == 0) // clearing is handled via "inMemory: true"
 
-        // note that club TemplateMin may already be loaded
-        // note that TemplateMinMembersProvider runs asynchronously (via bgContext.perform {})
         let randomTownForTesting = String.random(length: 10)
 
         _ = TemplateMinMembersProvider(bgContext: bgContext,
@@ -37,7 +46,7 @@ import CoreData // for NSManagedObjectContext
                                        useOnlyInBundleFile: true,
                                        randomTownForTesting: randomTownForTesting)
 
-        let idPlus = OrganizationIdPlus(fullName: "Template Club with Minimal Data",
+        let idPlus = OrganizationIdPlus(fullName: "Template Club With Minimal Data",
                                         town: randomTownForTesting, // town to keep this separate from normal club data
                                         nickname: "TemplateMin")
 
@@ -48,7 +57,7 @@ import CoreData // for NSManagedObjectContext
                                     argumentArray: [ randomTownForTesting ] )
         let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
         fetchRequest.predicate = predicate
-        let organizations: [Organization] = (try? context.fetch(fetchRequest)) ?? []
+        let organizations: [Organization] = (try? viewContext.fetch(fetchRequest)) ?? []
 
         #expect(Expertise.count(context: bgContext) == 0)
         #expect(PhotographerExpertise.count(context: bgContext) == 0)  // A club without PhotographerExpertises
@@ -64,18 +73,14 @@ import CoreData // for NSManagedObjectContext
     }
 
     // Read TemplateMax.level2.json and check for parsing errors
-    // Clears all CoreData expertises. Runs on background thread, adding bunch of extra complexity ;-(
     @Test("Parse TemplateMax.level2.json") func templateMaxParse() async {
-        let bgContext = PersistenceController.shared.container.newBackgroundContext()
-        bgContext.name = "TemplateMax"
+        let bgContext = testPersistenceController.container.newBackgroundContext()
+        bgContext.name = "TemplateMaxTest"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataObjects(viewContext: bgContext, deletionScope: .expertisesOnly)
         #expect(Expertise.count(context: bgContext) == 0)
 
-        // note that club TemplateMax may already be loaded
-        // note that TemplateMaxMembersProvider runs asynchronously (via bgContext.perform {})
         let randomTownForTesting = String.random(length: 10)
         _ = TemplateMaxMembersProvider(bgContext: bgContext,
                                        isBeingTested: true,
@@ -93,7 +98,7 @@ import CoreData // for NSManagedObjectContext
                                     argumentArray: [ randomTownForTesting ] )
         let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
         fetchRequest.predicate = predicate
-        let organizations: [Organization] = (try? context.fetch(fetchRequest)) ?? []
+        let organizations: [Organization] = (try? viewContext.fetch(fetchRequest)) ?? []
 
         #expect(Expertise.count(context: bgContext) == 5)
         #expect(PhotographerExpertise.count(context: bgContext, expertiseID: "Landscape") == 1)
@@ -108,18 +113,17 @@ import CoreData // for NSManagedObjectContext
     }
 
     // Read fgDeGender.level2.json and check for parsing errors
-    // Clears all CoreData expertises. Runs on background thread, adding bunch of extra complexity ;-(
     @Test("Parse fgDeGender.level2.json") func fgDeGenderParse() async {
-        let bgContext = PersistenceController.shared.container.newBackgroundContext()
+        let bgContext = testPersistenceController.container.newBackgroundContext()
         bgContext.name = "fgDeGender"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataObjects(viewContext: bgContext, deletionScope: .expertisesOnly)
+        // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
+        // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
+        Model.deleteCoreDataObjects(viewContext: viewContext, deletionScope: .expertisesOnly)
         #expect(Expertise.count(context: bgContext) == 0)
 
-        // note that club fgDeGender may already be loaded
-        // note that fgDeGenderMembersProvider runs asynchronously (via bgContext.perform {})
         let randomTownForTesting = String.random(length: 10)
         _ = FotogroepDeGenderMembersProvider(bgContext: bgContext, // The club has Expertises
                                              isBeingTested: true,
@@ -133,7 +137,7 @@ import CoreData // for NSManagedObjectContext
                                     argumentArray: [ randomTownForTesting ] )
         let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
         fetchRequest.predicate = predicate
-        let organizations: [Organization] = (try? context.fetch(fetchRequest)) ?? []
+        let organizations: [Organization] = (try? viewContext.fetch(fetchRequest)) ?? []
 
         let idPlus = OrganizationIdPlus(fullName: "Fotogroep de Gender",
                                         town: randomTownForTesting, // town to distinguish this from normal club data
@@ -145,26 +149,26 @@ import CoreData // for NSManagedObjectContext
             #expect(organizations[0].fullName == idPlus.fullName)
             #expect(organizations[0].town == idPlus.town)
             #expect(organizations[0].nickName == idPlus.nickname)
-            #expect(organizations[0].fotobondClubNumber?.id == 1620)
+            #expect(organizations[0].fotobondClubNumber?.id == nil) // club in randomTown → no fotobondNumber
         }
 
         #expect(Expertise.count(context: bgContext) == 21)
-        #expect(PhotographerExpertise.count(context: bgContext, expertiseID: "Minimal") == 3)
-        #expect(PhotographerExpertise.count(context: bgContext) == 14)
+        #expect(PhotographerExpertise.count(context: bgContext, expertiseID: "Minimal") == 2)
+        #expect(PhotographerExpertise.count(context: bgContext) == 50)
     }
 
     // Read and check for expertise merging
-    // Clears all CoreData expertises. Runs on background thread, adding bunch of extra complexity ;-(
     @Test("Load 2 clubs with expertise data for same photographer") func fgWaalreFgDeGender() async {
-        let bgContext = PersistenceController.shared.container.newBackgroundContext()
+        let bgContext = testPersistenceController.container.newBackgroundContext()
         bgContext.name = "fgDeGender"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        Model.deleteCoreDataObjects(viewContext: bgContext, deletionScope: .expertisesOnly) // remove Expertises
+        // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
+        // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
+        Model.deleteCoreDataObjects(viewContext: viewContext, deletionScope: .expertisesOnly) // remove Expertises
         #expect(Expertise.count(context: bgContext) == 0)
 
-        // note that club fgDeGender may already be loaded
         // note that fgDeGenderMembersProvider runs asynchronously (via bgContext.perform {})
         let randomTownForTestingG = String.random(length: 10)
         _ = FotogroepDeGenderMembersProvider(bgContext: bgContext,
@@ -172,7 +176,7 @@ import CoreData // for NSManagedObjectContext
                                              useOnlyInBundleFile: true,
                                              randomTownForTesting: randomTownForTestingG)
         #expect(Expertise.count(context: bgContext) == 21)
-        #expect(PhotographerExpertise.count(context: bgContext) == 14)
+        #expect(PhotographerExpertise.count(context: bgContext) == 50)
 
         let randomTownForTestingW = String.random(length: 10)
         _ = FotogroepWaalreMembersProvider(bgContext: bgContext,
@@ -180,8 +184,8 @@ import CoreData // for NSManagedObjectContext
                                            useOnlyInBundleFile: true,
                                            randomTownForTesting: randomTownForTestingW)
 
-        #expect(Expertise.count(context: bgContext) == 21)
-        #expect(PhotographerExpertise.count(context: bgContext) == 42)
+        #expect(Expertise.count(context: bgContext) == 22)
+        #expect(PhotographerExpertise.count(context: bgContext) == 50 + 44 - 2) // DeGender + Waalre - overlap
     }
 
 }
