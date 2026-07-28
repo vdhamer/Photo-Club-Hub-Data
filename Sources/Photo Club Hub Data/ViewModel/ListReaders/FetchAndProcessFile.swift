@@ -105,9 +105,13 @@ struct FetchAndProcessFile {
             return url // Search oder #1
         }
 
-        let searchDirs = [Bundle.main.resourceURL, // "../Build/Products/Debug/Photo%20Club%20Hub%20HTML.app"
-                          Bundle.main.bundleURL.deletingLastPathComponent()]
-                         .compactMap { $0 } // ..Build/Products/Debug"
+        let searchDirs = ([Bundle.main.resourceURL, // "../Build/Products/Debug/Photo%20Club%20Hub%20HTML.app"
+                           Bundle.main.bundleURL.deletingLastPathComponent()] // ..Build/Products/Debug"
+                          // Also scan any loaded code bundle: when unit tests run under the standalone
+                          // `xctest` tool, Bundle.main is that tool, so the test resources live in the
+                          // `.xctest` bundle's nested `<Package>_<Target>.bundle` instead.
+                          + Bundle.allBundles.map { $0.resourceURL })
+                         .compactMap { $0 }
         for dir in searchDirs {
             guard let entries = try? FileManager.default.contentsOfDirectory( at: dir,
                                                                               includingPropertiesForKeys: nil)
