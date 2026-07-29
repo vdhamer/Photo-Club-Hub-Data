@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="25201" systemVersion="25F80" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="Expertise" representedClassName="Expertise" elementID="Keyword" syncable="YES" codeGenerationType="class">
+    <entity name="Expertise" representedClassName="Expertise" elementID="Keyword" syncable="YES">
         <attribute name="id_" attributeType="String" defaultValueString="ID is missing"/>
         <attribute name="isSupported" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <relationship name="localizedExpertises_" toMany="YES" deletionRule="Cascade" destinationEntity="LocalizedExpertise" inverseName="expertise_" inverseEntity="LocalizedExpertise" elementID="localizedKeywords_"/>
@@ -11,7 +11,7 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
-    <entity name="Language" representedClassName="Language" syncable="YES" codeGenerationType="class">
+    <entity name="Language" representedClassName="Language" syncable="YES">
         <attribute name="isoCode_" attributeType="String"/>
         <attribute name="languageNameEN_" optional="YES" attributeType="String"/>
         <relationship name="localizedAddresses_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="LocalizedAddress" inverseName="language_" inverseEntity="LocalizedAddress"/>
@@ -35,7 +35,7 @@
     <entity name="Level3">
         <userInfo/>
     </entity>
-    <entity name="LocalizedAddress" representedClassName="LocalizedAddress" syncable="YES" codeGenerationType="class">
+    <entity name="LocalizedAddress" representedClassName="LocalizedAddress" syncable="YES">
         <attribute name="localizedCountry_" attributeType="String" defaultValueString="Country?"/>
         <attribute name="localizedTown_" attributeType="String" defaultValueString="Town?"/>
         <attribute name="prevLatitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -49,7 +49,7 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
-    <entity name="LocalizedExpertise" representedClassName="LocalizedExpertise" elementID="LocalizedKeyword" syncable="YES" codeGenerationType="class">
+    <entity name="LocalizedExpertise" representedClassName="LocalizedExpertise" elementID="LocalizedKeyword" syncable="YES">
         <attribute name="name_" attributeType="String" elementID="name"/>
         <attribute name="usage" optional="YES" attributeType="String"/>
         <relationship name="expertise_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Expertise" inverseName="localizedExpertises_" inverseEntity="Expertise" elementID="keyword_"/>
@@ -61,7 +61,7 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
-    <entity name="LocalizedRemark" representedClassName="LocalizedRemark" syncable="YES" codeGenerationType="class">
+    <entity name="LocalizedRemark" representedClassName="LocalizedRemark" syncable="YES">
         <attribute name="localizedString" attributeType="String"/>
         <relationship name="language_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Language" inverseName="localizedRemarks_" inverseEntity="Language"/>
         <relationship name="organization_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Organization" inverseName="localizedRemarks_" inverseEntity="Organization"/>
@@ -72,7 +72,7 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
-    <entity name="MemberPortfolio" representedClassName="MemberPortfolio" elementID="Member" syncable="YES" codeGenerationType="class">
+    <entity name="MemberPortfolio" representedClassName="MemberPortfolio" elementID="Member" syncable="YES">
         <attribute name="featuredImage" optional="YES" attributeType="URI" elementID="latestImage_"/>
         <attribute name="featuredImageThumbnail_" optional="YES" attributeType="URI" elementID="latestThumbURL"/>
         <attribute name="fotobondMemberNumber_" optional="YES" attributeType="Integer 32" usesScalarValueType="NO" elementID="fotobondNumber"/>
@@ -100,7 +100,7 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
-    <entity name="Organization" representedClassName="Organization" elementID="PhotoClub" syncable="YES" codeGenerationType="class">
+    <entity name="Organization" representedClassName="Organization" elementID="PhotoClub" syncable="YES">
         <attribute name="fotobondClubNumber_" optional="YES" attributeType="Integer 16" usesScalarValueType="NO" elementID="fotobondNumber"/>
         <attribute name="fullName_" attributeType="String" defaultValueString="DefaultPhotoClubName" elementID="name_"/>
         <attribute name="isMapScrollLocked" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" elementID="isScrollLocked"/>
@@ -127,7 +127,7 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
-    <entity name="OrganizationType" representedClassName="OrganizationType" syncable="YES" codeGenerationType="class">
+    <entity name="OrganizationType" representedClassName="OrganizationType" syncable="YES">
         <attribute name="organizationTypeName_" optional="YES" attributeType="String" elementID="name_"/>
         <attribute name="unusedProperty" optional="YES" attributeType="String"/>
         <relationship name="organizations_" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Organization" inverseName="organizationType_" inverseEntity="Organization"/>
@@ -137,7 +137,7 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
-    <entity name="Photographer" representedClassName="Photographer" syncable="YES" codeGenerationType="class">
+    <entity name="Photographer" representedClassName="Photographer" syncable="YES">
         <attribute name="bornDT" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="familyName_" attributeType="String" defaultValueString="DefaultPhotographerFamilyName"/>
         <attribute name="givenName_" attributeType="String" defaultValueString="DefaultPhotographerGivenName"/>
@@ -155,7 +155,7 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
-    <entity name="PhotographerExpertise" representedClassName="PhotographerExpertise" elementID="PhotographerKeyword" syncable="YES" codeGenerationType="class">
+    <entity name="PhotographerExpertise" representedClassName="PhotographerExpertise" elementID="PhotographerKeyword" syncable="YES">
         <relationship name="expertise_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Expertise" inverseName="photographerExpertises_" inverseEntity="Expertise" elementID="keyword_"/>
         <relationship name="photographer_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Photographer" inverseName="photographerExpertises_" inverseEntity="Photographer"/>
         <uniquenessConstraints>
