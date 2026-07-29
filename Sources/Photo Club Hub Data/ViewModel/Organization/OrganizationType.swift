@@ -34,10 +34,20 @@ public extension OrganizationType {
 
     // Find OrganizationType object (or create a new object - used at start of app)
     // Update existing attributes or fill the new object
+    // Thin wrapper that hops onto the context's own queue, so this is safe to call from any thread.
     static func findCreateUpdate(context: NSManagedObjectContext, // can be foreground or background context
                                  orgTypeName: String,
                                  unusedProperty: String = "foobar"
                                 ) -> OrganizationType {
+        context.performAndWait {
+            findCreateUpdate_(context: context, orgTypeName: orgTypeName, unusedProperty: unusedProperty)
+        }
+    }
+
+    private static func findCreateUpdate_(context: NSManagedObjectContext, // can be foreground or background context
+                                          orgTypeName: String,
+                                          unusedProperty: String = "foobar"
+                                         ) -> OrganizationType {
 
         let predicateFormat: String = "organizationTypeName_ = %@" // avoid localization
         let predicate = NSPredicate(format: predicateFormat, argumentArray: [orgTypeName])

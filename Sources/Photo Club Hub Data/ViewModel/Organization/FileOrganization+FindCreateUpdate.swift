@@ -17,6 +17,7 @@ extension Organization {
 
     // Find existing organization or create a new one
     // Update new or existing organization's attributes
+    // Thin wrapper that hops onto the context's own queue, so this is safe to call from any thread.
     public static func findCreateUpdate(context: NSManagedObjectContext, // can be foreground or background context
                                         organizationTypeEnum: OrganizationTypeEnum,
                                         idPlus: OrganizationIdPlus,
@@ -24,6 +25,28 @@ extension Organization {
                                         removeOrganization: Bool = false, // can remove records for removed org's
                                         optionalFields: OrganizationOptionalFields = OrganizationOptionalFields(),
                                         pinned: Bool = false) -> Organization {
+        // Safe: performAndWait runs synchronously on the context's queue; nothing actually escapes.
+        // performAndWait is synchronous and reentrant on this context's queue,
+        // so findCreateUpdate_() is never called concurrently or after return.
+        nonisolated(unsafe) let optionalFields = optionalFields
+        return context.performAndWait {
+            findCreateUpdate_(context: context,
+                              organizationTypeEnum: organizationTypeEnum,
+                              idPlus: idPlus,
+                              coordinates: coordinates,
+                              removeOrganization: removeOrganization,
+                              optionalFields: optionalFields,
+                              pinned: pinned)
+        }
+    }
+
+    private static func findCreateUpdate_(context: NSManagedObjectContext, // can be foreground or background context
+                                          organizationTypeEnum: OrganizationTypeEnum,
+                                          idPlus: OrganizationIdPlus,
+                                          coordinates: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0),
+                                          removeOrganization: Bool = false, // can remove records for removed org's
+                                          optionalFields: OrganizationOptionalFields = OrganizationOptionalFields(),
+                                          pinned: Bool = false) -> Organization {
 
         let predicateFormat: String = "fullName_ = %@ AND town_ = %@" // avoid localization
         // Note that organizationType is not an identifying attribute.
@@ -95,12 +118,15 @@ extension Organization {
             self.nickName_ = nickName
             modified = true }
 
-        // allow small rouding differences in double (instead of using != for Doubles)
-        let deltaCoordinates = abs(self.latitude_ - coordinates.latitude) +
+        // (0,0) is the "no data" sentinel (Null Island); skip it to avoid clobbering real coordinates.
+        let coordinatesProvided = abs(coordinates.latitude)  > 0.000001 ||
+                                  abs(coordinates.longitude) > 0.000001
+        // allow small rounding differences in double (instead of using != for Doubles)
+        let deltaCoordinates = abs(self.latitude_  - coordinates.latitude) +
                                abs(self.longitude_ - coordinates.longitude)
-        if deltaCoordinates > 0.000001 {
+        if coordinatesProvided, deltaCoordinates > 0.000001 {
             self.longitude_ = coordinates.longitude
-            self.latitude_ = coordinates.latitude
+            self.latitude_  = coordinates.latitude
             modified = true }
 
         if self.removeOrganization != removeOrganization {
@@ -132,7 +158,7 @@ extension Organization {
             modified = true }
 
         for localizedRemark in optionalFields.localizedRemarks { // load JSON localizedRemarks for provided languages
-            let isoCode: String? = localizedRemark["language"].stringValue.uppercased() // e.g. "NL", "DE" or "PDC"
+            let isoCode: String? = localizedRemark["language"].stringValue.lowercased() // e.g. "nl", "de" or "pdc"
             let localizedRemarkNewValue: String? = localizedRemark["value"].stringValue
 
             if isoCode != nil && localizedRemarkNewValue != nil { // nil could occur if JSON file isn't schema compliant
@@ -164,8 +190,16 @@ extension Organization {
         return modified
     }
 
+    // Thin wrapper that hops onto the context's own queue, so this is safe to call from any thread.
     public static func find(context: NSManagedObjectContext, // can be foreground or background context
                             organizationID: OrganizationID) throws -> Organization {
+        try context.performAndWait {
+            try find_(context: context, organizationID: organizationID)
+        }
+    }
+
+    private static func find_(context: NSManagedObjectContext, // can be foreground or background context
+                              organizationID: OrganizationID) throws -> Organization {
 
         let predicateFormat: String = "fullName_ = %@ AND town_ = %@" // avoid localization
         // Note that organizationType is not an identifying attribute.
@@ -191,8 +225,16 @@ extension Organization {
         }
     }
 
+    // Thin wrapper that hops onto the context's own queue, so this is safe to call from any thread.
     public static func find(context: NSManagedObjectContext, // can be foreground or background context
                             nickname: String) throws -> Organization {
+        try context.performAndWait {
+            try find_(context: context, nickname: nickname)
+        }
+    }
+
+    private static func find_(context: NSManagedObjectContext, // can be foreground or background context
+                              nickname: String) throws -> Organization {
 
         let predicateFormat: String = "nickName_ = %@" // avoid localization
         let predicate = NSPredicate(format: predicateFormat, argumentArray: [nickname] )

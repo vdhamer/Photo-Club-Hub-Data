@@ -35,11 +35,28 @@ extension LocalizedRemark { // expose computed properties (some related to handl
     // MARK: - find (if it exits) or create (if it doesn't exist) a LocalizedRemark
 
     // Find existing LocalizedRemark object or create a new LocalizedRemark object
+    // Thin wrapper that hops onto the context's own queue, so this is safe to call from any thread.
     static func findCreateUpdate(bgContext: NSManagedObjectContext,
                                  organization: Organization,
                                  language: Language,
                                  localizedString: String
                                 ) -> Bool { // true if something got updated
+        // Safe: performAndWait runs synchronously on the context's queue; nothing actually escapes.
+        nonisolated(unsafe) let organization = organization
+        nonisolated(unsafe) let language = language
+        return bgContext.performAndWait {
+            findCreateUpdate_(bgContext: bgContext,
+                              organization: organization,
+                              language: language,
+                              localizedString: localizedString)
+        }
+    }
+
+    private static func findCreateUpdate_(bgContext: NSManagedObjectContext,
+                                          organization: Organization,
+                                          language: Language,
+                                          localizedString: String
+                                         ) -> Bool { // true if something got updated
 
         // get remark if it is already in the database
         let predicateFormat: String = "organization_ = %@ AND language_ = %@" // avoid localization
