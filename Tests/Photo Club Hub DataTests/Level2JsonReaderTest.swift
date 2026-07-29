@@ -39,7 +39,7 @@ import CoreData // for NSManagedObjectContext
 
         #expect(Expertise.count(context: bgContext) == 0) // clearing is handled via "inMemory: true"
 
-        let randomTownForTesting = String.random(length: 10)
+        let randomTownForTesting = String.random(length: 10) // e.g. "s8H2bEU3C6"
 
         _ = TemplateMinMembersProvider(bgContext: bgContext,
                                        isBeingTested: true,
@@ -59,7 +59,7 @@ import CoreData // for NSManagedObjectContext
         fetchRequest.predicate = predicate
         let organizations: [Organization] = (try? viewContext.fetch(fetchRequest)) ?? []
 
-        #expect(Expertise.count(context: bgContext) == 0)
+        #expect(Expertise.count(context: bgContext) == 0) // this particular club has no expertises (it is "minimal")
         #expect(PhotographerExpertise.count(context: bgContext) == 0)  // A club without PhotographerExpertises
 
         #expect(organizations.count == 1)
@@ -100,8 +100,8 @@ import CoreData // for NSManagedObjectContext
         fetchRequest.predicate = predicate
         let organizations: [Organization] = (try? viewContext.fetch(fetchRequest)) ?? []
 
-        #expect(Expertise.count(context: bgContext) == 5)
-        #expect(PhotographerExpertise.count(context: bgContext, expertiseID: "Landscape") == 1)
+        #expect(Expertise.count(context: bgContext) == 5) // Mien's 2 + Mike's 5
+        #expect(PhotographerExpertise.count(context: bgContext, expertiseID: "Landscape") == 1) // that would be Mike
 
         #expect(organizations.count == 1)
         if organizations.isEmpty == false {
@@ -169,6 +169,7 @@ import CoreData // for NSManagedObjectContext
         Model.deleteCoreDataObjects(viewContext: viewContext, deletionScope: .expertisesOnly) // remove Expertises
         #expect(Expertise.count(context: bgContext) == 0)
 
+        // note that club fgDeGender may already be loaded
         // note that fgDeGenderMembersProvider runs asynchronously (via bgContext.perform {})
         let randomTownForTestingG = String.random(length: 10)
         _ = FotogroepDeGenderMembersProvider(bgContext: bgContext,

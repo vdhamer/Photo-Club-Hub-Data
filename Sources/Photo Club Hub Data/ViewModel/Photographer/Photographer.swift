@@ -74,10 +74,23 @@ extension Photographer {
 
     // Find existing object and otherwise create a new object
     // Update existing attributes or fill the new object
+    // Thin wrapper that hops onto the context's own queue, so this is safe to call from any thread.
     public static func findCreateUpdate(context: NSManagedObjectContext, // foreground or background context
                                         personName: PersonName,
                                         optionalFields: PhotographerOptionalFields = PhotographerOptionalFields()
                                        ) -> Photographer {
+        // Safe: performAndWait runs synchronously on the context's queue; nothing actually escapes.
+        nonisolated(unsafe) let personName = personName
+        nonisolated(unsafe) let optionalFields = optionalFields
+        return context.performAndWait {
+            findCreateUpdate_(context: context, personName: personName, optionalFields: optionalFields)
+        }
+    }
+
+    private static func findCreateUpdate_(context: NSManagedObjectContext, // foreground or background context
+                                          personName: PersonName,
+                                          optionalFields: PhotographerOptionalFields = PhotographerOptionalFields()
+                                         ) -> Photographer {
         let predicateFormat: String = "givenName_ = %@ AND infixName_ = %@ AND familyName_ = %@" // avoid localization
         let predicate = NSPredicate(format: predicateFormat, argumentArray: [
             personName.givenName, personName.infixName, personName.familyName ])

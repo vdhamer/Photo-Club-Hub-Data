@@ -38,8 +38,6 @@ let package = Package(
                 .copy("JSON/museumsJP.level1.json"),
                 .copy("JSON/museumsNL.level1.json"),
                 .copy("JSON/museumsUS.level1.json"),
-                .copy("JSON/recursionA.level1.json"),
-                .copy("JSON/recursionB.level1.json"),
                 .copy("JSON/root.level1.json"),
                 .copy("JSON/root_.level1.json"),
 
@@ -67,15 +65,26 @@ let package = Package(
             name: "Photo Club Hub DataTests",
             dependencies: ["Photo Club Hub Data"],
             resources: [
-                .copy("JSON/empty.level0.json"),
-                .copy("JSON/abstractExpertise.level0.json"),
-                .copy("JSON/language.level0.json"),
-                .copy("JSON/languages.level0.json"),
-                .copy("JSON/TemplateMin.level2.json"),
-                .copy("JSON/TemplateMax.level2.json"),
-                .copy("JSON/fgDeGender.level2.json"),
-                .copy("JSON/root.level0.json"),
-                .copy("JSON/fgWaalre.level2.json")
+                .copy("JSON/Level0/abstractExpertise.level0.json"),
+                .copy("JSON/Level0/empty.level0.json"),
+                .copy("JSON/Level0/expertiseMissingIdString.level0.json"),
+                .copy("JSON/Level0/garbage.level0.json"),
+                .copy("JSON/Level0/language.level0.json"),
+                .copy("JSON/Level0/languages.level0.json"),
+                .copy("JSON/Level0/root.level0.json"),
+                .copy("JSON/Level1/IncludeChild.level1.json"),
+                .copy("JSON/Level1/IncludeParent.level1.json"),
+                .copy("JSON/Level1/garbage.level1.json"),
+                .copy("JSON/Level1/museumsTest.level1.json"),
+                .copy("JSON/Level1/recursionA.level1.json"),
+                .copy("JSON/Level1/recursionB.level1.json"),
+                .copy("JSON/Level1/truncated.level1.json"),
+                .copy("JSON/Level2/TemplateMax.level2.json"),
+                .copy("JSON/Level2/TemplateMin.level2.json"),
+                .copy("JSON/Level2/fgDeGender.level2.json"),
+                .copy("JSON/Level2/fgWaalre.level2.json"),
+                .copy("JSON/Level2/garbage.level2.json"),
+                .copy("JSON/Level2/missingIdPlus.level2.json")
             ]
         )
     ]

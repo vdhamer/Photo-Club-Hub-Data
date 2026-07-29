@@ -56,12 +56,33 @@ extension LocalizedExpertise {
 
     // Find existing Expertise object or create a new one.
     // Update existing attributes or fill the new object
+    // Thin wrapper that hops onto the context's own queue, so this is safe to call from any thread.
     static func findCreateUpdate(context: NSManagedObjectContext, // can be foreground or background context
                                  expertise: Expertise,
                                  language: Language,
                                  localizedName: String?, // nil used if no update to LocalizedExpertise.name is desired
                                  localizedUsage: String? // nil used if no value of LocalizedExpertise.usage available
                                 ) -> LocalizedExpertise {
+        // Safe: performAndWait runs synchronously on the context's queue; nothing actually escapes.
+        // performAndWait is synchronous and reentrant on this context's queue,
+        // so findCreateUpdate_() is never called concurrently or after return.
+        nonisolated(unsafe) let expertise = expertise
+        nonisolated(unsafe) let language = language
+        return context.performAndWait {
+            findCreateUpdate_(context: context,
+                              expertise: expertise,
+                              language: language,
+                              localizedName: localizedName,
+                              localizedUsage: localizedUsage)
+        }
+    }
+
+    private static func findCreateUpdate_(context: NSManagedObjectContext, // can be foreground or background context
+                                          expertise: Expertise,
+                                          language: Language,
+                                          localizedName: String?, // nil if no update to LocalizedExpertise.name desired
+                                          localizedUsage: String? // nil if no LocalizedExpertise.usage value
+                                         ) -> LocalizedExpertise {
 
         // execute fetchRequest to get Expertise for id=id. Query could return multiple expertises - but shouldn't.
         let fetchRequest: NSFetchRequest<LocalizedExpertise> = LocalizedExpertise.fetchRequest()
@@ -90,7 +111,7 @@ extension LocalizedExpertise {
             if localizedExpertise.update(context: context,
                                          localizedName: localizedName, localizedUsage: localizedUsage) {
                 print("""
-                      Updated translation of expertise \"\(expertise.id)\" into \
+                      Updated translation of expertise "\(expertise.id)" into \
                       \(language.isoCode) as \(localizedName ?? "nil")
                       """)
                 LocalizedExpertise.save(context: context, errorText:
@@ -112,7 +133,7 @@ extension LocalizedExpertise {
                                           localizedName: localizedName, localizedUsage: localizedUsage)
             LocalizedExpertise.save(context: context, errorText:
                                     """
-                                    Could not create LocalizedExpertise for \"\(localizedExpertise.expertise.id)\" \
+                                    Could not create LocalizedExpertise for "\(localizedExpertise.expertise.id)" \
                                     for language \(localizedExpertise.language.isoCode)
                                     """,
                                     if: Settings.extraCoreDataSaves)
@@ -206,7 +227,7 @@ extension LocalizedExpertise {
         context.performAndWait {
             let expertiseIDCanonical = expertiseID.canonicalCase
             let fetchRequest: NSFetchRequest<LocalizedExpertise> = LocalizedExpertise.fetchRequest()
-            let predicateFormat: String = "expertise_.id_ = %@ && language_.isoCode_ = %@" // avoid localization
+            let predicateFormat: String = "expertise_.id_ = %@ && language_.isoCode_ =[c] %@" // avoid localization
             fetchRequest.predicate = NSPredicate(format: predicateFormat,
                                                  argumentArray: [expertiseIDCanonical, languageIsoCode])
             do {
@@ -236,7 +257,7 @@ extension LocalizedExpertise {
     private static func count(context: NSManagedObjectContext, languageIsoCode: String) -> Int {
         context.performAndWait {
             let fetchRequest: NSFetchRequest<LocalizedExpertise> = LocalizedExpertise.fetchRequest()
-            let predicateFormat: String = "language_.isoCode_ = %@" // avoid localization
+            let predicateFormat: String = "language_.isoCode_ =[c] %@" // case-insensitive; avoid localization
             fetchRequest.predicate = NSPredicate(format: predicateFormat, argumentArray: [languageIsoCode])
             do {
                 return try context.count(for: fetchRequest)

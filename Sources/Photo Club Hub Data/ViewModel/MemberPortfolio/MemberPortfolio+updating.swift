@@ -16,6 +16,7 @@ extension MemberPortfolio { // findCreateUpdate() records in Member table
 
     // Find existing object or create a new object
     // Update existing attributes or fill the new object
+    // Thin wrapper that hops onto the context's own queue, so this is safe to call from any thread.
     public static func findCreateUpdate(bgContext: NSManagedObjectContext,
                                         // identifying attributes of a Member:
                                         organization: Organization,
@@ -24,6 +25,30 @@ extension MemberPortfolio { // findCreateUpdate() records in Member table
                                         removeMember: Bool = false,
                                         // non-identifying attributes of a Member:
                                         optionalFields: MemberOptionalFields = MemberOptionalFields() // empty default
+    ) -> MemberPortfolio {
+        // Safe: performAndWait runs synchronously on the context's queue; nothing actually escapes.
+        // performAndWait is synchronous and reentrant on this context's queue,
+        // so findCreateUpdate_() is never called concurrently or after return.
+        nonisolated(unsafe) let organization = organization
+        nonisolated(unsafe) let photographer = photographer
+        nonisolated(unsafe) let optionalFields = optionalFields
+        return bgContext.performAndWait {
+            findCreateUpdate_(bgContext: bgContext,
+                              organization: organization,
+                              photographer: photographer,
+                              removeMember: removeMember,
+                              optionalFields: optionalFields)
+        }
+    }
+
+    private static func findCreateUpdate_(bgContext: NSManagedObjectContext,
+                                          // identifying attributes of a Member:
+                                          organization: Organization,
+                                          photographer: Photographer,
+                                          // remove records for members that disappeared from lists:
+                                          removeMember: Bool = false,
+                                          // non-identifying attributes of a Member:
+                                          optionalFields: MemberOptionalFields = MemberOptionalFields() // empty default
     ) -> MemberPortfolio {
 
         let predicateFormat: String = "organization_ = %@ AND photographer_ = %@" // avoid localization of query string

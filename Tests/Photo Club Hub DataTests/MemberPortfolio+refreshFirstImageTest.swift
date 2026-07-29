@@ -13,9 +13,24 @@ import CoreData // for NSMergePolicy
 
     let imageForUnknownClub: String = "http://www.vdHamer.com/fgWaalre/Empty_Website/config.xml"
 
-    @Test("Refresh featured image") func urlOfImageIndex_unknownClub() {
+    private let testPersistenceController: PersistenceController
 
-        let bgContext = PersistenceController.shared.container.newBackgroundContext()
+    init () {
+        // Use a private in-memory store rather than PersistenceController.shared. Sharing the singleton
+        // coordinator across parallel suites deadlocks (background-context saves contending with other
+        // suites' main-queue performAndWait fetches) and lets suites pollute each other's records. See #756.
+        testPersistenceController = PersistenceController(inMemory: true)
+        let viewContext = testPersistenceController.container.viewContext
+        viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+        // Seed constants used by the provider and Organization creation. Must run on the main-queue
+        // viewContext (initConstants does a bare save()). See #749.
+        Language.initConstants(context: viewContext)
+        OrganizationType.initConstants(context: viewContext)
+    }
+
+    @Test("Refresh featured image") func urlOfImageIndex_unknownClub() async {
+
+        let bgContext = testPersistenceController.container.newBackgroundContext()
         bgContext.name = "RefreshFeaturedImageTests"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
@@ -30,17 +45,24 @@ import CoreData // for NSMergePolicy
                                         town: randomTownForTesting, // new town to distinguish from normal club data
                                         nickname: "TemplateMin")
 
-        let club = Organization.findCreateUpdate(context: bgContext, organizationTypeEnum: .club, idPlus: idPlus)
+        // All access to the private-queue bgContext must run on that context's own queue. Both the
+        // findCreateUpdate() calls and the urlOfImageIndex property read (via level3URL) touch bgContext,
+        // so wrap them in bgContext.perform { } to avoid a Core Data multi-threaded access trap (issue #708).
+        let result: URL? = await bgContext.perform {
+            let club = Organization.findCreateUpdate(context: bgContext, organizationTypeEnum: .club, idPlus: idPlus)
 
-        let photographer = Photographer.findCreateUpdate(context: bgContext, personName: PersonName(givenName: "John",
-                                                                                                    infixName: "",
-                                                                                                    familyName: "Doe"))
+            let photographer = Photographer.findCreateUpdate(context: bgContext,
+                                                             personName: PersonName(givenName: "John",
+                                                                                    infixName: "",
+                                                                                    familyName: "Doe"))
 
         let memberPortfolio = MemberPortfolio.findCreateUpdate(bgContext: bgContext,
                                                                organization: club,
                                                                photographer: photographer)
 
-        let result: URL? = memberPortfolio.urlOfImageIndex
+            return memberPortfolio.urlOfImageIndex
+        }
+
         #expect(result?.absoluteString == imageForUnknownClub)
     }
 

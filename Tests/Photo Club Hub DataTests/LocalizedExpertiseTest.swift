@@ -11,10 +11,20 @@ import CoreData // for NSManagedObjectContext
 
 @MainActor @Suite("Tests the Core Data LocalizedExpertise class") struct LocalizedExpertiseTest {
 
+    private let testPersistenceController: PersistenceController
     private let context: NSManagedObjectContext
 
     init () {
-        context = PersistenceController.shared.container.viewContext
+        // Use a private in-memory store rather than PersistenceController.shared. Sharing the singleton
+        // coordinator across parallel suites deadlocks (main-queue performAndWait fetches contending with
+        // background-context saves) and lets suites pollute each other's records. See issue #756.
+        testPersistenceController = PersistenceController(inMemory: true)
+        context = testPersistenceController.container.viewContext
+        context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+        // Seed the Language rows so nameEN resolves to "Dutch"/"English" (assertions below); without a
+        // seeded name, Language.nameEN falls back to the ISO code. initConstants must run on the main-queue
+        // viewContext (it does a bare save()). See #749.
+        Language.initConstants(context: context)
     }
 
     @Test("Create a randomly named LocalizedExpertise") func addLocalizedExpertise() {
@@ -97,6 +107,34 @@ import CoreData // for NSManagedObjectContext
         #expect(LocalizedExpertise.count(context: context,
                                          expertiseID: expertise.id,
                                          languageIsoCode: language.isoCode) == 1)
+    }
+
+    // Pins the case-handling contract of selectedLocalizedExpertise(isoCode:):
+    // lowercase "nl", uppercase "NL", and lowercase "en" must all resolve correctly.
+    @Test("selectedLocalizedExpertise resolves lowercase, uppercase, and English isoCode")
+    func selectedLocalizedExpertiseIsoCodeCaseHandling() {
+        let nlName = String.random(length: 10)
+        let enName = String.random(length: 10)
+
+        let expertise = Expertise.findCreateUpdateTemporary(context: context,
+                                                            id: String.random(length: 8),
+                                                            names: [], usages: [])
+        let langNL = Language.findCreateUpdate(context: context, isoCode: "nl")
+        let langEN = Language.findCreateUpdate(context: context, isoCode: "en")
+        _ = LocalizedExpertise.findCreateUpdate(context: context, expertise: expertise,
+                                                language: langNL, localizedName: nlName, localizedUsage: nil)
+        _ = LocalizedExpertise.findCreateUpdate(context: context, expertise: expertise,
+                                                language: langEN, localizedName: enName, localizedUsage: nil)
+        LocalizedExpertise.save(context: context)
+
+        let resultNlLower = expertise.selectedLocalizedExpertise(isoCode: "nl")
+        #expect(resultNlLower.name == nlName)
+
+        let resultNlUpper = expertise.selectedLocalizedExpertise(isoCode: "NL")
+        #expect(resultNlUpper.name == nlName)
+
+        let resultEn = expertise.selectedLocalizedExpertise(isoCode: "en")
+        #expect(resultEn.name == enName)
     }
 
 }
