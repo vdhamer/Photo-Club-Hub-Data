@@ -22,6 +22,13 @@ let package = Package(
         .target(
             name: "Photo Club Hub Data",
             dependencies: ["SwiftyJSON"],
+            exclude: [
+                // Handed to momc by the CompileCoreDataModel plugin, which finds it on disk rather than
+                // through the manifest. Without this exclusion Xcode ALSO applies its built-in
+                // .xcdatamodeld build rule, and the two producers of Photo_Club_Hub.momd collide with
+                // "error: Multiple commands produce ... Photo_Club_Hub.momd".
+                "Model/Photo_Club_Hub.xcdatamodeld"
+            ],
             resources: [
                 // copying can probably also be done with a single copy command at directory level
                 .copy("JSON/root.level0.json"),
@@ -59,7 +66,8 @@ let package = Package(
                 .copy("JSON/TemplateMin.level2.json"),
                 .copy("JSON/TemplateMax.level2.json"),
                 .process("PhotoClubHubData.xcstrings")
-            ]
+            ],
+            plugins: ["CompileCoreDataModel"] // turns Model/*.xcdatamodeld into a .momd in the resource bundle
         ),
         .testTarget(
             name: "Photo Club Hub DataTests",
@@ -86,6 +94,10 @@ let package = Package(
                 .copy("JSON/Level2/garbage.level2.json"),
                 .copy("JSON/Level2/missingIdPlus.level2.json")
             ]
+        ),
+        .plugin(
+            name: "CompileCoreDataModel",
+            capability: .buildTool()
         )
     ]
 )
