@@ -11,7 +11,7 @@ final public class Persoonlijk16MembersProvider: Sendable {
 
     public init(bgContext: NSManagedObjectContext,
                 isBeingTested: Bool,
-                useOnlyInBundleFile: Bool = false,
+                useOnlyInBundleFile: Bool,
                 randomTownForTesting: String? = nil) {
 
         if isBeingTested {

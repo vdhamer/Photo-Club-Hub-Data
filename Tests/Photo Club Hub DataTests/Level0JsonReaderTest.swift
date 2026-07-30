@@ -49,7 +49,7 @@ private let isBeingTested = true
         _ = Level0JsonReader(bgContext: bgContext, // read root.Level0.json file
                              fileName: "empty",
                              isBeingTested: isBeingTested,
-                             useOnlyInBundleFile: false)
+                             useOnlyInBundleFile: true)
         #expect(Expertise.count(context: bgContext) == 0)
         #expect(LocalizedExpertise.count(context: bgContext) == 0)
         #expect(PhotographerExpertise.count(context: bgContext) == 0)
@@ -74,7 +74,7 @@ private let isBeingTested = true
             _ = Level0JsonReader(bgContext: bgContext, // read root.Level0.json file
                                  fileName: "abstractExpertise",
                                  isBeingTested: isBeingTested,
-                                 useOnlyInBundleFile: false)
+                                 useOnlyInBundleFile: true)
             try? bgContext.save()
         }
         #expect(Expertise.count(context: bgContext) == 1)
@@ -95,9 +95,9 @@ private let isBeingTested = true
         Model.deleteCoreDataObjects(viewContext: viewContext, deletionScope: .expertisesOnly)
 
         _ = Level0JsonReader(bgContext: bgContext, // read root.Level0.json file
-                             fileName: "root",
+                             fileName: "rootTest",
                              isBeingTested: isBeingTested,
-                             useOnlyInBundleFile: false)
+                             useOnlyInBundleFile: true)
         #expect(Expertise.count(context: bgContext) == 29)
     }
 
@@ -119,7 +119,7 @@ private let isBeingTested = true
         _ = Level0JsonReader(bgContext: bgContext, // read root.Level0.json file
                              fileName: "language",
                              isBeingTested: isBeingTested,
-                             useOnlyInBundleFile: false)
+                             useOnlyInBundleFile: true)
 
         #expect(Language.count(context: bgContext, isoCode: "UR") == 1)
         #expect(LocalizedRemark.count(context: bgContext) == 0)
@@ -144,7 +144,7 @@ private let isBeingTested = true
         _ = Level0JsonReader(bgContext: bgContext, // read root.Level0.json file
                              fileName: "languages",
                              isBeingTested: isBeingTested,
-                             useOnlyInBundleFile: false)
+                             useOnlyInBundleFile: true)
 
         #expect(Language.count(context: bgContext, isoCode: "EN") == 1)
         #expect(Language.count(context: bgContext, isoCode: "NL") == 1)

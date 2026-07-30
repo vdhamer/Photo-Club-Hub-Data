@@ -16,7 +16,7 @@ public class Level2JsonReader { // normally running on a background thread
     public init(bgContext: NSManagedObjectContext,
                 organizationIdPlus: OrganizationIdPlus,
                 isBeingTested: Bool,
-                useOnlyInBundleFile: Bool = false, // true avoids fetching the latest version from GitHub
+                useOnlyInBundleFile: Bool, // true avoids fetching the latest version from GitHub
                 includeFilePath: [String] = [] // captures recursion path like ["root","museums","museumsNL"]
                ) {
         _ = FetchAndProcessFile( // FetchAndProcessFile fetches jsonData and passes it to readRootLevel2Json()

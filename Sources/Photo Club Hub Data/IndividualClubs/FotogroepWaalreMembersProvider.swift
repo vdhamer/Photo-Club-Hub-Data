@@ -12,7 +12,7 @@ final public class FotogroepWaalreMembersProvider: Sendable { // WWDC21 Earthqua
 
     public init(bgContext: NSManagedObjectContext,
                 isBeingTested: Bool,
-                useOnlyInBundleFile: Bool = false,
+                useOnlyInBundleFile: Bool,
                 randomTownForTesting: String? = nil) {
 
         if isBeingTested {

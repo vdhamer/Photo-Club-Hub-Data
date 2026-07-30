@@ -15,7 +15,7 @@ public class Level0JsonReader {
     public init(bgContext: NSManagedObjectContext,
                 fileName: String = "root",  // can overrule the name for unit testing
                 isBeingTested: Bool,
-                useOnlyInBundleFile: Bool = false, // true can be used to avoid publishing a test file to GitHub
+                useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
                 includeFilePath: [String] = [] // captures recursion path like ["root","museums","museumsNL"]
                ) {
         _ = FetchAndProcessFile(

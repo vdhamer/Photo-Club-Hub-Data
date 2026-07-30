@@ -208,10 +208,15 @@ struct FetchAndProcessFile {
     private static func getData(remoteFileURL: URL,
                                 fileInBundleURL: URL,
                                 useOnlyInBundleFile: Bool) -> String {
-        if let urlData = try? String(contentsOf: remoteFileURL, encoding: .utf8), !useOnlyInBundleFile {
-            return urlData
+        // The flag has to be tested before the fetch, not alongside it: as a second condition it was
+        // evaluated only after String(contentsOf:) had already downloaded the file, so the remote read
+        // happened anyway and its result was merely discarded.
+        if !useOnlyInBundleFile {
+            if let urlData = try? String(contentsOf: remoteFileURL, encoding: .utf8) {
+                return urlData
+            }
+            print("Could not access online file \(remoteFileURL.relativeString). Trying in-app file instead.")
         }
-        print("Could not access online file \(remoteFileURL.relativeString). Trying in-app file instead.")
 
         if let bundleFileData = try? String(contentsOf: fileInBundleURL, encoding: .utf8) {
             return bundleFileData

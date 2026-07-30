@@ -38,7 +38,7 @@ import CoreData // for NSMergePolicy
         let randomTownForTesting = String.random(length: 10)
         _ = TemplateMinMembersProvider(bgContext: bgContext,
                                        isBeingTested: true,
-                                       useOnlyInBundleFile: false,
+                                       useOnlyInBundleFile: true,
                                        randomTownForTesting: randomTownForTesting)
 
         let idPlus = OrganizationIdPlus(fullName: "Template Club With Minimal Data",
