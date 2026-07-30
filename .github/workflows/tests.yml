@@ -1,0 +1,44 @@
+name: Tests
+
+# Since Photo Club Hub HTML consumes this package as a remote dependency, Xcode no longer
+# surfaces this test target there and "Photo Club Hub HTML.xctestplan" cannot run these tests.
+# This workflow is the only place the package's test suite runs automatically.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swift-test:
+    name: swift test
+    # Pinned rather than macos-latest: the CompileCoreDataModel plugin shells out to momc from
+    # the installed Xcode, so an unannounced runner rollover would change the toolchain silently.
+    runs-on: macos-26
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Show toolchain
+        run: |
+          swift --version
+          xcodebuild -version
+          # momc is an Xcode tool, not a Swift toolchain one. If this line fails, the runner
+          # image has no full Xcode and the plugin cannot produce Photo_Club_Hub.momd.
+          xcrun --find momc
+
+      - name: Build
+        run: swift build --build-tests
+
+      - name: Test
+        # --no-parallel until issue #1 is fixed: with parallel execution, one test's
+        # `defer { removeIfDebugFatalErrorSpy() }` can deinstall the process-global spy while
+        # another test is inside its window, reaching the bare fatalError and aborting all 86
+        # tests instead of failing one. A red run should mean a real regression.
+        run: swift test --no-parallel
