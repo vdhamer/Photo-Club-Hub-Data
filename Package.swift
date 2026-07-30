@@ -79,7 +79,7 @@ let package = Package(
                 .copy("JSON/Level0/garbage.level0.json"),
                 .copy("JSON/Level0/language.level0.json"),
                 .copy("JSON/Level0/languages.level0.json"),
-                .copy("JSON/Level0/root.level0.json"),
+                .copy("JSON/Level0/rootTest.level0.json"),
                 .copy("JSON/Level1/IncludeChild.level1.json"),
                 .copy("JSON/Level1/IncludeParent.level1.json"),
                 .copy("JSON/Level1/garbage.level1.json"),
