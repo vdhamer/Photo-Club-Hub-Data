@@ -1,0 +1,16 @@
+excluded:
+  # SwiftPM build directory: third-party checkouts (SwiftyJSON) and build
+  # artifacts. Appears as soon as anyone runs `swift build` from the CLI.
+  - ".build"
+
+  # Xcode's Core Data codegen output, committed because a standalone package has
+  # no Xcode codegen to fall back on (see README, "Core Data model"). These files
+  # legitimately violate three default rules and always will: identifier_name
+  # (the trailing underscore on raw attributes is this project's Core Data
+  # convention), colon (Xcode emits `extension Language : Identifiable`), and
+  # type_name (two 42-character typealiases against the 40-char default).
+  # Excluding the directory beats `// swiftlint:disable` annotations, which would
+  # have to be re-added across 21 files on every schema regeneration.
+  - "Sources/Photo Club Hub Data/ViewModel/CoreDataGenerated"
+
+# No rules are relaxed: everything hand-written is linted with the defaults.
