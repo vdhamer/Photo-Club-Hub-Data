@@ -22,7 +22,7 @@ private let level1HistoryAvailable: Bool = {
 
 // The suite is @MainActor and its first three tests are synchronous (they never suspend), which prevents
 // their bodies from interleaving. That is load-bearing beyond Core Data isolation: those tests share the
-// process-global Level1JsonReader.level1History, and two of them load the same file ("clubTemplates") —
+// process-global Level1JsonReader.level1History, and two of them load the same file ("clubTemplatesTest") —
 // if their bodies could interleave, one test's load could mark the file "visited" mid-way through the
 // other's, firing the duplicate-file ifDebugFatalError. So do NOT migrate them to `await load(...)` until
 // level1History is injectable (follow-up in #760). includeLoadsIntoInjectedStore() and
@@ -88,15 +88,15 @@ private let level1HistoryAvailable: Bool = {
 
     // MARK: - Tests
 
-    // Read clubTemplates.level1.json (2 clubs, no museums, no includes) and verify both clubs land
+    // Read clubTemplatesTest.level1.json (2 clubs, no museums, no includes) and verify both clubs land
     // with the right identity, and that the right club's optional fotobondNumber is parsed.
-    @Test("Parse clubTemplates.level1.json") func clubTemplatesParse() {
+    @Test("Parse clubTemplatesTest.level1.json") func clubTemplatesParse() {
         let bgContext = makeBackgroundContext(named: "clubTemplatesTest")
         #expect(allOrganizations().isEmpty) // fresh store: initConstants doesn't insert Organization
 
         clearVisitedHistory()
         _ = Level1JsonReader(bgContext: bgContext,
-                             fileName: "clubTemplates",
+                             fileName: "clubTemplatesTest",
                              isBeingTested: isBeingTested,
                              useOnlyInBundleFile: true)
         waitForLoad(on: bgContext)
@@ -153,7 +153,7 @@ private let level1HistoryAvailable: Bool = {
 
         clearVisitedHistory()
         _ = Level1JsonReader(bgContext: bgContext,
-                             fileName: "clubTemplates",
+                             fileName: "clubTemplatesTest",
                              isBeingTested: isBeingTested,
                              useOnlyInBundleFile: true)
         waitForLoad(on: bgContext)
@@ -163,7 +163,7 @@ private let level1HistoryAvailable: Bool = {
         // which is what exercises findCreateUpdate's de-duplication.
         clearVisitedHistory()
         _ = Level1JsonReader(bgContext: bgContext,
-                             fileName: "clubTemplates",
+                             fileName: "clubTemplatesTest",
                              isBeingTested: isBeingTested,
                              useOnlyInBundleFile: true)
         waitForLoad(on: bgContext)
