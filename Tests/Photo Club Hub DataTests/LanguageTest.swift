@@ -35,6 +35,9 @@ import CoreData // for NSManagedObjectContext
     }
 
     // The documented contract is that ISO codes are matched case-insensitively.
+    // Note this exercises only the *argument* being uppercase; findCreateUpdate lowercases it before
+    // querying, so this passes even with an exact-match predicate. For an uppercase value already in
+    // the store, see matchesLegacyUppercaseRow() below.
     @Test("ISO code is matched case-insensitively") func languageIDMatchedCaseInsensitively() {
         let isoCode = "qx" + String.random(length: 6) // "qx" guarantees lower/upper actually differ
 
@@ -44,6 +47,25 @@ import CoreData // for NSManagedObjectContext
         #expect(lower === upper) // both resolve to the same object
         #expect(lower.isoCode == isoCode.lowercased()) // stored code is normalised to lowercase
         #expect(Language.count(context: viewContext, isoCode: isoCode) == 1) // still only one record
+    }
+
+    // Shipping versions stored uppercase ISO codes, so an upgraded store can hold values the current
+    // normalising setter could never produce. Write isoCode_ directly to reproduce that state: an
+    // exact-match predicate misses the row and findCreateUpdate silently creates a duplicate.
+    @Test("findCreateUpdate matches a legacy uppercase row already in the store")
+    func matchesLegacyUppercaseRow() {
+        let isoCode = "qx" + String.random(length: 6) // "qx" guarantees lower/upper actually differ
+
+        let entity = NSEntityDescription.entity(forEntityName: "Language", in: viewContext)!
+        let legacy = Language(entity: entity, insertInto: viewContext)
+        legacy.isoCode_ = isoCode.uppercased() // bypasses the normalising isoCode setter on purpose
+        try? viewContext.save()
+
+        let found = Language.findCreateUpdate(context: viewContext, isoCode: isoCode.lowercased())
+
+        #expect(found === legacy) // the legacy row is reused, not shadowed by a second one
+        #expect(Language.count(context: viewContext, isoCode: isoCode) == 1) // no duplicate created
+        #expect(found.isoCode == isoCode.lowercased()) // the getter self-heals the stored value
     }
 
     // nil update semantics: nameENOptional == nil must leave an already-set name untouched.

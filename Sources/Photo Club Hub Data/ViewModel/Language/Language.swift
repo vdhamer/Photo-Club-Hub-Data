@@ -70,7 +70,9 @@ extension Language {
     public static func find(context: NSManagedObjectContext, isoCode: String) -> Language? {
         let isoCode = isoCode.lowercased()
         let fetchRequest: NSFetchRequest<Language> = Language.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "isoCode_ = %@", argumentArray: [isoCode])
+        // case-insensitive: shipped versions stored uppercase codes, so the store is not guaranteed
+        // lowercase even though every write path now normalizes. Avoid localization.
+        fetchRequest.predicate = NSPredicate(format: "isoCode_ =[c] %@", argumentArray: [isoCode])
         return try? context.fetch(fetchRequest).first
     }
 
@@ -83,7 +85,9 @@ extension Language {
                                  nameENOptional: String? = nil
                                 ) -> Language {
         let isoCode = isoCode.lowercased() // "EN" → "en" — ISO 639-1 codes are lowercase in the standard
-        let predicateFormat: String = "isoCode_ = %@" // avoid localization
+        // case-insensitive: shipped versions stored uppercase codes, so the store is not guaranteed
+        // lowercase even though every write path now normalizes. Avoid localization.
+        let predicateFormat: String = "isoCode_ =[c] %@"
         let predicate = NSPredicate(format: predicateFormat, argumentArray: [isoCode])
         let fetchRequest: NSFetchRequest<Language> = Language.fetchRequest()
         fetchRequest.predicate = predicate
@@ -95,7 +99,10 @@ extension Language {
             // on non-Debug version, continue with empty `languages` array
         }
 
-        if languages.count > 1 { // there is actually a Core Data constraint to prevent this
+        // Note: the Core Data uniqueness constraint on isoCode_ is case-sensitive, so it does NOT
+        // prevent "EN" and "en" coexisting. The =[c] predicate above is what keeps them from being
+        // created in the first place.
+        if languages.count > 1 {
             ifDebugPrint("Query returned multiple (\(languages.count)) Languages with code \(isoCode)")
         }
 
@@ -176,7 +183,8 @@ extension Language {
 
             let isoCodeLowercased = isoCode.lowercased()
             let fetchRequest: NSFetchRequest<Language> = Language.fetchRequest()
-            let predicateFormat: String = "isoCode_ = %@" // avoid localization
+            // case-insensitive, as this function's documented contract states. Avoid localization.
+            let predicateFormat: String = "isoCode_ =[c] %@"
             let predicate = NSPredicate(format: predicateFormat, argumentArray: [isoCodeLowercased])
             fetchRequest.predicate = predicate
 
