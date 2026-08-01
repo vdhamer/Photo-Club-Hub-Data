@@ -27,7 +27,14 @@ let package = Package(
                 // through the manifest. Without this exclusion Xcode ALSO applies its built-in
                 // .xcdatamodeld build rule, and the two producers of Photo_Club_Hub.momd collide with
                 // "error: Multiple commands produce ... Photo_Club_Hub.momd".
-                "Model/Photo_Club_Hub.xcdatamodeld"
+                "Model/Photo_Club_Hub.xcdatamodeld",
+
+                // Core Data Model Editor state (the colours used when it renders the model as a
+                // diagram). Tool-managed, kept in git, but no reason to ship it in the bundle.
+                // The per-version ConfigurationColors.json/EntityColors.json files live inside the
+                // .xcdatamodeld and are already covered by the exclusion above; this one sits loose
+                // in Model/, so it needs its own entry.
+                "Model/ConfigurationColors"
             ],
             resources: [
                 // copying can probably also be done with a single copy command at directory level
