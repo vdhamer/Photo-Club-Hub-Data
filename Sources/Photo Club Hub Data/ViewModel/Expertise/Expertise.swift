@@ -253,7 +253,7 @@ extension Expertise {
     // Count total number of Expertise objects/records.
     // Note: there are ways to count without fetching all records.
     // Items with "expertise" in the id are not counted to avoid counting "Too many expertises" pseudo-expertise.
-    static func count(context: NSManagedObjectContext) -> Int {
+    public static func count(context: NSManagedObjectContext) -> Int {
 
         let expertiseCount: Int = context.performAndWait {
             let fetchRequest: NSFetchRequest<Expertise> = Expertise.fetchRequest()
@@ -274,7 +274,7 @@ extension Expertise {
 
     @MainActor
     // get array with list of all Expertises
-    static func getAll(context: NSManagedObjectContext) -> [Expertise] {
+    public static func getAll(context: NSManagedObjectContext) -> [Expertise] {
 
         let allExpertises: [Expertise] = context.performAndWait {
             let fetchRequest: NSFetchRequest<Expertise> = Expertise.fetchRequest()

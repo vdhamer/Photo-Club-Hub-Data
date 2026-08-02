@@ -42,7 +42,7 @@ public struct LocalizedExpertiseResult {
     public var name: String { localizedExpertise?.name_ ?? id }
 
     /// `true` when a Level 0 translation exists (a "supported" tag); `false` for "temporary" tags.
-    var isSupported: Bool { localizedExpertise != nil }
+    public var isSupported: Bool { localizedExpertise != nil }
 
     public init(localizedExpertise: LocalizedExpertise?,
                 id: String,

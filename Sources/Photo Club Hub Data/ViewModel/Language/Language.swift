@@ -25,7 +25,7 @@ extension Language {
         ]
     }
 
-    static func initConstants(context: NSManagedObjectContext) {
+    public static func initConstants(context: NSManagedObjectContext) {
         // initConstants shouldn't be necessary, but is there as a temp safety net for concurrenty issues with CoreData
         for language in code2Name {
             _ = Language.findCreateUpdate(

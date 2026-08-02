@@ -9,7 +9,7 @@ import CoreData
 
 extension Organization {
 
-    static func count(context: NSManagedObjectContext, organizationTypeE: OrganizationTypeEnum) -> Int {
+    public static func count(context: NSManagedObjectContext, organizationTypeE: OrganizationTypeEnum) -> Int {
 
             let organizationCount: Int = context.performAndWait {
 

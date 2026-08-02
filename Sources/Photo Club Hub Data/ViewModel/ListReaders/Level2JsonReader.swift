@@ -32,6 +32,34 @@ public class Level2JsonReader { // normally running on a background thread
         )
     }
 
+    /// Loads the level2 file for `organizationIdPlus` on `bgContext`, suspending until it has been
+    /// processed and saved. `await`ing this method is the "happens-before" relation unit tests need;
+    /// the app keeps using `init` so its runtime behavior stays fire-and-forget.
+    /// Mirrors `Level1JsonReader.load` (issue #760).
+    ///
+    /// Note the callers that matter here are the `*MembersProvider` types: when one of those runs inside
+    /// its own `bgContext.perform { }` block, the nested `init` enqueues a *second* block, so a caller
+    /// cannot use an empty `perform { }` as a completion barrier. Awaiting this method instead is what
+    /// gives a sharp completion signal.
+    public static func load(bgContext: NSManagedObjectContext,
+                            organizationIdPlus: OrganizationIdPlus,
+                            isBeingTested: Bool,
+                            useOnlyInBundleFile: Bool, // true avoids fetching the latest version from GitHub
+                            includeFilePath: [String] = [] // captures recursion path like ["root","museums"]
+                           ) async {
+        _ = await FetchAndProcessFile.fetchAndProcess(
+            bgContext: bgContext,
+            fileSelector: FileSelector(organizationIdPlus: organizationIdPlus,
+                                       isBeingTested: isBeingTested),
+            fileFetchOptions: FileFetchOptions(fileType: "json",
+                                               fileSubType: "level2", // "fgDeGender.level2.json"
+                                               useOnlyInBundleFile: useOnlyInBundleFile,
+                                               isBeingTested: isBeingTested,
+                                               includeFilePath: includeFilePath),
+            fileContentProcessor: Level2JsonReader.readRootLevel2Json
+        )
+    }
+
     // swiftlint:disable:next function_parameter_count
     @Sendable static private func readRootLevel2Json(bgContext: NSManagedObjectContext,
                                                      jsonData: String,

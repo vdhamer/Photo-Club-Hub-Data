@@ -30,6 +30,29 @@ public class Level0JsonReader {
         )
     }
 
+    /// Loads `fileName`.level0.json on `bgContext`, suspending until the file has been processed and saved.
+    /// `await`ing this method is the "happens-before" relation unit tests need; the app keeps using `init`
+    /// so its runtime behavior stays fire-and-forget. Mirrors `Level1JsonReader.load` (issue #760).
+    ///
+    /// Level 0 has no `Include` mechanism, so unlike Level 1 there is no fan-out to await afterwards.
+    public static func load(bgContext: NSManagedObjectContext,
+                            fileName: String = "root",  // can overrule the name for unit testing
+                            isBeingTested: Bool,
+                            useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
+                            includeFilePath: [String] = [] // captures recursion path like ["root","museums"]
+                           ) async {
+        _ = await FetchAndProcessFile.fetchAndProcess(
+            bgContext: bgContext,
+            fileSelector: FileSelector(fileName: fileName, isBeingTested: isBeingTested),
+            fileFetchOptions: FileFetchOptions(fileType: "json",
+                                               fileSubType: "level0", // "root.level0.json"
+                                               useOnlyInBundleFile: useOnlyInBundleFile,
+                                               isBeingTested: isBeingTested,
+                                               includeFilePath: includeFilePath),
+            fileContentProcessor: Level0JsonReader.readRootLevel0Json
+        )
+    }
+
     // swiftlint:disable:next function_parameter_count
     @Sendable static private func readRootLevel0Json(bgContext: NSManagedObjectContext,
                                                      jsonData: String,

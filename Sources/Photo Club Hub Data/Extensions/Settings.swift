@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Settings {
+public struct Settings {
 
     @available(*, unavailable)
     init() {
@@ -30,7 +30,7 @@ struct Settings {
                                                             "dataResetPending"]
 
     // Doesn't really work in Photo Club Hub HTML until the version numbers are synchronized
-    static var dataResetPending: Bool { // stored as a string shown in Settings
+    public static var dataResetPending: Bool { // stored as a string shown in Settings
         // returns true only when read for the first time
 
         if UserDefaults.standard.object(forKey: userDefaultsKey) == nil {
@@ -49,7 +49,7 @@ struct Settings {
         return prevValue // if true, app will immediately do a data reset
     } // implicit getter only
 
-    static var manualDataLoading: Bool { // controlled by toggle in Settings
+    public static var manualDataLoading: Bool { // controlled by toggle in Settings
         // Setting this to true clears the existing database and skips loading any data on app startup.
         // It displays "Manual loading" in the Prelude startup screen as a warning that the mode is set.
         // The missing club/museum/member data can be loaded manually by swiping down on e.g., the Portfolio screen.
@@ -63,13 +63,13 @@ struct Settings {
         UserDefaults.standard.bool(forKey: "extraCoreDataSaves") // here we are happy with missing key → false
     }
 
-    static var showTemplateClubs: Bool { // controlled by toggle in Settings
+    public static var showTemplateClubs: Bool { // controlled by toggle in Settings
         // Instructs the app whether to load TemplateMax.level2.json and TemplateMin.level2.json
         // It will typically be used by people creating new level2.json files to see what the example files look like
         UserDefaults.standard.bool(forKey: "showTemplateClubs") // if the key is missing, this returns false
     }
 
-    static var errorOnCoreDataMerge: Bool { // controlled by toggle in Settings
+    public static var errorOnCoreDataMerge: Bool { // controlled by toggle in Settings
         // Instructs the app to set CoreData NSManagedObjectContext.mergePolicy to NSMergePolicy.error
         // This causes the app to stop when a uniqueness constraint violation or a merging issue in encountered.
         // Setting this Bool to true only does something if the app is in Debug mode. So does nothing for end users.

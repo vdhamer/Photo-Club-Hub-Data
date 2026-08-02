@@ -50,7 +50,7 @@ extension Photographer {
         return givenName + infixName + familyName
     }
 
-    var fullNameLastFirst: String { // "Doe, John" or "Doesburg, Jan van"
+    public var fullNameLastFirst: String { // "Doe, John" or "Doesburg, Jan van"
         let infixName = self.infixName.isEmpty ? "" : " \(self.infixName)" // "van" in names like "Jan van Doesburg"
         return familyName + ", " + givenName + infixName
     }

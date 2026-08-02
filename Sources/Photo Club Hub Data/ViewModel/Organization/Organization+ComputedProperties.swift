@@ -16,7 +16,7 @@ extension Organization {
 		set { members_ = newValue as NSSet }
 	}
 
-    var organizationType: OrganizationType {
+    public var organizationType: OrganizationType {
         @MainActor
         get { // careful: cannot read organizationType on background thread if database still contains nil
             if organizationType_ != nil {
@@ -117,7 +117,7 @@ extension Organization {
 		set { town_ = newValue }
 	}
 
-    var localizedTown: String {
+    public var localizedTown: String {
         /*
             LocalizedCountry is retrieved from the CoreData database, where it is not optional.
             It is calculated using the mandatory GPS coordinates using reverseGeolocation.
@@ -130,7 +130,7 @@ extension Organization {
         set { localizedTownDepr_ = newValue}
     }
 
-    var localizedCountry: String {
+    public var localizedCountry: String {
         /*
          LocalizedCountry is retrieved from the CoreData database, where it is not optional.
          It is calculated using the mandatory GPS coordinates using reverseGeolocation.
@@ -141,7 +141,7 @@ extension Organization {
         set { localizedCountryDepr_ = newValue}
     }
 
-    var level2URL: URL? {
+    public var level2URL: URL? {
         get {
             // use a default unless level2URL points to the club's own website
             let defaultURL: URL? = URL(string: "http://www.vdhamer.com/\(self.nickName)/index.html")
@@ -193,7 +193,7 @@ extension Organization {
 
     // Priority system to choose an item's remark in the appropriate language.
     // The choice depends on the current language settings of the device, and on available translations.
-    var localizedRemark: String {
+    public var localizedRemark: String {
         // don't use Locale.current.language.languageCode because this only returns languages supported by the app
         // first choice: accomodate user's language preferences according to Apple's Locale API
         for lang in Locale.preferredLanguages {

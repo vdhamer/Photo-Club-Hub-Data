@@ -12,7 +12,7 @@
 /// Helps prevent confusion with Fotobond club identifiers.
 public struct FotobondClubNumber: Equatable {
     /// Raw Fotobond club number (0101...9999). Nil if no valid number found in JSON data.
-    let id: Int16?
+    public let id: Int16?
 
     public init?(id: Int16?) {
         guard let id else { return nil } // failable initializer returns nil if Fotobond club number isn't available.

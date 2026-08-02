@@ -13,7 +13,7 @@ public struct PersistenceController: Sendable {
 
 	public let container: NSPersistentContainer
 
-	init(inMemory: Bool = false) {
+	public init(inMemory: Bool = false) {
         // solution to access Coredata in non-main bundle found in https://developer.apple.com/forums/thread/652209
         let name = "Photo_Club_Hub"
         let bundle: Bundle = Bundle.module // documentation: "resource bundle associated with the current Swift module"
@@ -50,7 +50,7 @@ public struct PersistenceController: Sendable {
         container.viewContext.automaticallyMergesChangesFromParent = true
 	}
 
-    func save() {
+    public func save() {
         let context = container.viewContext
 
         do {

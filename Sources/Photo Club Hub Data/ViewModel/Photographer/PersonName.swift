@@ -17,11 +17,11 @@ public struct PersonName {
     /// The display name, including any parenthesized role, e.g. "John Doe (lid)" or "Jan van Doesburg".
     var fullNameWithParenthesizedRole: String
     /// The given (first) name, e.g. "John" or "Jan".
-    let givenName: String
+    public let givenName: String
     /// The infix ("tussenvoegsel"), e.g. "" or "van" or "op de". Uses an empty String when the name has no infix.
-    let infixName: String
+    public let infixName: String
     /// The family (last) name, e.g. "Doe" or "Doesburg".
-    let familyName: String
+    public let familyName: String
     /// The display name with any trailing parenthesized role removed, e.g.
     /// "Bart van Stekelenburg (lid)" becomes "Bart van Stekelenburg".
     var fullNameWithoutParenthesizedRole: String {

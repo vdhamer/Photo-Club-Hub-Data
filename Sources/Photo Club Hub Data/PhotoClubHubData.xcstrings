@@ -7,13 +7,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "&#x1F3F5;"
+            "value" : "🏵️"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "&#x1F3F5;"
+            "value" : "🏵️"
           }
         }
       }
@@ -24,13 +24,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "&#x1FAB2;"
+            "value" : "🪲"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "&#x1FAB2;"
+            "value" : "🪲"
           }
         }
       }
@@ -217,7 +217,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geen opmerking beschikbaar voor %1$@ %2$@."
+            "value" : "Geen bijzonderheden bekend over %1$@ %2$@."
           }
         }
       }
@@ -268,7 +268,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "aspirantlid"
+            "value" : "aspirant-lid"
           }
         }
       }

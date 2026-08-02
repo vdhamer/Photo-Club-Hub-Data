@@ -15,5 +15,5 @@
 ///
 /// Update this in the same commit as any train bump, before tagging.
 public enum PhotoClubHubDataVersion {
-    public static let semver = "2.11.1"
+    public static let semver = "2.11.2"
 }

@@ -14,7 +14,7 @@ extension PhotographerExpertise {
         fatalError("init() is not available. Use .findCreateUpdate instead.")
     }
 
-    var expertise: Expertise {
+    public var expertise: Expertise {
         get {
             if let expertise = expertise_ {
                 return expertise
@@ -196,7 +196,7 @@ extension PhotographerExpertise {
 
     // count total number of PhotographerExpertise objects/records
     // there are ways to count without fetching all records, but this func is only used for testing
-    static func count(context: NSManagedObjectContext) -> Int {
+    public static func count(context: NSManagedObjectContext) -> Int {
 
         let photographerExpertiseCount: Int = context.performAndWait {
             let fetchRequest: NSFetchRequest<PhotographerExpertise> = PhotographerExpertise.fetchRequest()

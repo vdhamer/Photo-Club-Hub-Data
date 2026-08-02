@@ -84,7 +84,7 @@ extension MemberPortfolio { // expose computed properties (some related to handl
         set { featuredImageThumbnail_ = newValue }
     }
 
-    var level3URL: URL {
+    public var level3URL: URL {
         get {
             if level3URL_ == nil {
                 let string = MemberPortfolio.emptyPortfolioURL
