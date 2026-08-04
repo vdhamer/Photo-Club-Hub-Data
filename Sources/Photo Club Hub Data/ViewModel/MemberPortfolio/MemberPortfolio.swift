@@ -47,6 +47,14 @@ extension MemberPortfolio { // expose computed properties (some related to handl
         }
 	}
 
+    /// Section key for `SectionedFetchRequest`. Unlike the sort descriptors (which Core Data turns into
+    /// SQL and evaluates in the store) this keypath is evaluated in Swift on every fetched object, so it
+    /// must not trap: a deleted MemberPortfolio has no `organization_`, and SwiftUI can still evaluate it
+    /// while the row's removal animates (issue #802). Such rows are filtered out before they are shown.
+    @objc public var organizationSectionID: String { // @objc needed for SectionedFetchRequest's sectionIdentifier
+        organization_?.fullNameTown ?? ""
+    }
+
     /* https://
     stackoverflow.com/questions/25485273/swift-coredata-cannot-automatically-set-optional-attribute-on-generated-nsman
     */
