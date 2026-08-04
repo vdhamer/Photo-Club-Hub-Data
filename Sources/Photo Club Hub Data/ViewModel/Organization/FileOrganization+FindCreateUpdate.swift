@@ -79,15 +79,19 @@ extension Organization {
                   """)
             }
             return organization
-        } else { // have to create PhotoClub object because it doesn't exist yet
-            // cannot use PhotoClub() initializer because we must use bgContext
+        } else { // Have to create Organization object because it doesn't exist yet
+            // Cannot use Organization() initializer because we must use bgContext.
+            // Resolve the type BEFORE inserting the organization: on its create path.
+            // OrganizationType.findCreateUpdate() saves the context, and any organization already
+            // inserted here would be committed - and published to the live viewContext - while its
+            // organizationType_ was still nil, which the (non-optional) getter treats as fatal.
+            // Some fancy footwork because organization type info originated from other context
+            let organizationType = OrganizationType.findCreateUpdate(context: context,
+                                                                     orgTypeName: organizationTypeEnum.rawValue)
             let entity = NSEntityDescription.entity(forEntityName: "Organization", in: context)!
             let organization = Organization(entity: entity, insertInto: context) // create new Club or Museum
             organization.fullName = idPlus.fullName // first part of ID
             organization.town = idPlus.town // second part of ID
-            // some fancy footwork because organization type info originated from other context
-            let organizationType = OrganizationType.findCreateUpdate(context: context,
-                                                                     orgTypeName: organizationTypeEnum.rawValue)
             organization.organizationType = organizationType
             print("\(organization.fullNameTown): Will try to fill fields for this new organization")
             _ = organization.update(bgContext: context,
