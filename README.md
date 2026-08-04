@@ -40,7 +40,7 @@ import Photo_Club_Hub_Data
 The three repositories share a synchronised `major.minor` "release train"; `patch` numbers float independently per repository.
 
 - Apps depend via `.upToNextMinor(from:)`, so package **patch** fixes flow into both apps without either app retagging.
-- A change to the package's public API bumps the **minor**, which is a deliberate train bump in all three repositories.
+- A **breaking** change to the package's public API bumps the **minor**, which is a deliberate train bump in all three repositories. Purely *additive* public API may ship as a **patch** for as long as this package has a single consumer: the minor-bump convention exists to protect future external consumers pinning a version range, but this isn't relevant yet. Shipping additions as a patch also lets them reach both apps through the existing `.upToNextMinor(from:)` requirements without either app retagging.
 - `PhotoClubHubDataVersion.semver` carries the version programmatically, because SwiftPM code cannot read its own git tag and `Bundle.module` carries no version. The release checklist asserts that this constant matches the tag being pushed, and apps can assert that their own `major.minor` matches the package's.
 
 ## The three-level JSON data
