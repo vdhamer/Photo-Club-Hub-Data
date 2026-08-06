@@ -78,7 +78,7 @@ All 14 entities are set to Codegen **Manual/None**, and the 21 files Xcode would
 
 The model is deliberately listed in the target's `exclude:` in `Package.swift`. Without that, Xcode applies its own built-in `.xcdatamodeld` rule *in addition to* the plugin and the build fails with `Multiple commands produce … Photo_Club_Hub.momd`. That exclusion is load-bearing — do not remove it.
 
-Because the plugin arrives from a remote dependency, consumers may meet Xcode's plugin-trust prompt on first resolution, and `xcodebuild` in CI may need `-skipPackagePluginValidation`.
+Because the package's plugins arrive from a remote dependency, consumers may encounter Xcode's plugin-trust prompt on first resolution, and `xcodebuild` in CI may need `-skipPackagePluginValidation`. Trust is granted per package, not per plugin, so the second plugin ([linting](#linting)) adds no further prompt.
 
 ## The data-model diagrams
 
@@ -97,13 +97,30 @@ While co-developing an app and this package, use a **local package override** ra
 
 This also restores the package's tests inside Xcode. Xcode surfaces test targets for local packages but **not** for remote package dependencies, so without an override the tests below only run from the command line.
 
+## Linting
+
+SwiftLint runs on **every build**. The two apps get that from an Xcode "Run SwiftLint" build phase; a package has no `.xcodeproj` to hang a phase on, so `Plugins/RunSwiftLint` does the same job as a build tool plugin.
+
+It shells out to whichever `swiftlint` is on `PATH`, falling back to the usual Homebrew locations, rather than depending on a SwiftLint package. That keeps SwiftLint out of both apps' dependency graphs, and keeps the build and the command line on one version. SwiftLint ships with neither Xcode nor the Swift toolchain, so it has to be installed:
+
+```sh
+brew install swiftlint
+```
+
+A missing `swiftlint` is a warning rather than a build failure, so a bare clone and CI still build. Violations are likewise warnings and do not fail the build, matching the apps' behaviour. `.swiftlint.yml` relaxes no rules — it only excludes `.build` and the committed Core Data codegen (see [above](#the-generated-nsmanagedobject-classes-are-committed)).
+
+Two consequences worth knowing:
+
+- The plugin is attached to the library target, so **both apps lint this package whenever they build it**, and the violations appear in the app's build log against this package's file paths.
+- Linting re-runs only when a Swift file in the package has changed, unlike the apps' phase, which is marked always-out-of-date.
+
 ## Testing
 
 ```sh
 swift test
 ```
 
-86 tests in 19 suites, with an in-memory Core Data store per suite.
+97 tests in 22 suites, with an in-memory Core Data store per suite.
 
 ### Tests run against frozen data
 
@@ -122,7 +139,7 @@ Four Level 2 fixtures cannot take the suffix: `TemplateMin`, `TemplateMax`, `fgD
 
 Two known issues:
 
-- **Run tests serially if you see the suite abort rather than fail.** A process-global test spy can be deinstalled by a concurrently running suite, turning a deliberate `ifDebugFatalError` into a real crash that takes down all 86 tests. Use `swift test --no-parallel` until [#1](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/1) is fixed.
+- **Run tests serially if you see the suite abort rather than fail.** A process-global test spy can be deinstalled by a concurrently running suite, turning a deliberate `ifDebugFatalError` into a real crash that takes down all 97 tests. Use `swift test --no-parallel` until [#1](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/1) is fixed.
 - **`.xcstrings` is not compiled by `swift build`.** `PhotoClubHubData.xcstrings` lands in the bundle raw, so localized lookups fall back to raw keys on the command line even though they work in Xcode. No current test depends on localized output — but a localization assertion would pass in Xcode and fail in CI, so avoid writing one.
 
 ## License
