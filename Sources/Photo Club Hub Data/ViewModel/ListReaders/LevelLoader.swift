@@ -167,7 +167,7 @@ public enum LevelLoader {
     /// `mergeByPropertyStoreTrump` rather than `ObjectTrump`: with the sequencing above in place the policy
     /// does not affect `Expertise.isSupported` either way - but if the sequencing ever breaks - StoreTrump is
     /// the configuration that fails safely.
-    /// Package consumers cannot override it — the two apps used to disagree, which is the divergence Data#12 exists to remove.
+    /// Package consumers cannot override it — the two apps originally used different settings (for vague reasons).
     static func makeBgContext(ctxName: String, usedContainer: NSPersistentContainer) -> NSManagedObjectContext {
 
         let bgContext = usedContainer.newBackgroundContext()
