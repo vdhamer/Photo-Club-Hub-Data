@@ -13,8 +13,8 @@ API
 
 * __Loader sequencing__. New `LevelLoader.loadAllLevels(usedContainer:isBeingTested:useOnlyInBundleFile:)`. Runs one complete load pass — Level 0 awaited to completion, then Level 1, then all fourteen Level 2 club loaders concurrently — and returns only once the last loader has finished. The sequencing and the club list move here from the two apps, which each implemented them separately (Data#12).
 * __`Level1JsonReader` no longer global.__ `Level1JsonReader.load(...)` and `Level1JsonReader.init(...)` take a `history:` parameter. It is defaulted, so existing calls compile unchanged.
-* Removed `Level1JsonReader.level1History`. Neither app referenced it.`
-- Include-file cycles for iOS 17. Level1History`is no longer restricted to iOS 18 / macOS 15.
+* Removed `Level1JsonReader.level1History`. Neither app referenced it.
+* Include-file cycles for iOS 17. `Level1History` is no longer restricted to iOS 18 / macOS 15.
 
 BEHAVIOUR
 
@@ -31,7 +31,7 @@ STRUCTURAL
 DOCUMENTATION
 
 * README: the three-level section now describes `LevelLoader` rather than stating that sequencing is the consuming app's responsibility. New "Linting" section.
-- Release notes for the Data package created.
+* Release notes for the Data package created.
 
 ---------------------------------------------------------------------------
 
