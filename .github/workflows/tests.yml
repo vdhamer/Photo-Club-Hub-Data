@@ -39,6 +39,6 @@ jobs:
       - name: Test
         # --no-parallel until issue #1 is fixed: with parallel execution, one test's
         # `defer { removeIfDebugFatalErrorSpy() }` can deinstall the process-global spy while
-        # another test is inside its window, reaching the bare fatalError and aborting all 86
+        # another test is inside its window, reaching the bare fatalError and aborting all 97
         # tests instead of failing one. A red run should mean a real regression.
         run: swift test --no-parallel
