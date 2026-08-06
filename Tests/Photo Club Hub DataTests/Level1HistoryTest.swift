@@ -10,29 +10,21 @@ import Testing
 
 // Level1History is the loop/duplicate guard used by Level1JsonReader: each load of a level1.json file
 // is recorded the first time it is visited.
-// It can thereby guard that an Include tree (e.g. recursionA → recursionB → recursionA) cannot
+// It uses this to guard that an Include tree (e.g. recursionA → recursionB → recursionA → ...) cannot
 // load the same file twice or recurse forever.
 //
-// These tests construct their OWN Level1History instances rather than touching the process-wide
-// Level1JsonReader.level1History singleton, so they are fully isolated and deterministic.
+// These tests construct their own Level1History instances, which is now also how the loaders use it:
+// one instance per load pass rather than a process-wide singleton (Data#12).
 //
-// Level1History is annotated with @available(iOS 18, macOS 15, *). The app supports iOS 17.x — an OS on
-// which Level1History is unavailable — and the test target matches that deployment target. Each test is
-// therefore gated with an `.enabled(if:)` condition trait so that on iOS 17 it is reported as
-// *skipped* rather than as a silent pass. (Swift Testing's @Test/@Suite macros cannot be attached to
-// @available declarations, so a trait is used instead.) The in-body `#available` guard is also needed to
-// satisfy the compiler's use of Level1History; it is unreachable whenever the trait has enabled the test.
-private let level1HistoryAvailable: Bool = {
-    if #available(iOS 18, macOS 15, *) { true } else { false }
-}()
-
+// The tests used to be gated behind `.enabled(if:)` traits because Level1History was annotated
+// @available(iOS 18, macOS 15, *) for its use of `Mutex`, while this package supports iOS 17. It now uses
+// OSAllocatedUnfairLock (iOS 16+) so that it can appear in un-gated public signatures,
+// and the availability gating is gone with it.
 @Suite("Tests the Level1History recursion/duplicate guard") struct Level1HistoryTests {
 
     // The first visit to a file finds "not yet visited"; the second visit to the SAME file is "visited".
-    @Test("A file is unvisited the first time and visited the second time",
-          .enabled(if: level1HistoryAvailable, "Level1History requires iOS 18 / macOS 15"))
+    @Test("A file is unvisited the first time and visited the second time")
     func recordsFirstVisit() {
-        guard #available(iOS 18, macOS 15, *) else { return } // compiler-only; unreachable when enabled
 
         let history = Level1History()
         #expect(history.isVisitedBefore(fileName: "root") == false) // first encounter
@@ -40,10 +32,8 @@ private let level1HistoryAvailable: Bool = {
     }
 
     // Distinct file names are tracked independently — visiting one does not affect another.
-    @Test("Different file names are tracked independently",
-          .enabled(if: level1HistoryAvailable, "Level1History requires iOS 18 / macOS 15"))
+    @Test("Different file names are tracked independently")
     func distinctNamesAreIndependent() {
-        guard #available(iOS 18, macOS 15, *) else { return } // compiler-only; unreachable when enabled
 
         let history = Level1History()
         #expect(history.isVisitedBefore(fileName: "fileA") == false)
@@ -53,10 +43,8 @@ private let level1HistoryAvailable: Bool = {
     }
 
     // clear() resets the guard: a previously visited file is considered unvisited again.
-    @Test("clear() resets the visited history",
-          .enabled(if: level1HistoryAvailable, "Level1History requires iOS 18 / macOS 15"))
+    @Test("clear() resets the visited history")
     func clearResetsHistory() {
-        guard #available(iOS 18, macOS 15, *) else { return } // compiler-only; unreachable when enabled
 
         let history = Level1History()
         #expect(history.isVisitedBefore(fileName: "museums") == false)
@@ -67,12 +55,10 @@ private let level1HistoryAvailable: Bool = {
         #expect(history.isVisitedBefore(fileName: "museums") == false) // all previous visits are cleared by clear()
     }
 
-    // Matching is case-sensitive: names differing only in case are treated as different files.
+    // Matching is case-sensitive: names differing-only-in-case are treated as different files.
     // (Documents current behaviour — file names in the Include tree are used verbatim.)
-    @Test("File-name matching is case-sensitive",
-          .enabled(if: level1HistoryAvailable, "Level1History requires iOS 18 / macOS 15"))
+    @Test("File-name matching is case-sensitive")
     func matchingIsCaseSensitive() {
-        guard #available(iOS 18, macOS 15, *) else { return } // compiler-only; unreachable when enabled
 
         let history = Level1History()
         #expect(history.isVisitedBefore(fileName: "Museums") == false)

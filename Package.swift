@@ -74,7 +74,10 @@ let package = Package(
                 .copy("JSON/TemplateMax.level2.json"),
                 .process("PhotoClubHubData.xcstrings")
             ],
-            plugins: ["CompileCoreDataModel"] // turns Model/*.xcdatamodeld into a .momd in the resource bundle
+            plugins: [
+                "CompileCoreDataModel", // turns Model/*.xcdatamodeld into a .momd in the resource bundle
+                "RunSwiftLint" // lints on every build, like the apps' "Run SwiftLint" build phase
+            ]
         ),
         .testTarget(
             name: "Photo Club Hub DataTests",
@@ -105,6 +108,10 @@ let package = Package(
         ),
         .plugin(
             name: "CompileCoreDataModel",
+            capability: .buildTool()
+        ),
+        .plugin(
+            name: "RunSwiftLint",
             capability: .buildTool()
         )
     ]

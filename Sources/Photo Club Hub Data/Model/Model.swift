@@ -50,9 +50,9 @@ public struct Model {
         } catch {
             ifDebugFatalError("Error during forced clearing of CoreData tables: \(error)")
         }
-        if #available(iOS 18, macOS 15, *) { // uses Mutext feature of iOS 18
-            Level1JsonReader.level1History.clear() // array used to avoiding cycles in level 1 "include" files
-        }
+        // The visited-file guard used to be a process-global singleton that had to be cleared here, which
+        // silently made "delete the database" a precondition for starting a second load pass. Each pass now
+        // owns its own Level1History, so there is nothing left to reset.
     }
 
     /// Deletes all objects of a given Core Data entity type, with optional retries on failure during save()..

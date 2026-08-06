@@ -26,9 +26,12 @@ public class Level1JsonReader {
                 isBeingTested: Bool,
                 useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
                 includeFilePath: [String] = [], // captures recursion path like ["root","museums","museumsNL"]
-                usedContainer: NSPersistentContainer = PersistenceController.shared.container
+                usedContainer: NSPersistentContainer = PersistenceController.shared.container,
                 // ^ container whose background contexts `Included` files load into; defaults to the app's
                 //   shared store, but tests can inject a private in-memory store for isolation.
+                history: Level1History = Level1History()
+                // ^ visited-file guard for THIS pass; the default gives each top-level call its own,
+                //   and the Include recursion propagates it so one tree shares one guard.
                ) {
         var extendedIncludeFilePath: [String] = includeFilePath // copy because parameter itself is `let`
         extendedIncludeFilePath.append(fileName) // extend with extra name
@@ -52,7 +55,8 @@ public class Level1JsonReader {
                                         fileSelector: $2,
                                         useOnlyInBundleFile: useOnlyInBundleFile,
                                         isBeingTested: isBeingTested,
-                                        includeFilePath: includeFilePath)
+                                        includeFilePath: includeFilePath,
+                                        history: history)
                                     if includeNames.isEmpty { return } // no further recursion (important)
 
                                     Task { // on this fire-and-forget path nobody awaits the includes
@@ -60,7 +64,8 @@ public class Level1JsonReader {
                                                            isBeingTested: isBeingTested,
                                                            useOnlyInBundleFile: useOnlyInBundleFile,
                                                            includeFilePath: includeFilePath,
-                                                           usedContainer: usedContainer)
+                                                           usedContainer: usedContainer,
+                                                           history: history)
                                     }
                                 }
         )
@@ -75,9 +80,12 @@ public class Level1JsonReader {
                             isBeingTested: Bool,
                             useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
                             includeFilePath: [String] = [], // recursion path like ["root","museums","museumsNL"]
-                            usedContainer: NSPersistentContainer = PersistenceController.shared.container
+                            usedContainer: NSPersistentContainer = PersistenceController.shared.container,
                             // ^ container whose background contexts `Included` files load into; defaults to the app's
                             //   shared store, but tests can inject a private in-memory store for isolation.
+                            history: Level1History = Level1History()
+                            // ^ visited-file guard for THIS pass; the default gives each top-level call its own,
+                            //   and the Include recursion propagates it so one tree shares one guard.
                            ) async {
         var extendedIncludeFilePath: [String] = includeFilePath // copy because parameter itself is `let`
         extendedIncludeFilePath.append(fileName)
@@ -99,7 +107,8 @@ public class Level1JsonReader {
                                                     fileSelector: $2,
                                                     useOnlyInBundleFile: $3,
                                                     isBeingTested: $4,
-                                                    includeFilePath: $5)
+                                                    includeFilePath: $5,
+                                                    history: history)
             }
         ) ?? [] // nil (bundle resource not found) means there is nothing to include
 
@@ -107,9 +116,11 @@ public class Level1JsonReader {
                            isBeingTested: isBeingTested,
                            useOnlyInBundleFile: useOnlyInBundleFile,
                            includeFilePath: extendedIncludeFilePath,
-                           usedContainer: usedContainer)
+                           usedContainer: usedContainer,
+                           history: history)
     }
 
+    // swiftlint:disable function_parameter_count
     /// Parses and stores one level1.json file on the current (background) queue.
     /// Runs inside `bgContext`'s `perform` block, so it cannot await the include fan-out itself;
     /// instead it RETURNS the names of the `Include`d files for `load(...)` to process (issue #760).
@@ -118,22 +129,16 @@ public class Level1JsonReader {
                                                      fileSelector: FileSelector,
                                                      useOnlyInBundleFile: Bool,
                                                      isBeingTested: Bool = false,
-                                                     includeFilePath: [String]) -> [String] {
+                                                     includeFilePath: [String],
+                                                     history: Level1History) -> [String] {
 
         let fileName = fileSelector.fileName
-        if #available(iOS 18, macOS 15, *) {
-            // If we've already visited `filename`, avoid loading it twice. For performance and against infinite loops.
-            // Under iOS 18, 26 and beyond use Level1History which uses Mutex - introduced in iOS 18.
-            if Level1JsonReader.level1History.isVisitedBefore(fileName: fileName) {
-                ifDebugFatalError("Infinite loop or duplicate file in Include tree: \(includeFilePath)")
-                return []
-            }
-        } else {
-            // Under iOS 17 limit the nesting depth of includeFilePath to prevent executing infinite loops.
-            if includeFilePath.count >= 10 {
-                ifDebugFatalError("Excessive branch depth in Include tree: \(includeFilePath)")
-                return []
-            }
+        // If this pass already visited `fileName`, avoid loading it twice.
+        // Better performance and prevents infinite loops.
+        // `history` is per pass, so a second pass in the same process is not a duplicate.
+        if history.isVisitedBefore(fileName: fileName) {
+            ifDebugFatalError("Infinite loop or duplicate file in Include tree: \(includeFilePath)")
+            return []
         }
         ifDebugPrint("\nWill read \(fileName).level1.json with a list of organizations in the background.")
 
@@ -173,6 +178,7 @@ public class Level1JsonReader {
         ifDebugPrint("Completed readRootLevel1Json() in background")
         return includeNames
     }
+    // swiftlint:enable function_parameter_count
 
     /// Processes a single JSON Organizatio, and creates or updates the corresponding Organization record in Core Data.
     /// - Parameters:

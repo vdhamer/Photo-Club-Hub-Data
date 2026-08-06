@@ -70,14 +70,6 @@ private let isBeingTested = true
         }
     }
 
-    // The visited-file guard is a process-wide singleton shared with the app's background loading.
-    // Clearing it before a Level 1 load ensures the requested file is actually parsed rather than skipped.
-    private func clearVisitedHistory() {
-        if #available(iOS 18, macOS 15, *) {
-            Level1JsonReader.level1History.clear()
-        }
-    }
-
     // MARK: - Level 0
 
     // Garbage (non-JSON) input: SwiftyJSON turns it into a null document, so the reader finds no
@@ -125,7 +117,6 @@ private let isBeingTested = true
     @Test("Level 1: garbage input is tolerated (no organizations)") func level1GarbageIsGraceful() {
         let bgContext = makeBackgroundContext(named: "garbageLevel1")
 
-        clearVisitedHistory()
         _ = Level1JsonReader(bgContext: bgContext,
                              fileName: "garbage",
                              isBeingTested: isBeingTested,
@@ -140,7 +131,6 @@ private let isBeingTested = true
     @Test("Level 1: truncated input is tolerated (no organizations)") func level1TruncatedIsGraceful() {
         let bgContext = makeBackgroundContext(named: "truncatedLevel1")
 
-        clearVisitedHistory()
         _ = Level1JsonReader(bgContext: bgContext,
                              fileName: "truncated",
                              isBeingTested: isBeingTested,

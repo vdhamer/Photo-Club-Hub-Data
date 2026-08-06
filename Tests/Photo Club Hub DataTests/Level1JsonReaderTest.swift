@@ -11,24 +11,12 @@ import CoreData // for NSManagedObjectContext
 
 private let isBeingTested = true
 
-// Level1History (used by the Include machinery) is annotated with @available(iOS 18, macOS 15, *), and
-// the app supports iOS 17.x. The include test below is therefore gated with an `.enabled(if:)` condition
-// trait so that on iOS 17 it is reported as *skipped* rather than as a silent pass. (Same trick as in
-// Level1HistoryTest.swift; Swift Testing's @Test macro cannot be attached to @available declarations.)
-// The in-body `#available` guard is still needed to satisfy the compiler; it is unreachable when enabled.
-private let level1HistoryAvailable: Bool = {
-    if #available(iOS 18, macOS 15, *) { true } else { false }
-}()
-
-// The suite is @MainActor and its first three tests are synchronous (they never suspend), which prevents
-// their bodies from interleaving. That is load-bearing beyond Core Data isolation: those tests share the
-// process-global Level1JsonReader.level1History, and two of them load the same file ("clubTemplatesTest") —
-// if their bodies could interleave, one test's load could mark the file "visited" mid-way through the
-// other's, firing the duplicate-file ifDebugFatalError. So do NOT migrate them to `await load(...)` until
-// level1History is injectable (follow-up in #760). includeLoadsIntoInjectedStore() and
-// cyclicIncludeTerminates() do suspend, but their data files are unique to those tests,
-// so they cannot collide. Isolation from the app's concurrent background loading
-// comes from the use of a per-test IN-MEMORY store, not from execution order.
+// These tests used to depend on execution order, because every load shared one process-global
+// visited-file guard: two of them load the same file ("clubTemplatesTest"), so interleaved bodies could
+// mark it "visited" mid-way through each other and fire the duplicate-file ifDebugFatalError. Each load
+// pass now creates its own Level1History (Data#12), so that coupling is gone — as is the note that said
+// not to migrate these to `await load(...)` until the guard was injectable (#760).
+// Isolation from the app's concurrent background loading comes from the per-test IN-MEMORY store.
 @MainActor @Suite("Tests the Level 1 JSON reader") struct Level1JsonReaderTests {
 
     // MARK: - Init
@@ -61,15 +49,6 @@ private let level1HistoryAvailable: Bool = {
         return bgContext
     }
 
-    // The visited-file guard is a process-wide singleton shared with the app's background loading.
-    // Clearing it before each load ensures the requested file is actually parsed rather than being
-    // skipped because some other code path already marked it visited. (??)
-    private func clearVisitedHistory() {
-        if #available(iOS 18, macOS 15, *) {
-            Level1JsonReader.level1History.clear()
-        }
-    }
-
     // FetchAndProcessFile does its work asynchronously on `bgContext.perform { }`.
     // For a file without Includes the entire parse-and-save runs inside that single block
     // on the context's serial queue, so enqueueing an empty `performAndWait` afterwards acts as a barrier:
@@ -94,7 +73,6 @@ private let level1HistoryAvailable: Bool = {
         let bgContext = makeBackgroundContext(named: "clubTemplatesTest")
         #expect(allOrganizations().isEmpty) // fresh store: initConstants doesn't insert Organization
 
-        clearVisitedHistory()
         _ = Level1JsonReader(bgContext: bgContext,
                              fileName: "clubTemplatesTest",
                              isBeingTested: isBeingTested,
@@ -127,7 +105,6 @@ private let level1HistoryAvailable: Bool = {
         let bgContext = makeBackgroundContext(named: "museumsTest")
         #expect(allOrganizations().isEmpty)
 
-        clearVisitedHistory()
         _ = Level1JsonReader(bgContext: bgContext,
                              fileName: "museumsTest",
                              isBeingTested: isBeingTested,
@@ -151,7 +128,6 @@ private let level1HistoryAvailable: Bool = {
     @Test("Reloading the same file is idempotent") func reloadIsIdempotent() {
         let bgContext = makeBackgroundContext(named: "clubTemplatesReloadTest")
 
-        clearVisitedHistory()
         _ = Level1JsonReader(bgContext: bgContext,
                              fileName: "clubTemplatesTest",
                              isBeingTested: isBeingTested,
@@ -159,9 +135,8 @@ private let level1HistoryAvailable: Bool = {
         waitForLoad(on: bgContext)
         #expect(allOrganizations().count == 2)
 
-        // Clear the visited guard so the second load is actually processed (not short-circuited),
-        // which is what exercises findCreateUpdate's de-duplication.
-        clearVisitedHistory()
+        // Each load pass owns its own visited guard, so the second load is processed rather than
+        // short-circuited — which is what exercises findCreateUpdate's de-duplication.
         _ = Level1JsonReader(bgContext: bgContext,
                              fileName: "clubTemplatesTest",
                              isBeingTested: isBeingTested,
@@ -186,11 +161,8 @@ private let level1HistoryAvailable: Bool = {
     // Level1JsonReader.load(...), which returns only after the whole Include tree — including the
     // IncludeChild save — has completed (issue #760). The `await` IS the happens-before guarantee; no
     // NotificationCenter spying, no unstructured Task {}, no Task.yield() timing hacks.
-    @Test("An included file is loaded into the injected store",
-          .enabled(if: level1HistoryAvailable, "Level1History requires iOS 18 / macOS 15"))
+    @Test("An included file is loaded into the injected store")
     func includeLoadsIntoInjectedStore() async {
-        guard #available(iOS 18, macOS 15, *) else { return } // compiler-only; unreachable when enabled
-        clearVisitedHistory()
 
         let bgContext = makeBackgroundContext(named: "IncludeParentTest")
 
@@ -220,11 +192,8 @@ private let level1HistoryAvailable: Bool = {
     // The .timeLimit is the "terminates" assertion: if the loop guard ever regresses, the include
     // recursion would otherwise hang the test and run indefinitely rather than fail.
     @Test("A cyclic Include (recursionA ⇄ recursionB) terminates",
-          .enabled(if: level1HistoryAvailable, "Level1History requires iOS 18 / macOS 15"),
           .timeLimit(.minutes(1)))
     func cyclicIncludeTerminates() async {
-        guard #available(iOS 18, macOS 15, *) else { return } // compiler-only; unreachable when enabled
-        clearVisitedHistory()
 
         let spy = makeIfDebugFatalErrorSpy() // keeps the loop guard's fatalError from killing the test run
         installIfDebugFatalErrorSpy(spy)
