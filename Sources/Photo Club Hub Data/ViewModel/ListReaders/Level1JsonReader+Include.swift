@@ -5,14 +5,11 @@
 //  Created by Peter van den Hamer on 06/01/2026.
 //
 
-import CoreData        // for NSManagedObjectContext
-import SwiftyJSON      // for JSON struct
-import Synchronization // for Mutex (only used on iOS 18 or above)
+import CoreData   // for NSManagedObjectContext, NSPersistentContainer
+import SwiftyJSON // for JSON struct
+import os         // for OSAllocatedUnfairLock (a Mutex predecessor)
 
 extension Level1JsonReader {
-
-    @available(iOS 18, macOS 15, *)
-    static let level1History = Level1History() // singleton to track Level 1 loading across all Level 1 reader threads
 
     /// Extracts and validates the file names listed in the `level1URLIncludes` array in the Header
     /// of a level1.json file. Pure parsing — no loading happens here. The split between extraction
@@ -50,6 +47,7 @@ extension Level1JsonReader {
         return includeNames
     }
 
+    // swiftlint:disable function_parameter_count
     /// Concurrently loads the given `Include`d files, each on its own new background context of
     /// `usedContainer`, and suspends until ALL of them — recursively including their own Includes —
     /// have finished. This __task group__ is the structured replacement for the old fire-and-forget
@@ -61,7 +59,8 @@ extension Level1JsonReader {
                              includeFilePath: [String], // used to detect loops for error checking
                              /// Tests can inject a private in-memory store for isolation,
                              /// particularly to ensure all included files use the same Core Data store/database.
-                             usedContainer: NSPersistentContainer) async {
+                             usedContainer: NSPersistentContainer,
+                             history: Level1History) async {
         guard includeNames.isEmpty == false else { return }
 
         // NSPersistentContainer is Sendable (unlike NSManagedObjectContext), so the @Sendable
@@ -72,15 +71,8 @@ extension Level1JsonReader {
                 group.addTask {
                     print("Will load included file \(includeName).level1.json on a new background task")
 
-                    let bgContext = usedContainer.newBackgroundContext()
-                    bgContext.name = "Level 1 loader for \(includeName)"
-                    if inDebugMode && Settings.errorOnCoreDataMerge {
-                        bgContext.mergePolicy = NSMergePolicy.error // to force detection of Core Data merge issues
-                    } else {
-                        bgContext.mergePolicy = NSMergePolicy.mergeByPropertyStoreTrump
-                        // ^ .mergeByPropertyObjectTrump better?
-                    }
-                    bgContext.automaticallyMergesChangesFromParent = true // to push ObjectTypes to bgContext?
+                    let bgContext = LevelLoader.makeBgContext(ctxName: "Level 1 loader for \(includeName)",
+                                                              usedContainer: usedContainer)
 
                     await Level1JsonReader.load( // recursively traverse Include tree
                         bgContext: bgContext,
@@ -88,21 +80,36 @@ extension Level1JsonReader {
                         isBeingTested: isBeingTested,
                         useOnlyInBundleFile: useOnlyInBundleFile,
                         includeFilePath: includeFilePath,
-                        usedContainer: usedContainer) // propagate so whole Include tree shares one storage container
+                        usedContainer: usedContainer, // propagate so whole Include tree shares one CoreData container
+                        history: history) // and one visited-file guard, so the tree is one pass
                 }
             }
         }
     }
+    // swiftlint:enable function_parameter_count
 
 }
 
-@available(iOS 18, macOS 15, *)
+/// Tracks which level1.json files this load pass has already visited, so the Include tree cannot
+/// load a file twice or loop forever.
+///
+/// One instance per load pass, created by `Level1JsonReader.load`'s default argument and propagated
+/// down the Include recursion. It shouldn't be a process-global singleton cleared by
+/// `Model.deleteCoreDataObjects`, which made a second pass in one process (and any two tests running
+/// in parallel) trip the duplicate-file error.
 final public class Level1History: Sendable {
 
-    // https://www.avanderlee.com/concurrency/modern-swift-lock-mutex-the-synchronization-framework/
-    // A Set suffices because we only need membership (not order): Set.insert reports whether the
-    // element was already present, collapsing the old contains()/append() into one operation.
-    private let level1History = Mutex<Set<String>>([])
+    // A Set instead of array: we only need membership (not order).
+    // Set.insert reports whether the element was already present,
+    // collapsing the old contains()/append() into one operation.
+    //
+    // OSAllocatedUnfairLock rather than Mutex: now that an instance is threaded through a pass it
+    // appears in `load(...)`'s signature, and this package supports iOS 17. Mutex requires iOS 18,
+    // and a type gated to iOS 18 cannot be a parameter of un-gated public API.
+    // So... consider switching back to Mutex as soon as iOS 17 is no longer supported.
+    private let level1History = OSAllocatedUnfairLock<Set<String>>(initialState: [])
+
+    public init() {}
 
     func isVisitedBefore(fileName: String) -> Bool {
         level1History.withLock { level1History in
