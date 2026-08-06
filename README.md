@@ -54,7 +54,9 @@ Data is loaded from JSON files in three sequential levels. A club can be at any 
 | **2** | Members per club, with roles, status and portfolio links | `Level2JsonReader` |
 | **3** | Image portfolios per member | fetched by the apps, not by this package |
 
-**Level 0 must complete and save before Level 2 starts.** `Expertise` has a uniqueness constraint on `id_`; Level 0 creates expertises with `isSupported=true`, while Level 2's `findCreateUpdateUndefSupported()` creates them with the default `isSupported=false`. Under `mergeByPropertyObjectTrump` whichever context saves last wins per property, so concurrent saves corrupt the flag. Level 1 and Level 2 may run concurrently with each other. The sequencing is the consuming app's responsibility.
+**Level 0 must complete and save before Level 2 starts.** `Expertise` has a uniqueness constraint on `id_`; Level 0 creates expertises with `isSupported=true`, while Level 2's `findCreateUpdateUndefSupported()` creates them with the default `isSupported=false`. Whichever context saves last wins per property, so concurrent saves corrupt the flag. Level 1 and Level 2 may run concurrently with each other.
+
+The sequencing is this package's responsibility, not the consuming app's: `LevelLoader.loadAllLevels(usedContainer:)` runs one complete pass — Level 0 awaited to completion, then Level 1, then every Level 2 club loader concurrently — and returns only after the last loader has finished. An app supplies only the container to load into; the background contexts' merge policy is set here rather than by the app, because the apps used to disagree about it and this invariant depends on the sequencing rather than on the policy (see `MergePolicyTest` for characterizing the behavioral options, and `LevelLoaderTest` for the ordering assertion).
 
 For the semantics of individual entities and the JSON file formats, the [Photo Club Hub README](https://github.com/vdhamer/Photo-Club-Hub/blob/main/.github/README.md) is the detailed reference — it is written for club administrators maintaining the data, and is not duplicated here.
 
