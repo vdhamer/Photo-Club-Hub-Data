@@ -33,6 +33,33 @@ jobs:
           # image has no full Xcode and the plugin cannot produce Photo_Club_Hub.momd.
           xcrun --find momc
 
+      - name: Check the swift-tools-version floor
+        # CompileCoreDataModelPlugin uses the URL-based PackagePlugin API, which is
+        # @available(_PackageDescription 6.1). Below that the plugin will not compile and the build
+        # step reports only "build planning stopped due to build-tool plugin failures" — no file,
+        # no reason. That cost two red runs in August 2026 (issue #15), because 6.1 looks like a
+        # number that should track the release train and was "aligned" down to 6.0. It is not: it
+        # is a hard floor. Checking the manifest here names the cause in seconds.
+        #
+        # If a plugin failure ever appears despite this step, re-run the build with -v: that is the
+        # only way SwiftPM prints the underlying compiler diagnostic.
+        run: |
+          floor=6.1
+          declared="$(sed -n '1s|^//[[:space:]]*swift-tools-version:||p' Package.swift | tr -d '[:space:]')"
+
+          if [ -z "$declared" ]; then
+            echo "::error file=Package.swift,line=1::Could not read a swift-tools-version from line 1."
+            exit 1
+          fi
+
+          # sort -V puts the higher version last, so the declared version is below the floor exactly
+          # when it is not the one that sorts last. (String comparison would get 6.10 vs 6.1 wrong.)
+          if [ "$(printf '%s\n%s\n' "$declared" "$floor" | sort -V | tail -1)" != "$declared" ]; then
+            echo "::error file=Package.swift,line=1::swift-tools-version is ${declared}, but CompileCoreDataModelPlugin requires ${floor} or later. This is a hard floor, not a release-train number — do not align it with the app versions."
+            exit 1
+          fi
+          echo "swift-tools-version ${declared} — at or above the ${floor} floor."
+
       - name: Build
         run: swift build --build-tests
 
