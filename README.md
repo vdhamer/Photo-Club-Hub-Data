@@ -20,7 +20,7 @@ Keeping the data layer in one place removes the roughly 60 files that previously
 ## Adding the dependency
 
 ```swift
-.package(url: "https://github.com/vdhamer/Photo-Club-Hub-Data", .upToNextMinor(from: "2.11.0"))
+.package(url: "https://github.com/vdhamer/Photo-Club-Hub-Data", .upToNextMajor(from: "3.0.0"))
 ```
 
 The repository name and the package name differ (hyphens versus spaces), so consumers need the two-argument product form:
@@ -35,14 +35,22 @@ In Swift source files the module is imported using:
 import Photo_Club_Hub_Data
 ```
 
-## Versioning: a shared release train
+## Versioning
 
-The three repositories share a synchronised `major.minor` "release train"; `patch` numbers float independently per repository.
+This package uses plain [semantic versioning](https://semver.org): **MAJOR** on a change that breaks
+consumers, **MINOR** on additive public API, **PATCH** on fixes. Pin it the ordinary way —
+`.upToNextMajor(from: "3.0.0")`, which is also what Xcode generates by default — and a breaking
+release can never arrive unasked.
 
-- Apps depend via `.upToNextMinor(from:)`, so package **patch** fixes flow into both apps without either app retagging.
-- A **breaking** change to the package's public API bumps the **minor**, which is a deliberate train bump in all three repositories. Purely *additive* public API may ship as a **patch** for as long as this package has a single consumer: the minor-bump convention exists to protect future external consumers pinning a version range, but this isn't relevant yet. Shipping additions as a patch also lets them reach both apps through the existing `.upToNextMinor(from:)` requirements without either app retagging.
+- Very briefly - up to 2.11.x - the three Photo Club Hub repositories shared a version prefix as a "release train",
+  with the compatibility boundary at the second position rather than the first. That made the
+  conventional `.upToNextMajor` pin unsafe for anyone unaware of the local rules, so it was dropped:
+  all three were aligned at **3.0.0** once and their versions float independently from then on. The
+  two apps' versions are labels for their users and say nothing about this package.
 - `PhotoClubHubDataVersion.semver` carries the version programmatically, because SwiftPM code cannot read its own git tag and `Bundle.module` carries no version. The release checklist asserts that this constant matches the tag being pushed; both apps display it, so a stale value misreports which library a binary was built against.
-- This package uses plain [semantic versioning](https://semver.org): MAJOR on a breaking change, MINOR on additive public API, PATCH on fixes. Pin it the ordinary way — `.upToNextMajor(from: "3.0.0")` — which is also what Xcode generates by default. The package carries no build number: it produces no artifact to number, and a candidate is identified by its commit, which your own `Package.resolved` already records. See issue #17.
+- **No build number.** This package produces no artifact to number. A candidate handed to another
+  developer is identified by its commit, which their own `Package.resolved` records automatically —
+  version *and* revision. See issue #17.
 
 ## The three-level JSON data
 
