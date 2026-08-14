@@ -151,6 +151,13 @@ Two known issues:
 - **Run tests serially if you see the suite abort rather than fail.** A process-global test spy can be deinstalled by a concurrently running suite, turning a deliberate `ifDebugFatalError` into a real crash that takes down all 97 tests. Use `swift test --no-parallel` until [#1](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/1) is fixed.
 - **`.xcstrings` is not compiled by `swift build`.** `PhotoClubHubData.xcstrings` lands in the bundle raw, so localized lookups fall back to raw keys on the command line even though they work in Xcode. No current test depends on localized output — but a localization assertion would pass in Xcode and fail in CI, so avoid writing one.
 
+## Technology stack
+
+| Technology           | Description                 | Source |
+| -------------------- | --------------------------- | ------ |
+| [Core Data](https://developer.apple.com/documentation/coredata) | data storage framework | Apple |
+| [SwiftyJSON/SwiftyJSON](https://github.com/SwiftyJSON/SwiftyJSON.git) | JSON parsing | Github |
+
 ## License
 
 MIT — see [LICENSE.md](LICENSE.md).
