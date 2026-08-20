@@ -63,11 +63,11 @@ public struct Settings {
         UserDefaults.standard.bool(forKey: "extraCoreDataSaves") // here we are happy with missing key → false
     }
 
-    public static var showTemplateClubs: Bool { // controlled by toggle in Settings
-        // Instructs the app whether to load TemplateMax.level2.json and TemplateMin.level2.json
-        // It will typically be used by people creating new level2.json files to see what the example files look like
-        UserDefaults.standard.bool(forKey: "showTemplateClubs") // if the key is missing, this returns false
-    }
+    // `showTemplateClubs` used to live here. It read a "showTemplateClubs" key that no Root.plist ever
+    // offered and that nothing ever wrote, so it was permanently false, and it had no call site in this
+    // package or in either consumer. Template clubs are in fact always loaded; whether they are *shown*
+    // is decided in the app by SettingsViewModel.showTemplateClubs, which filters on the club nickname.
+    // Removed in #19.
 
     public static var errorOnCoreDataMerge: Bool { // controlled by toggle in Settings
         // Instructs the app to set CoreData NSManagedObjectContext.mergePolicy to NSMergePolicy.error
