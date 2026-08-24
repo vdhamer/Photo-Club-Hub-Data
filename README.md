@@ -116,7 +116,7 @@ It shells out to whichever `swiftlint` is on `PATH`, falling back to the usual H
 brew install swiftlint
 ```
 
-A missing `swiftlint` is a warning rather than a build failure, so a bare clone and CI still build. Violations are likewise warnings and do not fail the build, matching the apps' behaviour. `.swiftlint.yml` relaxes no rules — it only excludes `.build` and the committed Core Data codegen (see [above](#the-generated-nsmanagedobject-classes-are-committed)).
+A missing `swiftlint` is a warning rather than a build failure, so a bare clone and CI still build. Violations are likewise warnings and do not fail the build, matching the apps' behavior. `.swiftlint.yml` relaxes no rules — it only excludes `.build` and the committed Core Data codegen (see [above](#the-generated-nsmanagedobject-classes-are-committed)).
 
 Two consequences worth knowing:
 

@@ -7,6 +7,45 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
+### 3.0.1 (GitHub commit ???????) 25-08-2026
+
+API
+
+* Removed `Settings.showTemplateClubs`. It read a `showTemplateClubs` key that no `Root.plist` ever offered and that nothing ever wrote, so it was permanently `false`, and it had no call site in this package or in either app. The in-app Maps toggle of the same name is `SettingsViewModel.showTemplateClubs` in Photo-Club-Hub, which is a different switch with its own storage and is unaffected. Removing public API is strictly a MAJOR change, but this one provably had no users (Data#19).
+
+DATA
+
+* Fotoclub Kiekus is in "Wanroij", not "Wanroy" — corrected in `clubsNL16.level1.json` and in the legacy `root.level1.json`. "Wanroij" is the official spelling (Photo-Club-Hub#810).
+* __One-time database reset.__ `town` is part of `OrganizationID`, so on an existing install the spelling fix is not a rename: it creates a second Fotoclub Kiekus row beside the stale one, because obsolete Level 1 records are not pruned yet (Photo-Club-Hub#349). The reset key therefore becomes `dataResetPending301b4666`, which wipes the database once at first launch of app 3.0.1 (4666) and reloads it clean; `dataResetPending292b4657` moves to `prevUserDefaultsKeys`. A consuming app must carry the same string in its `Settings.bundle/Root.plist`.
+
+---------------------------------------------------------------------------
+
+### 3.0.0 (GitHub commit 5813872) 09-08-2026
+
+A renumbering release: no library code changed. The public API is identical to 2.11.4, so upgrading from 2.11.x needs no source changes in a consumer.
+
+VERSIONING
+
+* __The release train is retired.__ Up to 2.11.x the three Photo Club Hub repositories shared a `major.minor` prefix, which put the compatibility boundary in the second position and made the conventional `.upToNextMajor` pin unsafe for anyone unaware of the local rule. All three were aligned at 3.0.0 once; from then on their versions float independently. This package now uses plain semantic versioning — MAJOR breaks consumers, MINOR adds public API, PATCH fixes — and that number is a contract. The two apps' `MARKETING_VERSION`s are labels for their users and say nothing about this package (Photo-Club-Hub#808, Data#17).
+* Consumers pin `.upToNextMajor(from: "3.0.0")`, the range 3.0.0 ..< 4.0.0 and what Xcode generates by default. The previous advice was `.upToNextMinor(from: "2.11.0")`.
+* `PhotoClubHubDataVersion.semver` reads `"3.0.0"`, and its documentation now states the rule: the constant must equal the git tag and is updated in the commit that tags the release.
+* __No build number.__ The package produces no artifact to number. A candidate handed to another developer is identified by its commit, which their `Package.resolved` records automatically — version *and* revision (Data#17).
+
+STRUCTURAL
+
+* CI checks the `swift-tools-version` floor before building. `CompileCoreDataModelPlugin` needs 6.1 for the URL-based `PackagePlugin` API; below that SwiftPM reports only "build planning stopped due to build-tool plugin failures", naming neither file nor reason. That cost two red runs in August 2026 (Data#15). The floor is a hard requirement, not a release-train number, and is not to be aligned with the app versions.
+
+DATA
+
+* `root.level1.json`: the town of Fotoclub Optika changed from "Duerne" to "Deurne", aligning the legacy flat file with the live `clubsNL16.level1.json`, where the same fix landed in February 2026 and was swept by the 2.9.2 database reset (`dataResetPending292b4657`) before it could strand a duplicate. The legacy file is still fetched at runtime by installs older than 2.9.0 — from the copy in the Photo-Club-Hub repo, changed in the same pass (29bbaa1) — and those installs never saw that reset. Since `town` is part of `OrganizationID`, they gain a second Fotoclub Optika row that nothing prunes (Photo-Club-Hub#349). That is the class of change deliberately held back for Wanroij in Photo-Club-Hub#810; this one went out unnoticed.
+
+DOCUMENTATION
+
+* README: the "shared release train" section is replaced by a "Versioning" section describing plain semver, the `.upToNextMajor` pin, and why there is no build number.
+* CLAUDE.md: the Level 1 entry point is `root_.level1.json`, not `root.level1.json`. The latter is the pre-Include legacy file that no current code path loads, but app versions before 2.9.0 still fetch it from GitHub at runtime, so data fixes those versions should see must be applied there too (Photo-Club-Hub#676).
+
+---------------------------------------------------------------------------
+
 ### 2.11.4 (GitHub commit 0d7d09e) 07-08-2026
 
 API
