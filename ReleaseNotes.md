@@ -7,7 +7,7 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
-### 3.0.1 (GitHub commit ???????) 25-08-2026
+### 3.0.1 (GitHub commit 6bc3474) 25-08-2026
 
 API
 
@@ -55,7 +55,7 @@ API
 * Removed `Level1JsonReader.level1History`. Neither app referenced it.
 * Include-file cycles for iOS 17. `Level1History` is no longer restricted to iOS 18 / macOS 15.
 
-BEHAVIOUR
+BEHAVIOR
 
 * Background contexts created for loading always use `mergeByPropertyStoreTrump`. Consuming apps no longer choose: they previously disagreed, and the `Expertise.isSupported` invariant depends on the load sequencing rather than on the merge policy.
 * The visited-file guard against Include loops is now one instance per load pass instead of a process-global singleton. A second pass in the same process no longer reports every Level 1 file as a duplicate, and `Model.deleteCoreDataObjects` no longer has to clear it.
