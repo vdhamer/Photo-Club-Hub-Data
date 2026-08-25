@@ -15,6 +15,18 @@ maintainer and other contributors do not read local planning files.
 - Do not leave parallel local plan files; they go stale and nobody reads them.
 - A short pointer in your own notes/memory is fine, but the content must live in GitHub.
 
+## Use the `swift-concurrency-pro` skill for concurrency work
+
+This package owns the loading of all JSON levels, so it is where the concurrency lives: background
+contexts per level, a task group across Level 2 clubs, and the ordering rules that protect the
+`Expertise` uniqueness constraint. Load the `swift-concurrency-pro` skill (Paul Hudson / twostraws)
+before writing or reviewing any of it.
+
+- It reviews for concurrency correctness, modern API usage, and the usual async/await traps —
+  actor isolation, reentrancy, assumptions about when a `Task` starts.
+- If the skill is not installed in your environment, say so rather than proceeding silently, and
+  state plainly which concurrency questions you could not settle without compiling and testing.
+
 ## The Level 1 entry point is `root_.level1.json`, not `root.level1.json`
 
 `LevelLoader.loadAllLevels()` hardcodes `let fileName = "root_"` (`LevelLoader.swift:52`), so both apps start
