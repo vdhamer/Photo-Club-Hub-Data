@@ -151,6 +151,16 @@ Two known issues:
 - **Run tests serially if you see the suite abort rather than fail.** A process-global test spy can be deinstalled by a concurrently running suite, turning a deliberate `ifDebugFatalError` into a real crash that takes down all 97 tests. Use `swift test --no-parallel` until [#1](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/1) is fixed.
 - **`.xcstrings` is not compiled by `swift build`.** `PhotoClubHubData.xcstrings` lands in the bundle raw, so localized lookups fall back to raw keys on the command line even though they work in Xcode. No current test depends on localized output — but a localization assertion would pass in Xcode and fail in CI, so avoid writing one.
 
+## Cross-repo checks
+
+`.github/workflows/weekly-sweep.yml` runs on GitHub Actions every Monday at 06:17 UTC and checks things no single repository can check on its own. Today that is one job: `scripts/gate-and-stamp.sh` must be byte-identical in Photo-Club-Hub and Photo-Club-Hub-HTML. Both apps stamp their builds with the same script, the two copies have drifted by hand before, and a repository cannot compare itself against a sibling — so the check lives here, in the one thing both apps depend on.
+
+Nothing is added to the package or to its build. The job reads the two app repos over public raw URLs, checks out nothing from this one, and needs no token; it is skipped in forks. A failed scheduled run emails the repository owner, which is how a red sweep gets noticed without anyone watching the Actions tab.
+
+**The file is invisible in Xcode's Project Navigator.** Xcode hides dot-prefixed entries, and a package has no `.xcodeproj` in which to add a file reference — so `.github`, `.swiftlint.yml` and `.gitignore` are all maintained inside Photo Club Hub Data - but shown nowhere. Open it in Xcode using `xed .github/workflows/weekly-sweep.yml`, or (if you want) from an editor that supports YAML syntax highlighting.
+
+A future new check is appended as a **sibling job**, never as an extra step of an existing one: steps stop at the first failure, which would hide every check after it. Candidates are listed at the bottom of the workflow ([#23](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/23)).
+
 ## Technology stack
 
 | Technology           | Description                 | Source |

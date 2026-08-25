@@ -1,0 +1,87 @@
+name: Weekly sweep
+
+# Cross-repo checks that no single repository can make on its own, run on a schedule rather than on
+# a push. This package is the neutral host: it is the only thing both apps depend on, so a check
+# about *the pair* belongs here rather than in either half. Putting a copy in both app repos would
+# mean two workflow files to keep in sync, which is the very problem the first module detects.
+#
+# Design: https://github.com/vdhamer/Photo-Club-Hub-Data/issues/23
+#
+# Adding a module: append a job below. Jobs run in parallel on separate runners and are independent
+# unless linked with `needs:`, so a failing module cannot mask the others and each reports its own
+# pass/fail. Do NOT fold a new check in as an extra step of an existing job: steps are sequential
+# and stop at the first failure, which would hide every check after the first one to break.
+#
+# A check that needs a different cadence gets its own workflow file, rather than one file with
+# several cron lines and jobs gated on `github.event.schedule`.
+#
+# GitHub disables scheduled workflows in a repository with no commits for 60 days, and emails the
+# owner when it does. It also emails on a failed scheduled run, which is how a red sweep gets
+# noticed without anyone watching the Actions tab.
+
+on:
+  schedule:
+    # Mondays 06:17 UTC. Cron here is UTC only, with no DST handling. Deliberately not on the hour:
+    # GitHub delays scheduled runs under load and the top of the hour is where everyone piles up.
+    # Scheduled runs are best-effort, so treat a late or missed sweep as normal.
+    - cron: '17 6 * * 1'
+  workflow_dispatch: # cron only ever runs the copy on the default branch, so this is the way to test
+
+permissions:
+  contents: read
+
+jobs:
+
+  gate-and-stamp-in-sync:
+    name: gate-and-stamp.sh identical in both apps
+    # Skipped in forks, which would otherwise compare a fork's own copy against vdhamer's and fail
+    # over a difference its owner made on purpose. Actions are disabled by default in forks and
+    # `schedule` never fires there at all, so this is belt and braces, but it also documents that a
+    # fork wanting the check on its own pair has one string to edit.
+    if: github.repository == 'vdhamer/Photo-Club-Hub-Data'
+    runs-on: ubuntu-latest
+
+    # No actions/checkout step: nothing in this repository is read. The job compares two other
+    # repos, both public, so no token and no `pull_request_target` are involved either.
+    steps:
+      - name: Fetch both copies
+        run: |
+          fetch() { # $1 = repository name, $2 = local destination
+            url="https://raw.githubusercontent.com/vdhamer/$1/main/scripts/gate-and-stamp.sh"
+            curl -fsSL --retry 3 --retry-delay 5 -H 'Cache-Control: no-cache' "$url" -o "$2" ||
+              { echo "::error::Could not fetch $url"; exit 1; }
+
+            # -f already rejects a 404, but an outage or a proxy can answer 200 with a body that is
+            # not the script. A pass has to mean the two files were compared, not that both were
+            # empty: silence is not success.
+            test -s "$2" ||
+              { echo "::error::$url returned an empty body"; exit 1; }
+            head -1 "$2" | grep -q '^#!' ||
+              { echo "::error::$url does not start with a shebang, so it is not the script"; exit 1; }
+          }
+
+          fetch Photo-Club-Hub      ios.sh
+          fetch Photo-Club-Hub-HTML html.sh
+
+      - name: Compare
+        run: |
+          # Exact match is the contract: the two copies are meant to be byte-identical, and the
+          # comment block inside the script is already worded to suit both repos. If they ever need
+          # to diverge for real, delete this job and say why in the same commit.
+          if diff -u --label 'Photo-Club-Hub/scripts/gate-and-stamp.sh' \
+                     --label 'Photo-Club-Hub-HTML/scripts/gate-and-stamp.sh' \
+                     ios.sh html.sh
+          then
+            echo "The two copies are identical."
+          else
+            # No `file=` on the annotation: neither file lives in this repository, so a path here
+            # would send the reader to something that does not exist.
+            echo "::error::scripts/gate-and-stamp.sh has drifted between the two app repos (diff above)"
+            exit 1
+          fi
+
+  # Future modules would be added here as a new job. Initial candidates (see vdhamer/Photo-Club-Hub-Data/issues/23):
+  #
+  #   level2-json-valid       the *.level2.json files are syntactically valid JSON files
+  #   links-reachable         various URLs inside the Level 1/2 files still work (various websites, portfolios)
+  #   website-inputs-changed  Level 2 data changed since the HTML app last regenerated the static website

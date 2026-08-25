@@ -7,6 +7,14 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
+### 3.0.2 (GitHub commit ???????) ??-09-2026
+
+STRUCTURAL
+
+* __Weekly cross-repo sweep.__ New `.github/workflows/weekly-sweep.yml` runs on a schedule and compares `scripts/gate-and-stamp.sh` in Photo-Club-Hub against the copy in Photo-Club-Hub-HTML, failing when the two differ. They are meant to be byte-identical and nothing enforced that This package hosts the check because it is the only thing both apps depend on, so a check about *the pair* belongs in neither half, and a copy in each app repo would be two more files to keep in sync. Nothing is added to the package or to its build: the job reads only the two app repos, over public raw URLs, and needs no token. Later modules are appended as sibling jobs rather than as extra steps, so one failing check cannot mask another (Data#23).
+
+---------------------------------------------------------------------------
+
 ### 3.0.1 (GitHub commit 6bc3474) 25-08-2026
 
 API
