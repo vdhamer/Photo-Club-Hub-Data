@@ -29,7 +29,7 @@ let package = Package(
                 // "error: Multiple commands produce ... Photo_Club_Hub.momd".
                 "Model/Photo_Club_Hub.xcdatamodeld",
 
-                // Core Data Model Editor state (the colours used when it renders the model as a
+                // Core Data Model Editor state (the colors used when it renders the model as a
                 // diagram). Tool-managed, kept in git, but no reason to ship it in the bundle.
                 // The per-version ConfigurationColors.json/EntityColors.json files live inside the
                 // .xcdatamodeld and are already covered by the exclusion above; this one sits loose

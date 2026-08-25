@@ -83,7 +83,7 @@ import CoreData // for NSManagedObjectContext
     // MARK: - nickname is non-identifying
 
     // The data model constrains identity on (fullName, town), NOT on nickName, so two distinct
-    // organizations are allowed to share a nickname. This pins down that intended behaviour.
+    // organizations are allowed to share a nickname. This pins down that intended behavior.
     // Note: we deliberately do NOT call Organization.find(nickname:) here - with duplicate
     // nicknames it hits ifDebugFatalError, which would crash this (debug) test run.
     @Test("two organizations may share a nickname (nickname is non-identifying)")

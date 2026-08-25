@@ -56,7 +56,7 @@ import Testing
     }
 
     // Matching is case-sensitive: names differing-only-in-case are treated as different files.
-    // (Documents current behaviour — file names in the Include tree are used verbatim.)
+    // (Documents current behavior — file names in the Include tree are used verbatim.)
     @Test("File-name matching is case-sensitive")
     func matchingIsCaseSensitive() {
 

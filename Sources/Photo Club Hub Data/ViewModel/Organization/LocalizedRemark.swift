@@ -76,7 +76,7 @@ extension LocalizedRemark { // expose computed properties (some related to handl
         if let localizedRemark = localizedRemarks.first, localizedRemark.localizedString==localizedString {
             let changed: Bool = localizedRemark.update(bgContext: bgContext, localizedString: localizedString)
             do {
-                if bgContext.hasChanges && Settings.extraCoreDataSaves { // optimisation
+                if bgContext.hasChanges && Settings.extraCoreDataSaves { // optimization
                     try bgContext.save() // persist modifications in PhotoClub record
                 }
             } catch {
@@ -94,7 +94,7 @@ extension LocalizedRemark { // expose computed properties (some related to handl
             localizedRemark.language_ = language
             _ = localizedRemark.update(bgContext: bgContext, localizedString: localizedString)
             do { // robustness in the (illegal?) case of a new localizedRemark without any non-identifying attributes
-                if bgContext.hasChanges && Settings.extraCoreDataSaves { // optimisation
+                if bgContext.hasChanges && Settings.extraCoreDataSaves { // optimization
                     try bgContext.save() // persist modifications in PhotoClub record
                 }
             } catch {

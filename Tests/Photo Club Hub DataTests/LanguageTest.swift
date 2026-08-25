@@ -45,12 +45,12 @@ import CoreData // for NSManagedObjectContext
         let upper = Language.findCreateUpdate(context: viewContext, isoCode: isoCode.uppercased())
 
         #expect(lower === upper) // both resolve to the same object
-        #expect(lower.isoCode == isoCode.lowercased()) // stored code is normalised to lowercase
+        #expect(lower.isoCode == isoCode.lowercased()) // stored code is normalized to lowercase
         #expect(Language.count(context: viewContext, isoCode: isoCode) == 1) // still only one record
     }
 
     // Shipping versions stored uppercase ISO codes, so an upgraded store can hold values the current
-    // normalising setter could never produce. Write isoCode_ directly to reproduce that state: an
+    // normalizing setter could never produce. Write isoCode_ directly to reproduce that state: an
     // exact-match predicate misses the row and findCreateUpdate silently creates a duplicate.
     @Test("findCreateUpdate matches a legacy uppercase row already in the store")
     func matchesLegacyUppercaseRow() {
@@ -58,7 +58,7 @@ import CoreData // for NSManagedObjectContext
 
         let entity = NSEntityDescription.entity(forEntityName: "Language", in: viewContext)!
         let legacy = Language(entity: entity, insertInto: viewContext)
-        legacy.isoCode_ = isoCode.uppercased() // bypasses the normalising isoCode setter on purpose
+        legacy.isoCode_ = isoCode.uppercased() // bypasses the normalizing isoCode setter on purpose
         try? viewContext.save()
 
         let found = Language.findCreateUpdate(context: viewContext, isoCode: isoCode.lowercased())

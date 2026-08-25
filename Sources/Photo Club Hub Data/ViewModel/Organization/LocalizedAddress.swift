@@ -91,7 +91,7 @@ extension LocalizedAddress { // expose computed properties (some related to hand
                                                  newCoordinates: newCoordinates)
 
         do {
-            if bgContext.hasChanges && Settings.extraCoreDataSaves { // optimisation
+            if bgContext.hasChanges && Settings.extraCoreDataSaves { // optimization
                 try bgContext.save()
             }
         } catch {

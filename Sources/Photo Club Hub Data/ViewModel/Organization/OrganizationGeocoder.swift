@@ -13,7 +13,7 @@ import MapKit               // for MKReverseGeocodingRequest
 /// results as `LocalizedAddress` rows in CoreData.
 ///
 /// Lives in the `Photo Club Hub Data` package so both the macOS site generator and the iOS app can
-/// share the caching behaviour: a pair is only sent to Apple's geocoder when its coordinates have
+/// share the caching behavior: a pair is only sent to Apple's geocoder when its coordinates have
 /// changed since the previous run, and results survive across app launches.
 ///
 /// Currently requires macOS 26 / iOS 26 because it relies on `MKReverseGeocodingRequest`;

@@ -12,7 +12,7 @@ import CoreData // for NSManagedObjectContext, NSMergePolicy
 // Data#12: the two consuming apps currently set _different_ merge policies on their background contexts —
 // iOS uses mergeByPropertyStoreTrump, the HTML app mergeByPropertyObjectTrump —
 // and the safety of the Level 0 completes and saves before Level 2 starts" invariant
-// is claimed to depend on merge behaviour.
+// is claimed to depend on merge behavior.
 // Nobody had experimentally check which policy is actually correct, so these tests "measure" it.
 //
 // The collision under test: Level 0 creates an Expertise with `isSupported=true`, while Level 2's
@@ -24,7 +24,7 @@ import CoreData // for NSManagedObjectContext, NSMergePolicy
 // package's own logic. It also does not reproduce a real race: both arms save in a fixed, explicit order,
 // so the outcome is deterministic and this suite adds no flakiness of the kind described in Data#1.
 // Note that when the sequencing works as intended no conflict arises at all — Level 2's fetch finds
-// Level 0's committed row and takes the update path. What is measured here is the backstop behaviour
+// Level 0's committed row and takes the update path. What is measured here is the backstop behavior
 // for when the sequencing is absent or broken.
 //
 // The stakes are lower than the matrix below suggests, for a second reason. Within Level 2 the 14 club
