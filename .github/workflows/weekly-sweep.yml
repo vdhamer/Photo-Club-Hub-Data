@@ -80,8 +80,8 @@ jobs:
             exit 1
           fi
 
-  # Future modules would be added here as a new job. Initial candidates (see vdhamer/Photo-Club-Hub-Data/issues/23):
+  # Future modules would be added here as a new job. Initial candidates:
   #
   #   level2-json-valid       the *.level2.json files are syntactically valid JSON files
   #   links-reachable         various URLs inside the Level 1/2 files still work (various websites, portfolios)
-  #   website-inputs-changed  Level 2 data changed since the HTML app last regenerated the static website
+  #   website-inputs-changed  Level 2 data changed since the HTML app last regenerated the static website (#24)

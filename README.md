@@ -159,7 +159,7 @@ Nothing is added to the package or to its build. The job reads the two app repos
 
 **The file is invisible in Xcode's Project Navigator.** Xcode hides dot-prefixed entries, and a package has no `.xcodeproj` in which to add a file reference — so `.github`, `.swiftlint.yml` and `.gitignore` are all maintained inside Photo Club Hub Data - but shown nowhere. Open it in Xcode using `xed .github/workflows/weekly-sweep.yml`, or (if you want) from an editor that supports YAML syntax highlighting.
 
-A future new check is appended as a **sibling job**, never as an extra step of an existing one: steps stop at the first failure, which would hide every check after it. Candidates are listed at the bottom of the workflow ([#23](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/23)).
+A future new check is appended as a **sibling job**, never as an extra step of an existing one: steps stop at the first failure, which would hide every check after it. Candidates are listed at the bottom of the workflow; the one with a design behind it is [#24](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/24).
 
 ## Technology stack
 
