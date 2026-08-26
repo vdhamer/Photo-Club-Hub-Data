@@ -129,7 +129,7 @@ Two consequences worth knowing:
 swift test
 ```
 
-97 tests in 22 suites, with an in-memory Core Data store per suite.
+99 tests in 24 suites, with an in-memory Core Data store per suite.
 
 ### Tests run against frozen data
 
@@ -146,9 +146,10 @@ Two guardrails keep it that way:
 
 Four Level 2 fixtures cannot take the suffix: `TemplateMin`, `TemplateMax`, `fgDeGender` and `fgWaalre` are loaded through their `*MembersProvider`, which composes the filename from the club's nickname. Their names do exist in production and do resolve, so those four rely on guardrail 1 alone. Keep that in mind when touching provider tests.
 
-Two known issues:
+Three known issues:
 
-- **Run tests serially if you see the suite abort rather than fail.** A process-global test spy can be deinstalled by a concurrently running suite, turning a deliberate `ifDebugFatalError` into a real crash that takes down all 97 tests. Use `swift test --no-parallel` until [#1](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/1) is fixed.
+- **Run tests serially if you see the suite abort rather than fail.** A process-global test spy can be deinstalled by a concurrently running suite, turning a deliberate `ifDebugFatalError` into a real crash that takes down all 99 tests. Use `swift test --no-parallel` until [#1](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/1) is fixed.
+- **The Core Data concurrency trap is not armed here.** `-com.apple.CoreData.ConcurrencyDebug 1` traps cross-queue access to a private-queue context, and the iOS app arms it in its `.xctestplan`. Core Data reads that flag from the launch arguments *before* any test code runs, so a test cannot set it: `UserDefaults.standard.set(...)` reads back true and changes nothing. Nor can it be forwarded — `swift test` parses `-c` itself and rejects it, `xcrun xctest` rejects unrecognized arguments, and a shared Xcode scheme does not carry it for a package. `LoadOrderIndependenceTest` and `LanguageUpgradeInPlaceTest` are multi-context tests that ran with the trap armed while they lived in the app ([#11](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/11)); here they run without it. Migrating to SwiftData ([#6](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/6)) retires the question.
 - **`.xcstrings` is not compiled by `swift build`.** `PhotoClubHubData.xcstrings` lands in the bundle raw, so localized lookups fall back to raw keys on the command line even though they work in Xcode. No current test depends on localized output — but a localization assertion would pass in Xcode and fail in CI, so avoid writing one.
 
 ## Cross-repo checks
