@@ -12,6 +12,7 @@ TO-DO
 STRUCTURAL
 
 * __Weekly cross-repo sweep.__ New `.github/workflows/weekly-sweep.yml` runs on a schedule and compares `scripts/gate-and-stamp.sh` in Photo-Club-Hub against the copy in Photo-Club-Hub-HTML, failing when the two differ. They are meant to be byte-identical and nothing enforced that This package hosts the check because it is the only thing both apps depend on, so a check about *the pair* belongs in neither half, and a copy in each app repo would be two more files to keep in sync. Nothing is added to the package or to its build: the job reads only the two app repos, over public raw URLs, and needs no token. Later modules are appended as sibling jobs rather than as extra steps, so one failing check cannot mask another (Data#23).
+* __UK to US spelling.__ `colours` → `colors`, `optimisation` → `optimization`, `behaviour` → `behavior`, `normalised` → `normalized`, across 8 files including the tests. Comments only: no identifier was renamed, so nothing a consumer can observe changed. Consistency with the US-spelled frameworks the code sits on.
 
 API
 

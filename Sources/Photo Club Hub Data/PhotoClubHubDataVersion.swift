@@ -22,5 +22,5 @@
 public enum PhotoClubHubDataVersion {
 
     /// The version this package ships under, e.g. `"3.0.0"`. Must equal its git tag.
-    public static let semver = "3.0.1"
+    public static let semver = "3.0.2"
 }
