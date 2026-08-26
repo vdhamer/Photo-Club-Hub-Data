@@ -12,7 +12,7 @@ final public class FFCShot71MembersProvider: Sendable {
     // Fire-and-forget: this initializer returns immediately and loads the members asynchronously
     // in the background. Use it from the running app, where the UI simply updates once the data
     // arrives and nothing needs to wait for the loading to finish.
-    public init(bgContext: NSManagedObjectContext,
+    init(bgContext: NSManagedObjectContext,
                 isBeingTested: Bool,
                 useOnlyInBundleFile: Bool,
                 randomTownForTesting: String? = nil) {
@@ -43,7 +43,7 @@ final public class FFCShot71MembersProvider: Sendable {
     // on the data being ready before continuing. The app keeps using `init` (above) instead.
     // Awaiting completion is a join point, not serialization: callers wanting several clubs
     // loaded concurrently fan them out in a `TaskGroup`/`async let` and await the group.
-    public static func load(bgContext: NSManagedObjectContext,
+    static func load(bgContext: NSManagedObjectContext,
                             isBeingTested: Bool,
                             useOnlyInBundleFile: Bool) async {
         let idPlus = OrganizationIdPlus(fullName: "FFC Shot71",

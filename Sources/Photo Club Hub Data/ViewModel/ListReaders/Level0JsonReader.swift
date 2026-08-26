@@ -10,9 +10,9 @@ import SwiftyJSON // for JSON struct
 
 // see root.level0.json for a syntax example
 
-public class Level0JsonReader {
+class Level0JsonReader {
 
-    public init(bgContext: NSManagedObjectContext,
+    init(bgContext: NSManagedObjectContext,
                 fileName: String = "root",  // can overrule the name for unit testing
                 isBeingTested: Bool,
                 useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
@@ -35,7 +35,7 @@ public class Level0JsonReader {
     /// so its runtime behavior stays fire-and-forget. Mirrors `Level1JsonReader.load` (issue #760).
     ///
     /// Level 0 has no `Include` mechanism, so unlike Level 1 there is no fan-out to await afterwards.
-    public static func load(bgContext: NSManagedObjectContext,
+    static func load(bgContext: NSManagedObjectContext,
                             fileName: String = "root",  // can overrule the name for unit testing
                             isBeingTested: Bool,
                             useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub

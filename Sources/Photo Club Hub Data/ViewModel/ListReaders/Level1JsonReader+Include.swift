@@ -109,7 +109,7 @@ final public class Level1History: Sendable {
     // So... consider switching back to Mutex as soon as iOS 17 is no longer supported.
     private let level1History = OSAllocatedUnfairLock<Set<String>>(initialState: [])
 
-    public init() {}
+    init() {}
 
     func isVisitedBefore(fileName: String) -> Bool {
         level1History.withLock { level1History in
@@ -117,7 +117,7 @@ final public class Level1History: Sendable {
         }
     }
 
-    public func clear() {
+    func clear() {
         level1History.withLock { level1History in
             level1History.removeAll()
         }

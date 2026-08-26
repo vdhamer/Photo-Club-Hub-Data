@@ -11,7 +11,7 @@ import SwiftyJSON // for JSON struct
 
 private let organizationTypesToLoad: [OrganizationTypeEnum] = [.club, .museum] // types are loaded one-by-one
 
-public class Level1JsonReader {
+class Level1JsonReader {
 
     /// Fire-and-forget entry point for callers that don't need to know when loading completes
     /// (the sync Level 1 tests and the MapView preview). The app and the Include
@@ -21,7 +21,7 @@ public class Level1JsonReader {
     /// for a file WITHOUT Includes all work then runs in one block on the context's serial queue,
     /// so a caller-issued `bgContext.performAndWait { }` still acts as a completion barrier —
     /// the synchronous Level 1 reader tests rely on exactly that.
-    public init(bgContext: NSManagedObjectContext,
+    init(bgContext: NSManagedObjectContext,
                 fileName: String = "root",  // can overrule the name in tests or in top-level app code
                 isBeingTested: Bool,
                 useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
@@ -75,7 +75,7 @@ public class Level1JsonReader {
     /// (recursively) `Include`s have been processed and saved.
     /// `await`ing this method is the "happens-before" relation the unit tests need;
     /// the app keeps launching it from a `Task {}` so its runtime behavior stays fire-and-forget (issue #760).
-    public static func load(bgContext: NSManagedObjectContext,
+    static func load(bgContext: NSManagedObjectContext,
                             fileName: String = "root",  // can overrule the name in tests or in top-level app code
                             isBeingTested: Bool,
                             useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub

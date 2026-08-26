@@ -13,6 +13,10 @@ STRUCTURAL
 
 * __Weekly cross-repo sweep.__ New `.github/workflows/weekly-sweep.yml` runs on a schedule and compares `scripts/gate-and-stamp.sh` in Photo-Club-Hub against the copy in Photo-Club-Hub-HTML, failing when the two differ. They are meant to be byte-identical and nothing enforced that This package hosts the check because it is the only thing both apps depend on, so a check about *the pair* belongs in neither half, and a copy in each app repo would be two more files to keep in sync. Nothing is added to the package or to its build: the job reads only the two app repos, over public raw URLs, and needs no token. Later modules are appended as sibling jobs rather than as extra steps, so one failing check cannot mask another (Data#23).
 
+API
+
+* __Narrowed the load entry points to `internal`.__ `LevelLoader.loadAllLevels()` is meant to be the way in, but seventeen more `public` load entry points sat beside it: `Level0JsonReader.load()`, `Level1JsonReader.load()`, `Level2JsonReader.load()` and fourteen `*MembersProvider.load()`. Thirty-nine declarations across `ViewModel/ListReaders` and `IndividualClubs` drop to `internal` — not `package`, because all twenty test files use `@testable import` and this is a single-target package, so the wider level would buy nothing. As with Data#19, removing public API is strictly a MAJOR change, but these provably had no users outside the package. It is more than tidiness: a caller could start Level 2 with Level 0 never having run, which is exactly the `Expertise` uniqueness corruption `loadAllLevels()` exists to prevent, so the ordering rule stops being a convention and becomes a guarantee. One consumer had to change — the iOS MapsView preview called `Level1JsonReader`'s fire-and-forget initializer, which also loaded the legacy `root.level1.json` (Photo-Club-Hub#825). `LevelLoader` and `loadAllLevels()` remain public (Data#26).
+
 ---------------------------------------------------------------------------
 
 ### 3.0.1 (GitHub commit 6bc3474) 25-08-2026
