@@ -14,11 +14,11 @@ class Level2JsonReader { // normally running on a background thread
 
     // init() does it all: it fetches the JSON data, parses it, and updates the data stored in Core Data.
     init(bgContext: NSManagedObjectContext,
-                organizationIdPlus: OrganizationIdPlus,
-                isBeingTested: Bool,
-                useOnlyInBundleFile: Bool, // true avoids fetching the latest version from GitHub
-                includeFilePath: [String] = [] // captures recursion path like ["root","museums","museumsNL"]
-               ) {
+         organizationIdPlus: OrganizationIdPlus,
+         isBeingTested: Bool,
+         useOnlyInBundleFile: Bool, // true avoids fetching the latest version from GitHub
+         includeFilePath: [String] = [] // captures recursion path like ["root","museums","museumsNL"]
+        ) {
         _ = FetchAndProcessFile( // FetchAndProcessFile fetches jsonData and passes it to readRootLevel2Json()
                                 bgContext: bgContext,
                                 fileSelector: FileSelector(organizationIdPlus: organizationIdPlus,
@@ -42,11 +42,11 @@ class Level2JsonReader { // normally running on a background thread
     /// cannot use an empty `perform { }` as a completion barrier. Awaiting this method instead is what
     /// gives a sharp completion signal.
     static func load(bgContext: NSManagedObjectContext,
-                            organizationIdPlus: OrganizationIdPlus,
-                            isBeingTested: Bool,
-                            useOnlyInBundleFile: Bool, // true avoids fetching the latest version from GitHub
-                            includeFilePath: [String] = [] // captures recursion path like ["root","museums"]
-                           ) async {
+                     organizationIdPlus: OrganizationIdPlus,
+                     isBeingTested: Bool,
+                     useOnlyInBundleFile: Bool, // true avoids fetching the latest version from GitHub
+                     includeFilePath: [String] = [] // captures recursion path like ["root","museums"]
+                    ) async {
         _ = await FetchAndProcessFile.fetchAndProcess(
             bgContext: bgContext,
             fileSelector: FileSelector(organizationIdPlus: organizationIdPlus,

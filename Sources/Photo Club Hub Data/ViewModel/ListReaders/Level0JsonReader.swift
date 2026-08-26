@@ -13,11 +13,11 @@ import SwiftyJSON // for JSON struct
 class Level0JsonReader {
 
     init(bgContext: NSManagedObjectContext,
-                fileName: String = "root",  // can overrule the name for unit testing
-                isBeingTested: Bool,
-                useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
-                includeFilePath: [String] = [] // captures recursion path like ["root","museums","museumsNL"]
-               ) {
+         fileName: String = "root",  // can overrule the name for unit testing
+         isBeingTested: Bool,
+         useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
+         includeFilePath: [String] = [] // captures recursion path like ["root","museums","museumsNL"]
+        ) {
         _ = FetchAndProcessFile(
             bgContext: bgContext,
             fileSelector: FileSelector(fileName: fileName, isBeingTested: isBeingTested),
@@ -36,11 +36,11 @@ class Level0JsonReader {
     ///
     /// Level 0 has no `Include` mechanism, so unlike Level 1 there is no fan-out to await afterwards.
     static func load(bgContext: NSManagedObjectContext,
-                            fileName: String = "root",  // can overrule the name for unit testing
-                            isBeingTested: Bool,
-                            useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
-                            includeFilePath: [String] = [] // captures recursion path like ["root","museums"]
-                           ) async {
+                     fileName: String = "root",  // can overrule the name for unit testing
+                     isBeingTested: Bool,
+                     useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
+                     includeFilePath: [String] = [] // captures recursion path like ["root","museums"]
+                    ) async {
         _ = await FetchAndProcessFile.fetchAndProcess(
             bgContext: bgContext,
             fileSelector: FileSelector(fileName: fileName, isBeingTested: isBeingTested),

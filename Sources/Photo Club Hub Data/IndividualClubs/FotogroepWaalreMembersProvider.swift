@@ -14,9 +14,9 @@ final public class FotogroepWaalreMembersProvider: Sendable { // WWDC21 Earthqua
     // in the background. Use it from the running app, where the UI simply updates once the data
     // arrives and nothing needs to wait for the loading to finish.
     init(bgContext: NSManagedObjectContext,
-                isBeingTested: Bool,
-                useOnlyInBundleFile: Bool,
-                randomTownForTesting: String? = nil) {
+         isBeingTested: Bool,
+         useOnlyInBundleFile: Bool,
+         randomTownForTesting: String? = nil) {
 
         if isBeingTested {
             guard let randomTownForTesting else {
@@ -45,8 +45,8 @@ final public class FotogroepWaalreMembersProvider: Sendable { // WWDC21 Earthqua
     // Awaiting completion is a join point, not serialization: callers wanting several clubs
     // loaded concurrently fan them out in a `TaskGroup`/`async let` and await the group.
     static func load(bgContext: NSManagedObjectContext,
-                            isBeingTested: Bool,
-                            useOnlyInBundleFile: Bool) async {
+                     isBeingTested: Bool,
+                     useOnlyInBundleFile: Bool) async {
         let idPlus = OrganizationIdPlus(fullName: "Fotogroep Waalre",
                                         town: "Waalre",
                                         nickname: "fgWaalre")

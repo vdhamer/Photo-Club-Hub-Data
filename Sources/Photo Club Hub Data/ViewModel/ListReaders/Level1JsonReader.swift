@@ -22,17 +22,17 @@ class Level1JsonReader {
     /// so a caller-issued `bgContext.performAndWait { }` still acts as a completion barrier —
     /// the synchronous Level 1 reader tests rely on exactly that.
     init(bgContext: NSManagedObjectContext,
-                fileName: String = "root",  // can overrule the name in tests or in top-level app code
-                isBeingTested: Bool,
-                useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
-                includeFilePath: [String] = [], // captures recursion path like ["root","museums","museumsNL"]
-                usedContainer: NSPersistentContainer = PersistenceController.shared.container,
-                // ^ container whose background contexts `Included` files load into; defaults to the app's
-                //   shared store, but tests can inject a private in-memory store for isolation.
-                history: Level1History = Level1History()
-                // ^ visited-file guard for THIS pass; the default gives each top-level call its own,
-                //   and the Include recursion propagates it so one tree shares one guard.
-               ) {
+         fileName: String = "root",  // can overrule the name in tests or in top-level app code
+         isBeingTested: Bool,
+         useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
+         includeFilePath: [String] = [], // captures recursion path like ["root","museums","museumsNL"]
+         usedContainer: NSPersistentContainer = PersistenceController.shared.container,
+         // ^ container whose background contexts `Included` files load into; defaults to the app's
+         //   shared store, but tests can inject a private in-memory store for isolation.
+         history: Level1History = Level1History()
+         // ^ visited-file guard for THIS pass; the default gives each top-level call its own,
+         //   and the Include recursion propagates it so one tree shares one guard.
+        ) {
         var extendedIncludeFilePath: [String] = includeFilePath // copy because parameter itself is `let`
         extendedIncludeFilePath.append(fileName) // extend with extra name
 
@@ -76,17 +76,17 @@ class Level1JsonReader {
     /// `await`ing this method is the "happens-before" relation the unit tests need;
     /// the app keeps launching it from a `Task {}` so its runtime behavior stays fire-and-forget (issue #760).
     static func load(bgContext: NSManagedObjectContext,
-                            fileName: String = "root",  // can overrule the name in tests or in top-level app code
-                            isBeingTested: Bool,
-                            useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
-                            includeFilePath: [String] = [], // recursion path like ["root","museums","museumsNL"]
-                            usedContainer: NSPersistentContainer = PersistenceController.shared.container,
-                            // ^ container whose background contexts `Included` files load into; defaults to the app's
-                            //   shared store, but tests can inject a private in-memory store for isolation.
-                            history: Level1History = Level1History()
-                            // ^ visited-file guard for THIS pass; the default gives each top-level call its own,
-                            //   and the Include recursion propagates it so one tree shares one guard.
-                           ) async {
+                     fileName: String = "root",  // can overrule the name in tests or in top-level app code
+                     isBeingTested: Bool,
+                     useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
+                     includeFilePath: [String] = [], // recursion path like ["root","museums","museumsNL"]
+                     usedContainer: NSPersistentContainer = PersistenceController.shared.container,
+                     // ^ container whose background contexts `Included` files load into; defaults to the app's
+                     //   shared store, but tests can inject a private in-memory store for isolation.
+                     history: Level1History = Level1History()
+                     // ^ visited-file guard for THIS pass; the default gives each top-level call its own,
+                     //   and the Include recursion propagates it so one tree shares one guard.
+                    ) async {
         var extendedIncludeFilePath: [String] = includeFilePath // copy because parameter itself is `let`
         extendedIncludeFilePath.append(fileName)
 
