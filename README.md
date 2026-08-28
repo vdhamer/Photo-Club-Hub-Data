@@ -1,6 +1,10 @@
 # Photo Club Hub Data
 
-[![Tests](https://github.com/vdhamer/Photo-Club-Hub-Data/actions/workflows/tests.yml/badge.svg)](https://github.com/vdhamer/Photo-Club-Hub-Data/actions/workflows/tests.yml)
+[![Version][stable-version]][version-url]
+[![Tests][tests-shield]][tests-url]
+[![Issues][issues-shield]][issues-url]
+[![Discussions][discussions-shield]][discussions-url]
+[![MIT License][license-shield]][license-url]
 
 Swift package with the Core Data model, JSON loaders and value types shared by the Photo Club Hub apps.
 
@@ -174,3 +178,18 @@ A future new check is appended as a **sibling job**, never as an extra step of a
 ## License
 
 MIT — see [LICENSE.md](LICENSE.md).
+
+[stable-version]: https://img.shields.io/github/v/release/vdhamer/Photo-Club-Hub-Data?style=plastic&color=violet
+[version-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/releases
+
+[tests-shield]: https://img.shields.io/github/actions/workflow/status/vdhamer/Photo-Club-Hub-Data/tests.yml?style=plastic&label=tests
+[tests-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/actions/workflows/tests.yml
+
+[issues-shield]: https://img.shields.io/github/issues/vdhamer/Photo-Club-Hub-Data?style=plastic
+[issues-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/issues
+
+[discussions-shield]: https://img.shields.io/github/discussions/vdhamer/Photo-Club-Hub-Data?style=plastic&color=orange
+[discussions-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/discussions
+
+[license-shield]: https://img.shields.io/github/license/vdhamer/Photo-Club-Hub-Data?style=plastic
+[license-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/blob/main/LICENSE.md
