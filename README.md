@@ -2,6 +2,7 @@
 
 [![Version][stable-version]][version-url]
 [![Tests][tests-shield]][tests-url]
+[![Contributors][contributors-shield]][contributors-url]
 [![Issues][issues-shield]][issues-url]
 [![Discussions][discussions-shield]][discussions-url]
 [![MIT License][license-shield]][license-url]
@@ -184,6 +185,9 @@ MIT — see [LICENSE.md](LICENSE.md).
 
 [tests-shield]: https://img.shields.io/github/actions/workflow/status/vdhamer/Photo-Club-Hub-Data/tests.yml?style=plastic&label=tests
 [tests-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/actions/workflows/tests.yml
+
+[contributors-shield]: https://img.shields.io/github/contributors/vdhamer/Photo-Club-Hub-Data?style=plastic
+[contributors-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/graphs/contributors
 
 [issues-shield]: https://img.shields.io/github/issues/vdhamer/Photo-Club-Hub-Data?style=plastic
 [issues-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/issues
