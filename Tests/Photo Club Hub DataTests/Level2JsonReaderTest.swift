@@ -121,7 +121,7 @@ import CoreData // for NSManagedObjectContext
 
         // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
         // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
-        Model.deleteCoreDataObjects(viewContext: viewContext, deletionScope: .expertisesOnly)
+        Model.deleteExpertises(viewContext: viewContext)
         #expect(Expertise.count(context: bgContext) == 0)
 
         let randomTownForTesting = String.random(length: 10)
@@ -166,7 +166,7 @@ import CoreData // for NSManagedObjectContext
 
         // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
         // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
-        Model.deleteCoreDataObjects(viewContext: viewContext, deletionScope: .expertisesOnly) // remove Expertises
+        Model.deleteExpertises(viewContext: viewContext) // remove Expertises
         #expect(Expertise.count(context: bgContext) == 0)
 
         // note that club fgDeGender may already be loaded
