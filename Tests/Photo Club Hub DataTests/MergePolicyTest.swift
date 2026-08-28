@@ -27,8 +27,8 @@ import CoreData // for NSManagedObjectContext, NSMergePolicy
 // Level 0's committed row and takes the update path. What is measured here is the backstop behavior
 // for when the sequencing is absent or broken.
 //
-// The stakes are lower than the matrix below suggests, for a second reason. Within Level 2 the 14 club
-// loaders run concurrently and two of them can interleave a read-then-create for the same new expertise
+// The stakes are lower than the matrix below suggests, for a second reason. Within Level 2 the club
+// loaders all run concurrently and two of them can interleave a read-then-create for the same new expertise
 // — Core Data offers no serializable transaction, so that race is real — but they write *identical*
 // rows, so the constraint deduplicates them and the policy has nothing to arbitrate. Only
 // Level0JsonReader ever writes isSupported=true (via the single call to findCreateUpdateSupported);

@@ -20,12 +20,19 @@ public enum LevelLoader {
     /// - every Level 2 club loader concurrently; returning only once every loader has finished.
     /// In this manner a caller can get a guarantee that a load pass has been fully executed.
     ///
-    /// **Why Level 0 is awaited first.** This ordering is required, not stylistic. `Expertise` has a
-    /// uniqueness constraint on `id_`. Level 0 creates expertises with `isSupported=true`, while Level 2's
-    /// `findCreateUpdateUndefSupported()` submits them with the default `isSupported=false`. Whichever
-    /// context saves later wins per property, so a Level 2 save racing Level 0 corrupts the flag. Awaiting
-    /// Level 0 is what prevents the collision; the merge policy only decides which way an *unsequenced*
-    /// load would fail (see `MergePolicyTest`).
+    /// **Why Level 0 is awaited first.** `Expertise.update()` promotes `isSupported`
+    /// from false to true and never demotes, and `LoadOrderIndependenceTest` checks that a Level-2-
+    /// then-Level-0 sequence reaches the same state as the reverse. The `await` is about contention. `Expertise`
+    /// has a uniqueness constraint on `id_`, and two contexts that cannot see each other's uncommitted
+    /// insert both create a row; the store then settles that collision property by property, after the latching promotion step,
+    /// so a promotion can be dropped (`MergePolicyTest`).
+    ///
+    /// Awaiting Level 0 commits every expertise on its list (with isSupport == true) before the Level 2 runs,
+    /// so those loaders find those rows rather than insert them. What
+    /// is left to insert are ad-hoc expertises that are not on the Level 0 list, where colliding clubs write the same
+    /// value and the constraint deduplicates harmlessly. Same move as `initConstants()` pre-creating the
+    /// contended Language and OrganizationType rows; the merge policy only decides how an *unsequenced*
+    /// load fails.
     ///
     /// Level 1 is awaited too, but only for simplicity: Level 1 and Level 2 may overlap.
     ///
