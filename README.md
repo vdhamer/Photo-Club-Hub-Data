@@ -1,5 +1,7 @@
 # Photo Club Hub Data
 
+[![Tests](https://github.com/vdhamer/Photo-Club-Hub-Data/actions/workflows/tests.yml/badge.svg)](https://github.com/vdhamer/Photo-Club-Hub-Data/actions/workflows/tests.yml)
+
 Swift package with the Core Data model, JSON loaders and value types shared by the Photo Club Hub apps.
 
 Two apps currently depend on this package (the list may grow):
