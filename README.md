@@ -63,7 +63,7 @@ Data is loaded from JSON files in three sequential levels. A club can be at any 
 | **2** | Members per club, with roles, status and portfolio links | `Level2JsonReader` |
 | **3** | Image portfolios per member | fetched by the apps, not by this package |
 
-**Level 0 must complete and save before Level 2 starts.** `Expertise` has a uniqueness constraint on `id_`; Level 0 creates expertises with `isSupported=true`, while Level 2's `findCreateUpdateUndefSupported()` creates them with the default `isSupported=false`. Whichever context saves last wins per property, so concurrent saves corrupt the flag. Level 1 and Level 2 may run concurrently with each other.
+**Level 0 must complete and save before Level 2 starts.** Not because loading out of order would produce a wrong value: `findCreateUpdateUndefSupported()` passes `isSupported: nil` and `Expertise.update()` only ever promotes false to true, so a sequential Level 2 then Level 0 run ends up correct either way (`LoadOrderIndependenceTest`). The rule is about contention on the `id_` uniqueness constraint: two contexts that cannot see each other's uncommitted insert both create a row, and Core Data settles that collision property by property down in the store, where the promote-only logic does not run, so a promotion can be lost (`MergePolicyTest`). Awaiting Level 0 commits the expertises it declares before the Level 2 fan-out, leaving those loaders nothing to insert. Level 1 and Level 2 may run concurrently with each other.
 
 The sequencing is this package's responsibility, not the consuming app's: `LevelLoader.loadAllLevels(usedContainer:)` runs one complete pass — Level 0 awaited to completion, then Level 1, then every Level 2 club loader concurrently — and returns only after the last loader has finished. An app supplies only the container to load into; the background contexts' merge policy is set here rather than by the app, because the apps used to disagree about it and this invariant depends on the sequencing rather than on the policy (see `MergePolicyTest` for characterizing the behavioral options, and `LevelLoaderTest` for the ordering assertion).
 
@@ -129,7 +129,7 @@ Two consequences worth knowing:
 swift test
 ```
 
-99 tests in 24 suites, with an in-memory Core Data store per suite.
+Every suite runs against its own in-memory Core Data store.
 
 ### Tests run against frozen data
 
@@ -148,7 +148,7 @@ Four Level 2 fixtures cannot take the suffix: `TemplateMin`, `TemplateMax`, `fgD
 
 Three known issues:
 
-- **Run tests serially if you see the suite abort rather than fail.** A process-global test spy can be deinstalled by a concurrently running suite, turning a deliberate `ifDebugFatalError` into a real crash that takes down all 99 tests. Use `swift test --no-parallel` until [#1](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/1) is fixed.
+- **Run tests serially if you see the suite abort rather than fail.** A process-global test spy can be deinstalled by a concurrently running suite, turning a deliberate `ifDebugFatalError` into a real crash that takes down the whole suite. Use `swift test --no-parallel` until [#1](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/1) is fixed.
 - **The Core Data concurrency trap is not armed here.** `-com.apple.CoreData.ConcurrencyDebug 1` traps cross-queue access to a private-queue context, and the iOS app arms it in its `.xctestplan`. Core Data reads that flag from the launch arguments *before* any test code runs, so a test cannot set it: `UserDefaults.standard.set(...)` reads back true and changes nothing. Nor can it be forwarded — `swift test` parses `-c` itself and rejects it, `xcrun xctest` rejects unrecognized arguments, and a shared Xcode scheme does not carry it for a package. `LoadOrderIndependenceTest` and `LanguageUpgradeInPlaceTest` are multi-context tests that ran with the trap armed while they lived in the app ([#11](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/11)); here they run without it. Migrating to SwiftData ([#6](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/6)) retires the question.
 - **`.xcstrings` is not compiled by `swift build`.** `PhotoClubHubData.xcstrings` lands in the bundle raw, so localized lookups fall back to raw keys on the command line even though they work in Xcode. No current test depends on localized output — but a localization assertion would pass in Xcode and fail in CI, so avoid writing one.
 

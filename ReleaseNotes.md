@@ -7,6 +7,18 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
+### 3.0.3 (GitHub commit TBD) 28-08-2026
+
+API
+
+* __`DeletionScope.expertisesOnly` is gone.__ `Model.DeletionScope` is public, so all three of its cases were, but `.expertisesOnly` had seven call sites and every one was in this package's own tests: it deletes `Expertise`, `LocalizedExpertise` and `PhotographerExpertise` and returns early, which is a fixture reset rather than anything a client wants. Swift has no per-case access control, so the case could not be narrowed the way Data#26 narrowed the load entry points; instead `DeletionScope` keeps `.standard` and `.all`, and an `internal` `Model.deleteExpertises(viewContext:)` serves the tests. The three deletions moved into a shared private helper, so `deleteCoreDataObjects` and the new entry point cannot drift apart. As with Data#19 and Data#26, removing public API is strictly a MAJOR change, but this case provably had no users outside the package: the apps pass `.all` (Photo-Club-Hub, twice) and `.standard` (Photo-Club-Hub-HTML, once), and neither needs a change (Data#28).
+
+STRUCTURAL
+
+* __New `PhotographerContentionTest`.__ Level 2 files describe one club each, so the fourteen concurrent loaders normally touch disjoint rows. The exception is a photographer who belongs to two clubs: `Photographer` is constrained on `(familyName_, infixName_, givenName_)`, so both files describe the same row. Four tests pin where the field-by-field merge in `Photographer.update()` holds and where it stops. A birthday already in the store survives two clubs that do not mention one — the guarantee that matters, since a file omitting a birthday must never turn a known birthday back into "unknown". A club supplying a different birthday overwrites the stored one, there being no basis to prefer either. Colliding creates leave exactly one row under either save order. And when the row is created twice before either context saves, the merge policy decides the birthday rather than the field rules, so a nil can win: that costs an offered value rather than a stored one, and the next pass acquires it because by then the row exists. `MergePolicyTest` covers the same mechanism on `Expertise`, where awaiting Level 0 removes the collision; nothing pre-creates photographers (Data#22).
+
+---------------------------------------------------------------------------
+
 ### 3.0.2 (GitHub commit 7f2e104) 26-08-2026
 
 STRUCTURAL
