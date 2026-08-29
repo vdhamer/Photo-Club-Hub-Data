@@ -86,7 +86,6 @@
         <attribute name="isSecretary" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="isTreasurer" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="isViceChairman" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
-        <attribute name="latestImageSeen" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="level3URL_" optional="YES" attributeType="URI" elementID="level3URL"/>
         <attribute name="membershipEndDate_" optional="YES" attributeType="Date" usesScalarValueType="NO" elementID="dateIntervalEnd_"/>
         <attribute name="membershipStartDate_" optional="YES" attributeType="Date" usesScalarValueType="NO" elementID="dateIntervalStart_"/>

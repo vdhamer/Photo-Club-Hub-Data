@@ -31,7 +31,6 @@ extension MemberPortfolio {
     @NSManaged nonisolated public var isSecretary: Bool
     @NSManaged nonisolated public var isTreasurer: Bool
     @NSManaged nonisolated public var isViceChairman: Bool
-    @NSManaged nonisolated public var latestImageSeen: Bool
     @NSManaged nonisolated public var level3URL_: URL?
     @NSManaged nonisolated public var membershipEndDate_: Date?
     @NSManaged nonisolated public var membershipStartDate_: Date?
