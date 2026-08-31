@@ -192,6 +192,23 @@ extension Organization {
         localizedAddresses.first { $0.language_ == language } // is that language available? else nil.
     }
 
+    /// The town in `language`, falling back to the unlocalized name the JSON supplied.
+    ///
+    /// A missing `LocalizedAddress` row means the pair has not been reverse-geocoded in that language,
+    /// which for a town is worth nothing extra to say: `town` is a real name ("Waalre"), just not
+    /// translated. Callers get one string and never unwrap.
+    public func localizedTown(for language: Language) -> String {
+        localizedAddress(for: language)?.localizedTown ?? town
+    }
+
+    /// The country in `language`, falling back to `LocalizedAddress.unknownCountry`.
+    ///
+    /// Unlike the town there is no unlocalized country stored on `Organization`, so a missing row
+    /// leaves nothing truthful to show and the placeholder stands in.
+    public func localizedCountry(for language: Language) -> String {
+        localizedAddress(for: language)?.localizedCountry ?? LocalizedAddress.unknownCountry
+    }
+
     // Priority system to choose an item's remark in the appropriate language.
     // The choice depends on the current language settings of the device, and on available translations.
     public var localizedRemark: String {

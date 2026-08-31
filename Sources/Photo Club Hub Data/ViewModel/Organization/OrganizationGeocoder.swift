@@ -185,8 +185,8 @@ public struct OrganizationGeocoder: Sendable {
                 if let error { cont.resume(throwing: error); return }
                 cont.resume(returning: items?.first.map { mapItem in
                     LocalizedAddressStrings(
-                        localizedTown: mapItem.addressRepresentations?.cityName ?? "⏳",
-                        localizedCountry: mapItem.addressRepresentations?.regionName ?? "⏳"
+                        localizedTown: mapItem.addressRepresentations?.cityName ?? LocalizedAddress.unknownTown,
+                        localizedCountry: mapItem.addressRepresentations?.regionName ?? LocalizedAddress.unknownCountry
                     )
                 })
             }

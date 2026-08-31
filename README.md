@@ -88,7 +88,7 @@ Two things about this model are unusual, and both exist so that the package buil
 
 All 14 entities are set to Codegen **Manual/None**, and the 21 files Xcode would otherwise generate live in `Sources/Photo Club Hub Data/ViewModel/CoreDataGenerated/`. A standalone package has no Xcode codegen for bare clones or CI, so these files are the only source of truth.
 
-**Maintenance rule:** any schema change — adding or removing an attribute or relationship — requires hand-updating the matching `+CoreDataProperties.swift`. The `+CoreDataClass.swift` files are static (`class Foo: NSManagedObject {}`) and never need touching.
+**Maintenance rule:** any schema change — adding or removing an attribute or relationship — requires hand-updating the matching `+CoreDataProperties.swift`. Changing an existing attribute's *optionality* does not, as long as its generated property is already an optional reference type: Core Data declares `String` attributes as `String?` whether or not the model marks them optional. The `+CoreDataClass.swift` files are static (`class Foo: NSManagedObject {}`) and never need touching.
 
 ### A build plugin compiles the model
 
