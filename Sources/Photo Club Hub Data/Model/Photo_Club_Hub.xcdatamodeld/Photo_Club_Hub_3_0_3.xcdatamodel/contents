@@ -36,8 +36,8 @@
         <userInfo/>
     </entity>
     <entity name="LocalizedAddress" representedClassName="LocalizedAddress" syncable="YES">
-        <attribute name="localizedCountry_" attributeType="String" defaultValueString="Country?"/>
-        <attribute name="localizedTown_" attributeType="String" defaultValueString="Town?"/>
+        <attribute name="localizedCountry_" optional="YES" attributeType="String"/>
+        <attribute name="localizedTown_" optional="YES" attributeType="String"/>
         <attribute name="prevLatitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="prevLongitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="language_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Language" inverseName="localizedAddresses_" inverseEntity="Language"/>
