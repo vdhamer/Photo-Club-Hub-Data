@@ -46,8 +46,19 @@ extension LocalizedAddress { // expose computed properties (some related to hand
         }
     }
 
-    var localizedTown: String { localizedTown_ ?? "" }
-    var localizedCountry: String { localizedCountry_ ?? "" }
+    /// Shown when a row exists but carries no usable name, which happens when Apple returns a placemark
+    /// without a city or region for the coordinates. This can occur for coordinates like (0,0) which are in the moddle of an ocean?
+    /// A *missing row* is a different question — "not geocoded yet for that language" —
+    /// and is answered by `Organization.localizedTown(for:)`.
+    ///
+    /// These are the single source for the placeholder text. The Core Data attributes are optional and
+    /// carry no `defaultValueString`, so a nil reaches these getters rather than a second spelling of
+    /// the same idea stored in the model.
+    public static let unknownTown = "Town?" // just naming a constant
+    public static let unknownCountry = "Country?" // just naming a constant
+
+    public var localizedTown: String { localizedTown_ ?? Self.unknownTown }
+    public var localizedCountry: String { localizedCountry_ ?? Self.unknownCountry }
 
     // MARK: - find (if it exists) or create (if it doesn't exist) a LocalizedAddress
 
