@@ -16,35 +16,29 @@ extension Level1JsonReader {
     /// and loading exists because this runs inside the parent's synchronous `perform` block, where
     /// the concurrent include fan-out cannot be awaited (issue #760); `loadIncludes` does that part.
     ///
-    /// If the app has been built in Debug mode, an entry that isn't a valid URL emits a debug fatal error.
-    /// If the app has been built in Release mode, invalid URL → array element is silently ignored.
+    /// Validation lives in `Level1Source.init(urlString:)`, which throws a `Level1URLError` naming the
+    /// validation rule that was broken. In Debug an unusable entry emits a debug fatal error; in Release it is
+    /// silently skipped, and the remaining entries still load.
     ///
     /// - Parameter jsonRoot: The parsed SwiftyJSON root object that holds the content of a Level 1 JSON file.
-    /// - Returns: The base names of the files to include (e.g. ["clubsNL", "museums"]).
-    @Sendable static func extractIncludeNames(from jsonRoot: JSON) -> [String] {
+    /// - Returns: The files to include, each carrying the URL to fetch and the file name it derives
+    ///   from that URL (e.g. "clubsNL" alongside its full URL).
+    @Sendable static func extractIncludes(from jsonRoot: JSON) -> [Level1Source] {
         let includeJSONs: [JSON] = jsonRoot["level1Header"]["level1URLIncludes"].arrayValue
-        var includeNames: [String] = []
+        var includes: [Level1Source] = []
 
         for includeJSON in includeJSONs {
-            let includeURLoptional: URL? = URL(string: includeJSON.stringValue)
-            guard let includeURL: URL = includeURLoptional else {
-                ifDebugFatalError("Included level1URL <\(includeJSON.stringValue)> is not a valid URL")
+            do {
+                includes.append(try Level1Source(urlString: includeJSON.stringValue))
+            } catch {
+                // Unchanged reaction: complain loudly in Debug, skip the entry in Release. What is new is
+                // that the thrown case says which rule the entry broke, so the message no longer has to be
+                // written out per guard.
+                ifDebugFatalError("Unusable level1URLInclude: \(error)")
                 continue
             }
-            let includeNameSegments: [Substring] = includeURL.lastPathComponent.split(separator: ".")
-            guard includeNameSegments.isEmpty == false else {
-                ifDebugFatalError("level1URLIncludes contains an empty string")
-                continue
-            } // if it is an empty string, just ignore
-            guard includeNameSegments.count >= 3, // avoid index-out-of-bounds on e.g. "museums.json"
-                  includeNameSegments[1].lowercased() == "level1",
-                  includeNameSegments[2].lowercased() == "json" else {
-                ifDebugFatalError("level1URLInclude does not end with level1.json")
-                continue
-            }
-            includeNames.append(String(includeNameSegments[0])) // the guards ensure there must be an element [0]
         }
-        return includeNames
+        return includes
     }
 
     // swiftlint:disable function_parameter_count
@@ -53,35 +47,38 @@ extension Level1JsonReader {
     /// have finished. This __task group__ is the structured replacement for the old fire-and-forget
     /// recursion (issue #760): it keeps the includes loading concurrently AND gives `load(...)` a
     /// join point, so "a file's load isn't done until all its spawned child Includes are done".
-    static func loadIncludes(_ includeNames: [String],
+    static func loadIncludes(_ includes: [Level1Source],
                              isBeingTested: Bool,
                              useOnlyInBundleFile: Bool,
                              includeFilePath: [String], // used to detect loops for error checking
                              /// Tests can inject a private in-memory store for isolation,
                              /// particularly to ensure all included files use the same Core Data store/database.
                              usedContainer: NSPersistentContainer,
-                             history: Level1History) async {
-        guard includeNames.isEmpty == false else { return }
+                             history: Level1History,
+                             allowBundleFallback: Bool = true) async {
+        guard includes.isEmpty == false else { return }
 
         // NSPersistentContainer is Sendable (unlike NSManagedObjectContext), so the @Sendable
         // child-task closures may capture it directly; creating background contexts is thread-safe.
         // "A [task] group always waits for all of its child tasks to complete before it returns."
         await withDiscardingTaskGroup { group in // discarding: child tasks return no results
-            for includeName in includeNames {
+            for include in includes {
                 group.addTask {
-                    print("Will load included file \(includeName).level1.json on a new background task")
+                    print("Will load included file \(include.fileName).level1.json on a new background task")
 
-                    let bgContext = LevelLoader.makeBgContext(ctxName: "Level 1 loader for \(includeName)",
+                    let bgContext = LevelLoader.makeBgContext(ctxName: "Level 1 loader for \(include.fileName)",
                                                               usedContainer: usedContainer)
 
                     await Level1JsonReader.load( // recursively traverse Include tree
                         bgContext: bgContext,
-                        fileName: includeName,
+                        fileName: include.fileName,
                         isBeingTested: isBeingTested,
                         useOnlyInBundleFile: useOnlyInBundleFile,
                         includeFilePath: includeFilePath,
                         usedContainer: usedContainer, // propagate so whole Include tree shares one CoreData container
-                        history: history) // and one visited-file guard, so the tree is one pass
+                        history: history, // and one visited-file guard, so the tree is one pass
+                        explicitRemoteURL: include.url, // fetch where the file says it lives
+                        allowBundleFallback: allowBundleFallback) // inherited: an external tree has no in-app copy
                 }
             }
         }
@@ -124,4 +121,69 @@ final public class Level1History: Sendable {
 
     }
 
+}
+
+/// Why a string cannot be used as a Level 1 file reference.
+///
+/// Distinct cases rather than a `Bool`, because the reason is shown to a user: Photo-Club-Hub#829 reports
+/// a rejected Settings URL through the app's own `EmptyListReason`, where "that will not work" is a worse
+/// message than naming the rule the URL broke.
+enum Level1URLError: Error, Sendable {
+    case notAValidURL(String)
+    case notHTTPS(URL)
+    case notALevel1FileName(URL)
+}
+
+/// A validated reference to one Level 1 file: where it lives, and the file name that follows from it.
+///
+/// Covers both kinds of reference — an entry of a `level1URLIncludes` array, and the custom root a user
+/// names in Settings (Photo-Club-Hub#829) — which is why it is not called `Level1Include`. A run has one
+/// root and any number of includes, so the include case is the common one but not the only one.
+///
+/// Both fields are needed because they answer different questions. The URL is fetched, which is what lets
+/// an Include tree live outside this project. The file name resolves the embedded copy used when the
+/// network is unavailable, and identifies the file in the visited-file guard and in log messages.
+///
+/// `fileName` is derived rather than supplied, so the two cannot disagree. It is stored rather than
+/// computed because every reference is read three times — the log line, the background context's name,
+/// and the recursive `load` call — while the URL it comes from never changes.
+///
+/// `fileName` names a *group* of organizations here — "clubsNL", "museums" — unlike the Level 2 file name,
+/// which `FileSelector` derives from a single organization's `nickName`.
+///
+/// Deliberately `internal`. The app half of Photo-Club-Hub#829 will want it for validating the Settings
+/// field, and that is the moment to widen it — public API with no user outside the package is what
+/// Data#19, Data#26 and Data#28 spent three releases removing.
+struct Level1Source: Sendable {
+    let url: URL
+    let fileName: String
+
+    /// Parses and validates `urlString`, then derives the file name from it.
+    ///
+    /// - Throws: `Level1URLError.notAValidURL` if the string is not a URL at all,
+    ///   `.notHTTPS` if it uses any other scheme, or `.notALevel1FileName` if the last path component is
+    ///   not of the form `<name>.level1.json`.
+    init(urlString: String) throws {
+        guard let url = URL(string: urlString) else { throw Level1URLError.notAValidURL(urlString) }
+        guard url.scheme?.lowercased() == "https" else { throw Level1URLError.notHTTPS(url) }
+
+        let segments: [Substring] = url.lastPathComponent.split(separator: ".")
+        guard segments.count >= 3, // avoid index-out-of-bounds on e.g. "museums.json"
+              segments[1].lowercased() == "level1",
+              segments[2].lowercased() == "json" else {
+            throw Level1URLError.notALevel1FileName(url)
+        }
+
+        self.url = url
+        self.fileName = Self.fileName(of: url) // one derivation, shared with the custom-root path
+    }
+
+    /// The file name of a level1.json URL: "clubsNL" from ".../clubsNL.level1.json".
+    ///
+    /// Also used for the custom Level 1 root, which reaches `LevelLoader` as a bare URL the app has
+    /// already validated. The fallback therefore covers only a URL with nothing before the first dot,
+    /// which neither caller can currently produce (Photo-Club-Hub#829).
+    static func fileName(of url: URL) -> String {
+        url.lastPathComponent.split(separator: ".").first.map(String.init) ?? "customLevel1Root"
+    }
 }
