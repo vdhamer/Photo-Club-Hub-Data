@@ -7,6 +7,18 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
+### 3.3.0 (GitHub commit ???????) ??-09-2026
+
+API
+
+* __`Organization.localizedTown` and `Organization.localizedCountry` are gone.__ Each was a single untagged string per organization: one slot, so "the Dutch name" and "the English name" could not both exist, and nothing recorded which was stored. `LocalizedAddress` has modelled this properly for some time — one row per (organization × language) — and both apps moved onto it in Photo-Club-Hub#827. What made removal worth doing rather than merely tidy is that they had become misleading: since nothing writes the underlying column any more, the getter returned its Core Data default, `"Town?"`, for every organization, permanently, while sitting beside the correct `localizedTown(for:)` and being shorter to type. That is the trap shape that cost Photo-Club-Hub#825. Removing public API is strictly MAJOR, but neither app referenced these, so it is treated as MINOR on the same reasoning as Data#19, Data#26 and Data#28 (Data#40).
+
+STRUCTURAL
+
+* __New Core Data model version `Photo_Club_Hub_3_3_0`,__ with `localizedTownDepr_` and `localizedCountryDepr_` removed from `Organization`. Dropping attributes is compatible with lightweight migration, so no mapping model is needed; a store in the field migrates on first launch after a consumer's version pin moves, and no data is lost because nothing has read those columns since 3.1.0. `Photo_Club_Hub_3_2_0` is untouched, being shipped. The matching entries in `Organization+CoreDataProperties.swift` were removed by hand, as the model's Manual/None codegen requires. `LocalizedAddress.localizedTown_` and `localizedCountry_` are unaffected — they differ from the removed names only by the `Depr_` suffix, and they are the working mechanism.
+
+---------------------------------------------------------------------------
+
 ### 3.2.0 (GitHub commit 854c1ef) 01-09-2026
 
 STRUCTURAL
