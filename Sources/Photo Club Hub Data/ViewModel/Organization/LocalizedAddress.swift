@@ -47,7 +47,8 @@ extension LocalizedAddress { // expose computed properties (some related to hand
     }
 
     /// Shown when a row exists but carries no usable name, which happens when Apple returns a placemark
-    /// without a city or region for the coordinates. This can occur for coordinates like (0,0) which are in the moddle of an ocean?
+    /// without a city or region for the coordinates. That can happen for coordinates like (0,0),
+    /// which are in the middle of an ocean.
     /// A *missing row* is a different question — "not geocoded yet for that language" —
     /// and is answered by `Organization.localizedTown(for:)`.
     ///
