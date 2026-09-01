@@ -80,7 +80,7 @@ For the semantics of individual entities and the JSON file formats, the [Photo C
 
 ## Core Data model
 
-The model lives at `Sources/Photo Club Hub Data/Model/Photo_Club_Hub.xcdatamodeld` and has 14 entities across 37 versioned schema revisions. The container name is `"Photo_Club_Hub"` and must stay that way: existing iOS installations upgrade their store in place.
+The model lives at `Sources/Photo Club Hub Data/Model/Photo_Club_Hub.xcdatamodeld`. The container name is `"Photo_Club_Hub"` and must stay that way: existing iOS installations upgrade their store in place.
 
 **Version names track this package's release, not the app's.** A version is named for the release it ships in — `Photo_Club_Hub_3_1_0` for package 3.1.0 — which is why the newest name can be well ahead of the newest *schema change*: several versions have content identical to their predecessor. That is deliberate. A shipped version must stay immutable, because stores in the field are matched by hash and editing one in place breaks automatic migration, so every release gets a fresh container to edit and duplicate content is the cheap price. The numbering earlier followed the app's releases, a leftover of the retired release train (Photo-Club-Hub#808); there is no `3_0_0`, because none was created at the time (Data#31).
 
@@ -88,7 +88,7 @@ Two things about this model are unusual, and both exist so that the package buil
 
 ### The generated NSManagedObject classes are committed
 
-All 14 entities are set to Codegen **Manual/None**, and the 21 files Xcode would otherwise generate live in `Sources/Photo Club Hub Data/ViewModel/CoreDataGenerated/`. A standalone package has no Xcode codegen for bare clones or CI, so these files are the only source of truth.
+Every entity is set to Codegen **Manual/None**, and the files Xcode would otherwise generate live in `Sources/Photo Club Hub Data/ViewModel/CoreDataGenerated/`. A standalone package has no Xcode codegen for bare clones or CI, so these files are the only source of truth.
 
 **Maintenance rule:** any schema change — adding or removing an attribute or relationship — requires hand-updating the matching `+CoreDataProperties.swift`. Changing an existing attribute's *optionality* does not, as long as its generated property is already an optional reference type: Core Data declares `String` attributes as `String?` whether or not the model marks them optional. The `+CoreDataClass.swift` files are static (`class Foo: NSManagedObject {}`) and never need touching.
 
@@ -109,7 +109,7 @@ The entity diagrams in the Photo Club Hub README are **not** produced by Xcode. 
 Two consequences worth knowing before touching anything in the model directory:
 
 1. **`Level0`, `Level1`, `Level2` and `Level3` are placeholder entities. Do not delete them.** They only exist so the diagrams can show a legend that maps levels to their colors in the diagram.
-2. **`EntityPositions.json`, `ConfigurationColors.json` and `EntityColors.json` are that app's saved state** — 70 files, tracked in git so the layout and layer coloring persists and can be shared across machines.`
+2. **`EntityPositions.json`, `ConfigurationColors.json` and `EntityColors.json` are that app's saved state** — two per model version, tracked in git so the layout and layer coloring persists and can be shared across machines.`
 
 ## Developing app and package together
 

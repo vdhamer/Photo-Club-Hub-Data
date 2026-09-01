@@ -7,6 +7,18 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
+### 3.2.0 (GitHub commit ???????) ??-09-2026
+
+STRUCTURAL
+
+* __New Core Data model version `Photo_Club_Hub_3_2_0`.__ Byte-identical to `3_1_0`: this release changes no schema, and a version is created per release regardless so that the model name never lags the version shipping it. A shipped version must stay immutable, because stores in the field are matched by hash, so 3_1_0 is left untouched and a fresh container is opened for the next schema change to edit.
+
+API
+
+* __`LocalizedAddressStrings` is now `LocalizedAddressFields`.__ The plural read as "one string per language", which is the one axis this type does not vary on: it carries the town and the country of *one* address in *one* language, and the per-language dimension is the `LocalizedAddress` rows themselves. "Fields" also survives a third field — a region or a postcode would leave `LocalizedTownCountry` needing another rename. The parameter label follows, `newLocalizedAddressStrings:` becoming `newLocalizedAddressFields:`, keeping its pairing with `newCoordinates:`. Renaming public API is strictly MAJOR, but this type was published two hours earlier in 3.1.0 with no consumer outside this package, so it is treated as MINOR on the same reasoning as Data#19, Data#26 and Data#28. Note that neither MINOR nor PATCH would have protected a consumer here — both are adopted automatically under the `.upToNextMajor(from: "3.0.0")` pin the README recommends — so the number is a statement about what changed rather than a shield (Photo-Club-Hub#827).
+
+---------------------------------------------------------------------------
+
 ### 3.1.0 (GitHub commit 2f34b04) 01-09-2026
 
 API

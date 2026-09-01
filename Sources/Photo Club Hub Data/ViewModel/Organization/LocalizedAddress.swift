@@ -70,7 +70,7 @@ extension LocalizedAddress { // expose computed properties (some related to hand
     public static func findCreateUpdate(bgContext: NSManagedObjectContext,
                                         organization: Organization, // part of unique identifier
                                         language: Language, // part of unique identifier
-                                        newLocalizedAddressStrings: LocalizedAddressStrings,
+                                        newLocalizedAddressFields: LocalizedAddressFields,
                                         newCoordinates: CLLocationCoordinate2D
                                 ) -> Bool { // true if something got updated (or created?)
 
@@ -99,7 +99,7 @@ extension LocalizedAddress { // expose computed properties (some related to hand
 
         // At this point, localizedAddress has the required ID, but could have outdated coordinates or localized strings
         // Adjusting these non-ID properties is handled in update()
-        let hasChanged = localizedAddress.update(newLocalizedAddressStrings: newLocalizedAddressStrings,
+        let hasChanged = localizedAddress.update(newLocalizedAddressFields: newLocalizedAddressFields,
                                                  newCoordinates: newCoordinates)
 
         do {
@@ -113,15 +113,15 @@ extension LocalizedAddress { // expose computed properties (some related to hand
         return hasChanged
     }
 
-    private func update(newLocalizedAddressStrings: LocalizedAddressStrings,
+    private func update(newLocalizedAddressFields: LocalizedAddressFields,
                         newCoordinates: CLLocationCoordinate2D) -> Bool {
         var changed = false
-        if self.localizedTown_ != newLocalizedAddressStrings.localizedTown {
-            self.localizedTown_ = newLocalizedAddressStrings.localizedTown
+        if self.localizedTown_ != newLocalizedAddressFields.localizedTown {
+            self.localizedTown_ = newLocalizedAddressFields.localizedTown
             changed = true
         }
-        if self.localizedCountry_ != newLocalizedAddressStrings.localizedCountry {
-            self.localizedCountry_ = newLocalizedAddressStrings.localizedCountry
+        if self.localizedCountry_ != newLocalizedAddressFields.localizedCountry {
+            self.localizedCountry_ = newLocalizedAddressFields.localizedCountry
             changed = true
         }
         if self.prevCoordinates != newCoordinates {
@@ -144,7 +144,10 @@ extension LocalizedAddress { // expose computed properties (some related to hand
 
 }
 
-public struct LocalizedAddressStrings: Sendable { // only used to decrease parameter count in a function by one
+/// The two non-identifying fields of a `LocalizedAddress`, bundled so `findCreateUpdate` stays within
+/// SwiftLint's parameter limit. "Fields" rather than "Strings": these are the parts of *one* address in
+/// *one* language, not the same address across languages — that dimension is the `LocalizedAddress` rows.
+public struct LocalizedAddressFields: Sendable {
     public let localizedTown: String // e.g. "Parijs" (NL) or "Paris" (EN)
     public let localizedCountry: String // e.g. "Frankrijk" (NL) or "France" (EN)
 

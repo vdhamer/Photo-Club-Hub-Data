@@ -76,7 +76,7 @@ public struct OrganizationGeocoder: Sendable {
         while !queue.isEmpty {
             var item = queue.removeFirst()
             do {
-                guard let addressStrings = try await reverseGeocode(item) else { continue } // no placemark: drop item
+                guard let addressFields = try await reverseGeocode(item) else { continue } // no placemark: drop item
 
                 let coords = CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)
                 let organizationObjectID = item.organizationObjectID // immutable copy so the closure
@@ -90,7 +90,7 @@ public struct OrganizationGeocoder: Sendable {
                     LocalizedAddress.findCreateUpdate(bgContext: bgContext,
                                                       organization: org,
                                                       language: language,
-                                                      newLocalizedAddressStrings: addressStrings,
+                                                      newLocalizedAddressFields: addressFields,
                                                       newCoordinates: coords)
                 }
                 // The queue is ordered organization-major (all languages of one organization
@@ -175,7 +175,7 @@ public struct OrganizationGeocoder: Sendable {
 
     /// Issues a single `MKReverseGeocodingRequest` for the given work item and returns the
     /// localized town and country strings, or `nil` if the geocoder found no result.
-    private func reverseGeocode(_ item: GeocodeWorkItem) async throws -> LocalizedAddressStrings? {
+    private func reverseGeocode(_ item: GeocodeWorkItem) async throws -> LocalizedAddressFields? {
         let location = CLLocation(latitude: item.latitude, longitude: item.longitude)
         guard let request = MKReverseGeocodingRequest(location: location) else { return nil }
         request.preferredLocale = Locale(identifier: item.languageCode)
@@ -184,7 +184,7 @@ public struct OrganizationGeocoder: Sendable {
             request.getMapItems { items, error in
                 if let error { cont.resume(throwing: error); return }
                 cont.resume(returning: items?.first.map { mapItem in
-                    LocalizedAddressStrings(
+                    LocalizedAddressFields(
                         localizedTown: mapItem.addressRepresentations?.cityName ?? LocalizedAddress.unknownTown,
                         localizedCountry: mapItem.addressRepresentations?.regionName ?? LocalizedAddress.unknownCountry
                     )
