@@ -22,7 +22,7 @@ class Level1JsonReader {
     /// so a caller-issued `bgContext.performAndWait { }` still acts as a completion barrier —
     /// the synchronous Level 1 reader tests rely on exactly that.
     init(bgContext: NSManagedObjectContext,
-         fileName: String = "root",  // can overrule the name in tests or in top-level app code
+         fileName: String, // no default: "root" names the legacy flat file (Data#45)
          isBeingTested: Bool,
          useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
          includeFilePath: [String] = [], // captures recursion path like ["root","museums","museumsNL"]
@@ -76,7 +76,7 @@ class Level1JsonReader {
     /// `await`ing this method is the "happens-before" relation the unit tests need;
     /// the app keeps launching it from a `Task {}` so its runtime behavior stays fire-and-forget (issue #760).
     static func load(bgContext: NSManagedObjectContext,
-                     fileName: String = "root",  // can overrule the name in tests or in top-level app code
+                     fileName: String, // no default: "root" names the legacy flat file (Data#45)
                      isBeingTested: Bool,
                      useOnlyInBundleFile: Bool, // true can be used to avoid publishing a test file to GitHub
                      includeFilePath: [String] = [], // recursion path like ["root","museums","museumsNL"]
