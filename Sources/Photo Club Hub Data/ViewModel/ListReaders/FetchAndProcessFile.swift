@@ -164,7 +164,6 @@ struct FetchAndProcessFile {
                               \(fileSelector.fileName).\(fileSubType).\(fileType). \
                               Might be a filename or branch problem.
                               """)
-            print("ERROR: Couldn't load \(nameWithSubtype).\(fileType) from bundle.")
             return nil
         }
 
