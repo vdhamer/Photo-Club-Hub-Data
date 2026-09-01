@@ -15,6 +15,43 @@ struct FileFetchOptions: Sendable {
     let useOnlyInBundleFile: Bool // if true, skip the remote fetch and only read from the bundle
     let isBeingTested: Bool       // forwarded to the processor to adjust behavior during tests
     let includeFilePath: [String] // recursion path like ["root","museums"]; used to detect loops
+
+    /// Complete URL to fetch, instead of composing one from `dataSourcePath` and the file name (#829).
+    /// Set once Level 1 Includes are honored as written, so it applies to this project's own files as
+    /// well as any special cases ("cat photos").
+    let explicitRemoteURL: URL?
+
+    /// Whether an embedded copy may stand in when the remote read fails. False for data outside this
+    /// project: such a file, sharing a name with a bundled one, would otherwise serve this project's
+    /// clubs in place of the data that was actually requested (#829).
+    let allowBundleFallback: Bool
+
+    /// Written out rather than relying on the memberwise initializer: Swift omits `let` properties that
+    /// have a default value, so `explicitRemoteURL` and `allowBundleFallback` would be defaulted but
+    /// unsettable. It can go once no stored property needs a default — Data#44 removes one of the two,
+    /// Data#42 the other, by making the caller always supply a URL.
+    init(fileType: String,
+         fileSubType: String,
+         useOnlyInBundleFile: Bool,
+         isBeingTested: Bool,
+         includeFilePath: [String],
+         explicitRemoteURL: URL? = nil,
+         allowBundleFallback: Bool = true) {
+        // Temporary stand-in for Data#44, which replaces both flags with one source-policy enum. "Only use the
+        // bundle" and "the bundle may not stand in" cannot both hold: the remote read is skipped and the
+        // only remaining source is refused, so nothing is left to load and the failure is silent (#829).
+        if useOnlyInBundleFile && !allowBundleFallback {
+            ifDebugFatalError("Unsupported combination: useOnlyInBundleFile requires allowBundleFallback")
+        }
+
+        self.fileType = fileType
+        self.fileSubType = fileSubType
+        self.useOnlyInBundleFile = useOnlyInBundleFile
+        self.isBeingTested = isBeingTested
+        self.includeFilePath = includeFilePath
+        self.explicitRemoteURL = explicitRemoteURL
+        self.allowBundleFallback = allowBundleFallback
+    }
 }
 
 /// Retrieves a data file from a remote source with a local bundle fallback and
@@ -119,24 +156,44 @@ struct FetchAndProcessFile {
         // `<Package>_<Target>.bundle`). Resolve at runtime across both layouts so both repos use the same code.
         let fileInBundleURL: URL? = Self.urlForBundledResource(nameWithSubtype, withExtension: fileType)
 
-        guard fileInBundleURL != nil else {
+        // A missing bundled copy is a build mistake only when the bundle is a possible source. Data from
+        // outside this project has no embedded counterpart by definition, so absence is expected there.
+        if fileFetchOptions.allowBundleFallback && fileInBundleURL == nil {
             ifDebugFatalError("""
                               Failed to find internal URL for \
                               \(fileSelector.fileName).\(fileSubType).\(fileType). \
                               Might be a filename or branch problem.
                               """)
-            print("ERROR: Couldn't load \(nameWithSubtype).\(fileType) from bundle.")
             return nil
         }
 
         let fileName = fileSelector.fileName
-        let data = getData( // get the data from one of the two sources
-            remoteFileURL: URL(string: Self.dataSourcePath + fileName // e.g., "fgDeGender" or "root"
-                               + "." + fileSubType // e.g., ".level0" or ".level1" or ".level2"
-                               + "." + fileType)!, // ".json"
-            fileInBundleURL: fileInBundleURL!, // forced unwrap is safe (due to guard statement above)
+
+        // Composed only when no URL was supplied. `fileName` can be derived from a root the user typed
+        // (#829), and a name carrying a space or a non-ASCII character composes into a string that
+        // `URL(string:)` rejects, so composing unconditionally would trap on bad input.
+        let remoteFileURL: URL?
+        if let explicitRemoteURL = fileFetchOptions.explicitRemoteURL {
+            remoteFileURL = explicitRemoteURL
+        } else {
+            remoteFileURL = URL(string: Self.dataSourcePath + fileName // e.g., "fgDeGender" or "root"
+                                + "." + fileSubType // e.g., ".level0" or ".level1" or ".level2"
+                                + "." + fileType) // ".json"
+        }
+
+        // Bad input rather than a build mistake, so this reports and returns instead of trapping.
+        guard let remoteFileURL else {
+            print("ERROR: could not compose a remote URL for \(nameWithSubtype).\(fileType).")
+            return nil
+        }
+
+        guard let data = getData( // get the data from one of the two sources
+            remoteFileURL: remoteFileURL,
+            fileInBundleURL: fileFetchOptions.allowBundleFallback ? fileInBundleURL : nil,
             useOnlyInBundleFile: fileFetchOptions.useOnlyInBundleFile
-        )
+        ) else {
+            return nil // no source yielded content; the caller may report this to the user
+        }
         return fileContentProcessor(bgContext, data, fileSelector,
                                     fileFetchOptions.useOnlyInBundleFile,
                                     fileFetchOptions.isBeingTested,
@@ -205,9 +262,12 @@ struct FetchAndProcessFile {
     ///   - useOnlyInBundleFile: When true, bypasses the remote read and uses the bundle file.
     /// - Returns: The file contents as a UTF-8 `String`.
     /// - Note: If neither source can be read, the method terminates with a true `fatalError` (also in non-debug mode).
+    /// Returns nil when the remote read fails and no embedded copy may be used — the ordinary outcome
+    /// for a mistyped or unreachable custom URL (#829), which must not trap. A bundled copy that exists
+    /// but cannot be read is still a programming error, so that case still traps.
     private static func getData(remoteFileURL: URL,
-                                fileInBundleURL: URL,
-                                useOnlyInBundleFile: Bool) -> String {
+                                fileInBundleURL: URL?,
+                                useOnlyInBundleFile: Bool) -> String? {
         // The flag has to be tested before the fetch, not alongside it: as a second condition it was
         // evaluated only after String(contentsOf:) had already downloaded the file, so the remote read
         // happened anyway and its result was merely discarded.
@@ -216,6 +276,11 @@ struct FetchAndProcessFile {
                 return urlData
             }
             print("Could not access online file \(remoteFileURL.relativeString). Trying in-app file instead.")
+        }
+
+        guard let fileInBundleURL else {
+            print("No in-app copy may stand in for \(remoteFileURL.relativeString).")
+            return nil
         }
 
         if let bundleFileData = try? String(contentsOf: fileInBundleURL, encoding: .utf8) {
