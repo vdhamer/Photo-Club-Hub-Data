@@ -49,7 +49,7 @@ class Level1JsonReader {
                                     let useOnlyInBundleFile = $3
                                     let isBeingTested = $4
                                     let includeFilePath = $5
-                                    let includeNames = Level1JsonReader.readRootLevel1Json(
+                                    let includes = Level1JsonReader.readRootLevel1Json(
                                         bgContext: $0,
                                         jsonData: $1,
                                         fileSelector: $2,
@@ -57,10 +57,10 @@ class Level1JsonReader {
                                         isBeingTested: isBeingTested,
                                         includeFilePath: includeFilePath,
                                         history: history)
-                                    if includeNames.isEmpty { return } // no further recursion (important)
+                                    if includes.isEmpty { return } // no further recursion (important)
 
                                     Task { // on this fire-and-forget path nobody awaits the includes
-                                        await Level1JsonReader.loadIncludes(includeNames,
+                                        await Level1JsonReader.loadIncludes(includes,
                                                            isBeingTested: isBeingTested,
                                                            useOnlyInBundleFile: useOnlyInBundleFile,
                                                            includeFilePath: includeFilePath,
@@ -83,9 +83,15 @@ class Level1JsonReader {
                      usedContainer: NSPersistentContainer = PersistenceController.shared.container,
                      // ^ container whose background contexts `Included` files load into; defaults to the app's
                      //   shared store, but tests can inject a private in-memory store for isolation.
-                     history: Level1History = Level1History()
-                     // ^ visited-file guard for THIS pass; the default gives each top-level call its own,
-                     //   and the Include recursion propagates it so one tree shares one guard.
+                     history: Level1History = Level1History(),
+                     // ^ visited-file guard for THIS pass; the default gives each top-level call its own
+                     //   Level1History, and the Include recursion propagates it so one tree shares one guard.
+                     explicitRemoteURL: URL? = nil,
+                     // ^ where to fetch this file, instead of composing a URL from `fileName` (#829).
+                     //   Set for a user-supplied root and for every Include reached from one.
+                     allowBundleFallback: Bool = true
+                     // ^ false for data outside this project, which has no embedded copy to stand in.
+                     //   Propagated down the Include tree, since the Includes of an external root are external too.
                     ) async {
         var extendedIncludeFilePath: [String] = includeFilePath // copy because parameter itself is `let`
         extendedIncludeFilePath.append(fileName)
@@ -93,14 +99,16 @@ class Level1JsonReader {
         // Parse-and-save runs inside the context's synchronous `perform` block, where a task group
         // cannot be awaited. So the block only *returns* the names of the `Include`d files, and the
         // concurrent include fan-out is hoisted out here (issue #760, "Restructuring note").
-        let includeNames: [String] = await FetchAndProcessFile.fetchAndProcess(
+        let includes: [Level1Source] = await FetchAndProcessFile.fetchAndProcess(
             bgContext: bgContext,
             fileSelector: FileSelector(fileName: fileName, isBeingTested: isBeingTested),
             fileFetchOptions: FileFetchOptions(fileType: "json",
                                                fileSubType: "level1", // "root.level1.json"
                                                useOnlyInBundleFile: useOnlyInBundleFile,
                                                isBeingTested: isBeingTested,
-                                               includeFilePath: extendedIncludeFilePath),
+                                               includeFilePath: extendedIncludeFilePath,
+                                               explicitRemoteURL: explicitRemoteURL,
+                                               allowBundleFallback: allowBundleFallback),
             fileContentProcessor: {
                 Level1JsonReader.readRootLevel1Json(bgContext: $0,
                                                     jsonData: $1,
@@ -112,12 +120,13 @@ class Level1JsonReader {
             }
         ) ?? [] // nil (bundle resource not found) means there is nothing to include
 
-        await loadIncludes(includeNames,
+        await loadIncludes(includes,
                            isBeingTested: isBeingTested,
                            useOnlyInBundleFile: useOnlyInBundleFile,
                            includeFilePath: extendedIncludeFilePath,
                            usedContainer: usedContainer,
-                           history: history)
+                           history: history,
+                           allowBundleFallback: allowBundleFallback)
     }
 
     // swiftlint:disable function_parameter_count
@@ -130,7 +139,7 @@ class Level1JsonReader {
                                                      useOnlyInBundleFile: Bool,
                                                      isBeingTested: Bool = false,
                                                      includeFilePath: [String],
-                                                     history: Level1History) -> [String] {
+                                                     history: Level1History) -> [Level1Source] {
 
         let fileName = fileSelector.fileName
         // If this pass already visited `fileName`, avoid loading it twice.
@@ -145,7 +154,7 @@ class Level1JsonReader {
         // hand the data to SwiftyJSON to parse
         let jsonRoot = JSON(parseJSON: jsonData) // call to SwiftyJSON
 
-        let includeNames: [String] = extractIncludeNames(from: jsonRoot)
+        let includes: [Level1Source] = extractIncludes(from: jsonRoot)
 
         // extract the `organizationTypes` in `organizationTypeEnumsToLoad` one-by-one from `jsonRoot`
         for organizationTypeEnum in organizationTypesToLoad {
@@ -172,11 +181,11 @@ class Level1JsonReader {
                               file: #fileID, line: #line) // likely deprecation of #fileID in Swift 6.0
             // in release mode, the failed database update is only logged. App doesn't stop.
             ifDebugPrint("Failed to save JSON ClubList items in background")
-            return includeNames // a failed save of this file shouldn't block loading the included files
+            return includes // a failed save of this file shouldn't block loading the included files
         }
 
         ifDebugPrint("Completed readRootLevel1Json() in background")
-        return includeNames
+        return includes
     }
     // swiftlint:enable function_parameter_count
 
