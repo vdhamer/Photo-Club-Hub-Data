@@ -14,6 +14,13 @@ import CoreData // for NSManagedObjectContext, NSPersistentContainer, NSMergePol
 /// But the invariant belongs to the Data package because it owns the loading of the various Levels.
 public enum LevelLoader {
 
+    /// The built-in Level 1 root: the entry point of this project's own Include tree.
+    ///
+    /// The underscore matters. `root.level1.json` is the pre-Include flat file that app versions before
+    /// 2.9.0 still fetch, so the two names select different content for different audiences. Retiring
+    /// that split — which turns this constant back into `"root"` — is Data#45.
+    static let builtInLevel1RootName = "root_"
+
     /// Runs one complete load pass:
     /// - Level 0 (awaited to completion), then
     /// - Level 1, then
@@ -40,8 +47,20 @@ public enum LevelLoader {
     ///   the apps used to disagree about it and the invariant above is the package's to protect.
     public static func loadAllLevels(usedContainer: NSPersistentContainer = PersistenceController.shared.container,
                                      isBeingTested: Bool = false,
-                                     useOnlyInBundleFile: Bool = false // true avoids fetching the latest from GitHub
+                                     useOnlyInBundleFile: Bool = false, // can skip loading current version from GitHub
+                                     level1RootURL: URL? = nil
+                                     // ^ a Level 1 root named by the user instead of the built-in default one
+                                     //   (Photo-Club-Hub#829). nil leaves every behavior below unchanged.
+                                     //   non-nil expected to be used in specialized use-cases (e.g. stress testing)
                                     ) async {
+
+        // The hardcoded Level 2 clubs are skipped for any custom root, since those 15 clubs are the
+        // production tree's own content: loading them over another tree would inject organizations it
+        // never listed. Level 0 is deliberately not conditional. Its expertises and languages come from
+        // this project's own file, cost nothing when an external tree never references them, and the
+        // languages are needed either way. A tree wanting its own vocabulary is better served by a
+        // Level 0 override, once there is a use case, than by this package guessing whose data a URL holds.
+        let usesCustomRoot: Bool = level1RootURL != nil
 
         // MARK: - Level 0
 
@@ -54,15 +73,28 @@ public enum LevelLoader {
         // MARK: - Level 1
 
         // Load list of organizations from root_.level1.json file - which can pull in additional Level 1 "include" files
-        let fileName = "root_"
+        let fileName: String
+        if let level1RootURL {
+            fileName = Level1Source.fileName(of: level1RootURL)
+        } else {
+            fileName = Self.builtInLevel1RootName
+        }
+
         await Level1JsonReader.load(
             bgContext: makeBgContext(ctxName: "Level 1 loader for \(fileName)", usedContainer: usedContainer),
             fileName: fileName,
             isBeingTested: isBeingTested,
             useOnlyInBundleFile: useOnlyInBundleFile,
-            usedContainer: usedContainer) // propagate so the whole Include tree shares one storage container
+            usedContainer: usedContainer, // propagate so the whole Include tree shares one storage container
+            explicitRemoteURL: level1RootURL,
+            // A custom root has no embedded copy of its custom data, so there is nothing to fall
+            // back to. Saying so explicitly also stops a file from outside this project, from sharing a name
+            // with a bundled one, from quietly serving this project's clubs instead.
+            allowBundleFallback: !usesCustomRoot)
 
         // MARK: - Level 2
+
+        guard !usesCustomRoot else { return } // see the note above on why these clubs are production-only
 
         await loadAllLevel2Clubs(usedContainer: usedContainer,
                                  isBeingTested: isBeingTested,
