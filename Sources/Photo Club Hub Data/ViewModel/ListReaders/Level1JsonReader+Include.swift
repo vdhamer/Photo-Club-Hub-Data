@@ -184,6 +184,9 @@ struct Level1Source: Sendable {
     /// already validated. The fallback therefore covers only a URL with nothing before the first dot,
     /// which neither caller can currently produce (Photo-Club-Hub#829).
     static func fileName(of url: URL) -> String {
-        url.lastPathComponent.split(separator: ".").first.map(String.init) ?? "customLevel1Root"
+        guard let firstSegment = url.lastPathComponent.split(separator: ".").first else {
+            return "customLevel1Root"
+        }
+        return String(firstSegment)
     }
 }
