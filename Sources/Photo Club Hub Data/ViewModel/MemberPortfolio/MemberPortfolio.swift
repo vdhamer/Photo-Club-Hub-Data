@@ -86,7 +86,10 @@ extension MemberPortfolio { // expose computed properties (some related to handl
             if featuredImageThumbnail_ != nil {
                 return featuredImageThumbnail_!
             } else {
-                return URL(string: "http://www.vdhamer.com/2017_GemeentehuisWaalre_5D2_33-Edit.jpg")!
+                // Served over https from this package's own repo, so the default asset does not depend on
+                // a private server staying reachable. See Photo-Club-Hub-Data#52.
+                return URL(string: "https://raw.githubusercontent.com/vdhamer/Photo-Club-Hub-Data/" +
+                           "main/images/placeholderThumbnail.jpg")!
             }
         }
         set { featuredImageThumbnail_ = newValue }
