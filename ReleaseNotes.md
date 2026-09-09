@@ -7,11 +7,15 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
-### 3.3.0 (GitHub commit ???????) 09-09-2026
+### 3.4.0 (GitHub commit ???????) ??-09-2026
+
+---------------------------------------------------------------------------
+
+### 3.3.0 (GitHub commit 16cdeef) 09-09-2026
 
 BEHAVIOR
 
-* __The default thumbnail no longer points at a private HTTP server.__ `MemberPortfolio.featuredImageThumbnail` returned a hardcoded `http://www.vdhamer.com/...` URL for every photographer without a featured image. That host currently serves no HTTPS at all, so on the generated website, which is published over HTTPS, browsers dropped the image: 90 occurrences across 30 of its 103 pages, and on 18 of those it was the only broken image. Both apps hid this behind an ATS exception for that domain, so it was visible only in a browser (Data#52, Photo-Club-Hub-HTML#264). The image now ships in this repo as `images/placeholderThumbnail.jpg` and is fetched over https from `raw.githubusercontent.com`; it was re-cut square at 400 x 400, since the members table renders it in a 1:1 cell and the old 150 x 112 JuiceBox thumbnail was cropped and upscaled to fill it. The picture is deliberately loud — a red circle captioned "No images available here yet" — because its job is to make a photographer or club contact supply a real one, so a quieter replacement would look like an improvement while failing the only test that matters. Its sibling `MemberPortfolio.emptyPortfolioURL`, the portfolio link shown for those same members, still points at the same HTTP host: a navigation rather than a subresource, so no browser blocks it and it was left alone here.
+* __The default thumbnail no longer points at a private HTTP server.__ `MemberPortfolio.featuredImageThumbnail` returned a hardcoded `http://www.vdhamer.com/...` URL for every photographer without a featured image. That host currently serves no HTTPS at all, so on the generated website, which is published over HTTPS, browsers dropped the image: 90 occurrences across 30 of its 103 pages, and on 18 of those it was the only broken image. Both apps hid this behind an ATS exception for that domain, so it was visible only in a browser (Data#52, Photo-Club-Hub-HTML#264). The image now ships in this repo as `images/placeholderThumbnail.jpg` and is fetched over https from `raw.githubusercontent.com`; it was re-cut square at 512 x 512 — the largest surface showing it is the iOS 160 pt cell at 3x — since the members table renders it in a 1:1 cell and the old 150 x 112 JuiceBox thumbnail was cropped and upscaled to fill it. The picture is deliberately loud — a red circle captioned "No images available here yet" — because its job is to make a photographer or club contact supply a real one, so a quieter replacement would look like an improvement while failing the only test that matters. Its sibling `MemberPortfolio.emptyPortfolioURL`, the portfolio link shown for those same members, still points at the same HTTP host: a navigation rather than a subresource, so no browser blocks it and it was left alone here.
 
 API
 

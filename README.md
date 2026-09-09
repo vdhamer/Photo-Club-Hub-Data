@@ -54,7 +54,7 @@ release can never arrive unasked.
   conventional `.upToNextMajor` pin unsafe for anyone unaware of the local rules, so it was dropped:
   all three were aligned at **3.0.0** once and their versions float independently from then on. The
   two apps' versions are labels for their users and say nothing about this package.
-- `PhotoClubHubDataVersion.semver` carries the version programmatically, because SwiftPM code cannot read its own git tag and `Bundle.module` carries no version. The release checklist asserts that this constant matches the tag being pushed; both apps display it, so a stale value misreports which library a binary was built against.
+- `PhotoClubHubDataVersion.semver` carries the version programmatically, because SwiftPM code cannot read its own git tag and `Bundle.module` carries no version. The release checklist asserts that this constant matches the tag being pushed, and gives the one-line check that reads it out of the tagged tree rather than the working copy (Annex F of the iOS repo's `Documentation/ReleaseProcess.md`); both apps display it, so a stale value misreports which library a binary was built against.
 - **No build number.** This package produces no artifact to number. A candidate handed to another
   developer is identified by its commit, which their own `Package.resolved` records automatically —
   version *and* revision. See issue #17.

@@ -18,9 +18,14 @@
 /// users and float independently of this number; they are aligned at 3.0.0 once and not thereafter.
 /// See vdhamer/Photo-Club-Hub#808 and #17.
 ///
-/// Update this in the same commit that tags a release, before pushing the tag.
+/// Bumped at the *start* of a release cycle, to the version the coming work is expected to deserve,
+/// together with the matching Core Data model container (Annex C of the iOS repo's `ReleaseProcess.md`).
+/// Until that release is tagged the number is a plan, and it may be overtaken: 3.0.3 sat here for days
+/// and shipped as 3.1.0. What makes it true is the tag, so the number must equal the tag at the moment
+/// the tag is pushed — Annex F carries the one-line check that reads this constant out of the tagged
+/// tree rather than out of the working copy, where it is always right.
 public enum PhotoClubHubDataVersion {
 
-    /// The version this package ships under, e.g. `"3.0.0"`. Must equal its git tag.
-    public static let semver = "3.3.0"
+    /// The version this package ships under, e.g. `"3.0.0"`. Must equal its git tag once that tag exists.
+    public static let semver = "3.4.0"
 }
