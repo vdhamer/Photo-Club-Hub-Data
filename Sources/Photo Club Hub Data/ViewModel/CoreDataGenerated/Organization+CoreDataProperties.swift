@@ -23,8 +23,6 @@ extension Organization {
     @NSManaged nonisolated public var isMapScrollLocked: Bool
     @NSManaged nonisolated public var latitude_: Double
     @NSManaged nonisolated public var level2URL_: URL?
-    @NSManaged nonisolated public var localizedCountryDepr_: String?
-    @NSManaged nonisolated public var localizedTownDepr_: String?
     @NSManaged nonisolated public var longitude_: Double
     @NSManaged nonisolated public var maintainerEmail_: String?
     @NSManaged nonisolated public var nickName_: String?

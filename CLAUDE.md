@@ -43,7 +43,7 @@ It is not inert, though: `FetchAndProcessFile.dataSourcePath` points at
 `raw.githubusercontent.com/vdhamer/Photo-Club-Hub/main/JSON/`, so **app versions before 2.9.0 still fetch
 `root.level1.json` from GitHub main at runtime** — they predate Include support and would ignore the include
 list. Data fixes that those versions should see must be applied there too, not only in the include files.
-Retiring the two-file split (delete `root`, rename `root_` → `root`) is vdhamer/Photo-Club-Hub#676.
+Retiring the two-file split (delete `root`, rename `root_` → `root`) is Data#45.
 
 When working out what the apps actually display, follow the `root_` include chain. Reading `root.level1.json`
 gives plausible but wrong answers.

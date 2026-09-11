@@ -14,8 +14,9 @@ public struct Settings {
         fatalError("init() is not available. Settings only holds a few static computer properties.")
     }
 
-    static let userDefaultsKey: String = "dataResetPending301b4666" // must match id of Settings toggle in Root.plist
-    private static let prevUserDefaultsKeys: Set<String> = ["dataResetPending292b4657",
+    static let userDefaultsKey: String = "dataResetPending302b4667" // must match id of Settings toggle in Root.plist
+    private static let prevUserDefaultsKeys: Set<String> = ["dataResetPending301b4666",
+                                                            "dataResetPending292b4657",
                                                             "dataResetPending291b4656",
                                                             "dataResetPending290b4655",
                                                             "dataResetPending288b4654",

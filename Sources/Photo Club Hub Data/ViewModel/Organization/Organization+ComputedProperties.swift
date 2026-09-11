@@ -118,30 +118,6 @@ extension Organization {
 		set { town_ = newValue }
 	}
 
-    public var localizedTown: String {
-        /*
-            LocalizedCountry is retrieved from the CoreData database, where it is not optional.
-            It is calculated using the mandatory GPS coordinates using reverseGeolocation.
-            During this reverseGeolocation, the string is automatically adapted to the current locale.
-            Example: Paris returns localizedTown="Paris" if the device is set to Dutch.
-            The value of Town is not localized and is the original value provided by the user.
-            Localization may return a slightly different town: Tokyo → suburb of Tokyo (because "Tokyo" is not used).
-        */
-        get { return localizedTownDepr_ ?? "ErrorTown" }
-        set { localizedTownDepr_ = newValue}
-    }
-
-    public var localizedCountry: String {
-        /*
-         LocalizedCountry is retrieved from the CoreData database, where it is not optional.
-         It is calculated using the mandatory GPS coordinates using reverseGeolocation.
-         During this reverseGeolocation, the string is automatically adapted to the current locale.
-         Example: Paris returns localizedCountry="Frankrijk" if the device is set to Dutch.
-         */
-        get { return localizedCountryDepr_ ?? "ErrorCountry" }
-        set { localizedCountryDepr_ = newValue}
-    }
-
     public var level2URL: URL? {
         get {
             // use a default unless level2URL points to the club's own website
@@ -190,6 +166,23 @@ extension Organization {
 
     public func localizedAddress(for language: Language) -> LocalizedAddress? {
         localizedAddresses.first { $0.language_ == language } // is that language available? else nil.
+    }
+
+    /// The town in `language`, falling back to the unlocalized name the JSON supplied.
+    ///
+    /// A missing `LocalizedAddress` row means the pair has not been reverse-geocoded in that language,
+    /// which for a town is worth nothing extra to say: `town` is a real name ("Waalre"), just not
+    /// translated. Callers get one string and never unwrap.
+    public func localizedTown(for language: Language) -> String {
+        localizedAddress(for: language)?.localizedTown ?? town
+    }
+
+    /// The country in `language`, falling back to `LocalizedAddress.unknownCountry`.
+    ///
+    /// Unlike the town there is no unlocalized country stored on `Organization`, so a missing row
+    /// leaves nothing truthful to show and the placeholder stands in.
+    public func localizedCountry(for language: Language) -> String {
+        localizedAddress(for: language)?.localizedCountry ?? LocalizedAddress.unknownCountry
     }
 
     // Priority system to choose an item's remark in the appropriate language.

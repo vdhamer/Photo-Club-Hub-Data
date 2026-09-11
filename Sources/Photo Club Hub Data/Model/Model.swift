@@ -12,7 +12,6 @@ public struct Model {
 
     /// Controls which entities `deleteAllCoreDataObjects` removes.
     public enum DeletionScope {
-        case expertisesOnly // deletes Expertise, LocalizedExpertise, PhotographerExpertise only
         case standard       // avoids deleting Language, Organization, OrganizationType, LocalizedAddress
         case all            // deletes all objects from all CoreData tables
     }
@@ -26,13 +25,7 @@ public struct Model {
                                                         deletionScope: DeletionScope) {
         do {
             // order is important to avoid violating database referential integrity constraints
-            try deleteEntitiesOfOneType("LocalizedExpertise", viewContext: viewContext)
-            try deleteEntitiesOfOneType("PhotographerExpertise", viewContext: viewContext)
-            try deleteEntitiesOfOneType("Expertise", viewContext: viewContext)
-            if deletionScope == .expertisesOnly {
-                try viewContext.save()
-                return
-            }
+            try deleteExpertiseEntities(viewContext: viewContext)
 
             try deleteEntitiesOfOneType("LocalizedRemark", viewContext: viewContext)
             try deleteEntitiesOfOneType("MemberPortfolio", viewContext: viewContext)
@@ -53,6 +46,29 @@ public struct Model {
         // The visited-file guard used to be a process-global singleton that had to be cleared here, which
         // silently made "delete the database" a precondition for starting a second load pass. Each pass now
         // owns its own Level1History, so there is nothing left to reset.
+    }
+
+    /// Deletes the three expertise entities, leaving every other table untouched.
+    ///
+    /// Tests use this to get a clean expertise state between cases. It is deliberately `internal` rather
+    /// than a `DeletionScope` case: no client of the package has a reason to delete expertises on their
+    /// own, and an enum case cannot be narrowed on its own because Swift has no per-case access control
+    /// (Data#28).
+    /// - Parameter viewContext: The managed object context to operate on. For now this has to be the main thread.
+    @MainActor static func deleteExpertises(viewContext: NSManagedObjectContext) {
+        do {
+            try deleteExpertiseEntities(viewContext: viewContext)
+            try viewContext.save()
+        } catch {
+            ifDebugFatalError("Error during forced clearing of the Expertise CoreData tables: \(error)")
+        }
+    }
+
+    /// Deletes Expertise and the two entities that reference it, in referential-integrity order.
+    @MainActor private static func deleteExpertiseEntities(viewContext: NSManagedObjectContext) throws {
+        try deleteEntitiesOfOneType("LocalizedExpertise", viewContext: viewContext)
+        try deleteEntitiesOfOneType("PhotographerExpertise", viewContext: viewContext)
+        try deleteEntitiesOfOneType("Expertise", viewContext: viewContext)
     }
 
     /// Deletes all objects of a given Core Data entity type, with optional retries on failure during save()..

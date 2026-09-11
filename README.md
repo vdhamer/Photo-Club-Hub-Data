@@ -1,5 +1,12 @@
 # Photo Club Hub Data
 
+[![Version][stable-version]][version-url]
+[![Tests][tests-shield]][tests-url]
+[![Contributors][contributors-shield]][contributors-url]
+[![Issues][issues-shield]][issues-url]
+[![Discussions][discussions-shield]][discussions-url]
+[![MIT License][license-shield]][license-url]
+
 Swift package with the Core Data model, JSON loaders and value types shared by the Photo Club Hub apps.
 
 Two apps currently depend on this package (the list may grow):
@@ -47,7 +54,7 @@ release can never arrive unasked.
   conventional `.upToNextMajor` pin unsafe for anyone unaware of the local rules, so it was dropped:
   all three were aligned at **3.0.0** once and their versions float independently from then on. The
   two apps' versions are labels for their users and say nothing about this package.
-- `PhotoClubHubDataVersion.semver` carries the version programmatically, because SwiftPM code cannot read its own git tag and `Bundle.module` carries no version. The release checklist asserts that this constant matches the tag being pushed; both apps display it, so a stale value misreports which library a binary was built against.
+- `PhotoClubHubDataVersion.semver` carries the version programmatically, because SwiftPM code cannot read its own git tag and `Bundle.module` carries no version. The release checklist asserts that this constant matches the tag being pushed, and gives the one-line check that reads it out of the tagged tree rather than the working copy (Annex F of the iOS repo's `Documentation/ReleaseProcess.md`); both apps display it, so a stale value misreports which library a binary was built against.
 - **No build number.** This package produces no artifact to number. A candidate handed to another
   developer is identified by its commit, which their own `Package.resolved` records automatically —
   version *and* revision. See issue #17.
@@ -63,23 +70,27 @@ Data is loaded from JSON files in three sequential levels. A club can be at any 
 | **2** | Members per club, with roles, status and portfolio links | `Level2JsonReader` |
 | **3** | Image portfolios per member | fetched by the apps, not by this package |
 
-**Level 0 must complete and save before Level 2 starts.** `Expertise` has a uniqueness constraint on `id_`; Level 0 creates expertises with `isSupported=true`, while Level 2's `findCreateUpdateUndefSupported()` creates them with the default `isSupported=false`. Whichever context saves last wins per property, so concurrent saves corrupt the flag. Level 1 and Level 2 may run concurrently with each other.
+**Level 0 must complete and save before Level 2 starts.** Not because loading out of order would produce a wrong value: `findCreateUpdateUndefSupported()` passes `isSupported: nil` and `Expertise.update()` only ever promotes false to true, so a sequential Level 2 then Level 0 run ends up correct either way (`LoadOrderIndependenceTest`). The rule is about contention on the `id_` uniqueness constraint: two contexts that cannot see each other's uncommitted insert both create a row, and Core Data settles that collision property by property down in the store, where the promote-only logic does not run, so a promotion can be lost (`MergePolicyTest`). Awaiting Level 0 commits the expertises it declares before the Level 2 fan-out, leaving those loaders nothing to insert. Level 1 and Level 2 may run concurrently with each other.
 
 The sequencing is this package's responsibility, not the consuming app's: `LevelLoader.loadAllLevels(usedContainer:)` runs one complete pass — Level 0 awaited to completion, then Level 1, then every Level 2 club loader concurrently — and returns only after the last loader has finished. An app supplies only the container to load into; the background contexts' merge policy is set here rather than by the app, because the apps used to disagree about it and this invariant depends on the sequencing rather than on the policy (see `MergePolicyTest` for characterizing the behavioral options, and `LevelLoaderTest` for the ordering assertion).
+
+`loadAllLevels` also takes an optional `level1RootURL`, which replaces the built-in `root_` file with a Level 1 root the user named (Photo-Club-Hub#829). An override changes two things. The hardcoded Level 2 club list is skipped, since those clubs are the production tree's own content and would otherwise be injected into a dataset that never listed them. And no bundled copy may stand in, because an external file sharing a name with an embedded one would otherwise serve this project's clubs in place of the data actually requested. Level 0 is deliberately not conditional: its expertises and languages come from this project's own file, cost nothing when a tree external to this project never references them, and the languages are needed either way. A tree wanting its own vocabulary is better served by a Level 0 override, once there is a use case for one, than by this package guessing whose data a URL holds. Relatedly, Level 1 Includes are fetched at the URL each entry is written with rather than by recomposing its name against the built-in data path, which is what lets an Include tree live outside this project at all.
 
 For the semantics of individual entities and the JSON file formats, the [Photo Club Hub README](https://github.com/vdhamer/Photo-Club-Hub/blob/main/.github/README.md) is the detailed reference — it is written for club administrators maintaining the data, and is not duplicated here.
 
 ## Core Data model
 
-The model lives at `Sources/Photo Club Hub Data/Model/Photo_Club_Hub.xcdatamodeld` and has 14 entities across 34 versioned schema revisions. The container name is `"Photo_Club_Hub"` and must stay that way: existing iOS installations upgrade their store in place.
+The model lives at `Sources/Photo Club Hub Data/Model/Photo_Club_Hub.xcdatamodeld`. The container name is `"Photo_Club_Hub"` and must stay that way: existing iOS installations upgrade their store in place.
+
+**Version names track this package's release, not the app's.** A version is named for the release it ships in — `Photo_Club_Hub_3_1_0` for package 3.1.0 — which is why the newest name can be well ahead of the newest *schema change*: several versions have content identical to their predecessor. That is deliberate. A shipped version must stay immutable, because stores in the field are matched by hash and editing one in place breaks automatic migration, so every release gets a fresh container to edit and duplicate content is the cheap price. The numbering earlier followed the app's releases, a leftover of the retired release train (Photo-Club-Hub#808); there is no `3_0_0`, because none was created at the time (Data#31).
 
 Two things about this model are unusual, and both exist so that the package builds without Xcode's build system:
 
 ### The generated NSManagedObject classes are committed
 
-All 14 entities are set to Codegen **Manual/None**, and the 21 files Xcode would otherwise generate live in `Sources/Photo Club Hub Data/ViewModel/CoreDataGenerated/`. A standalone package has no Xcode codegen for bare clones or CI, so these files are the only source of truth.
+Every entity is set to Codegen **Manual/None**, and the files Xcode would otherwise generate live in `Sources/Photo Club Hub Data/ViewModel/CoreDataGenerated/`. A standalone package has no Xcode codegen for bare clones or CI, so these files are the only source of truth.
 
-**Maintenance rule:** any schema change — adding or removing an attribute or relationship — requires hand-updating the matching `+CoreDataProperties.swift`. The `+CoreDataClass.swift` files are static (`class Foo: NSManagedObject {}`) and never need touching.
+**Maintenance rule:** any schema change — adding or removing an attribute or relationship — requires hand-updating the matching `+CoreDataProperties.swift`. Changing an existing attribute's *optionality* does not, as long as its generated property is already an optional reference type: Core Data declares `String` attributes as `String?` whether or not the model marks them optional. The `+CoreDataClass.swift` files are static (`class Foo: NSManagedObject {}`) and never need touching.
 
 ### A build plugin compiles the model
 
@@ -98,7 +109,7 @@ The entity diagrams in the Photo Club Hub README are **not** produced by Xcode. 
 Two consequences worth knowing before touching anything in the model directory:
 
 1. **`Level0`, `Level1`, `Level2` and `Level3` are placeholder entities. Do not delete them.** They only exist so the diagrams can show a legend that maps levels to their colors in the diagram.
-2. **`EntityPositions.json`, `ConfigurationColors.json` and `EntityColors.json` are that app's saved state** — 70 files, tracked in git so the layout and layer coloring persists and can be shared across machines.`
+2. **`EntityPositions.json`, `ConfigurationColors.json` and `EntityColors.json` are that app's saved state** — two per model version, tracked in git so the layout and layer coloring persists and can be shared across machines.`
 
 ## Developing app and package together
 
@@ -129,7 +140,7 @@ Two consequences worth knowing:
 swift test
 ```
 
-99 tests in 24 suites, with an in-memory Core Data store per suite.
+Every suite runs against its own in-memory Core Data store.
 
 ### Tests run against frozen data
 
@@ -148,7 +159,7 @@ Four Level 2 fixtures cannot take the suffix: `TemplateMin`, `TemplateMax`, `fgD
 
 Three known issues:
 
-- **Run tests serially if you see the suite abort rather than fail.** A process-global test spy can be deinstalled by a concurrently running suite, turning a deliberate `ifDebugFatalError` into a real crash that takes down all 99 tests. Use `swift test --no-parallel` until [#1](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/1) is fixed.
+- **Run tests serially if you see the suite abort rather than fail.** A process-global test spy can be deinstalled by a concurrently running suite, turning a deliberate `ifDebugFatalError` into a real crash that takes down the whole suite. Use `swift test --no-parallel` until [#1](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/1) is fixed.
 - **The Core Data concurrency trap is not armed here.** `-com.apple.CoreData.ConcurrencyDebug 1` traps cross-queue access to a private-queue context, and the iOS app arms it in its `.xctestplan`. Core Data reads that flag from the launch arguments *before* any test code runs, so a test cannot set it: `UserDefaults.standard.set(...)` reads back true and changes nothing. Nor can it be forwarded — `swift test` parses `-c` itself and rejects it, `xcrun xctest` rejects unrecognized arguments, and a shared Xcode scheme does not carry it for a package. `LoadOrderIndependenceTest` and `LanguageUpgradeInPlaceTest` are multi-context tests that ran with the trap armed while they lived in the app ([#11](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/11)); here they run without it. Migrating to SwiftData ([#6](https://github.com/vdhamer/Photo-Club-Hub-Data/issues/6)) retires the question.
 - **`.xcstrings` is not compiled by `swift build`.** `PhotoClubHubData.xcstrings` lands in the bundle raw, so localized lookups fall back to raw keys on the command line even though they work in Xcode. No current test depends on localized output — but a localization assertion would pass in Xcode and fail in CI, so avoid writing one.
 
@@ -172,3 +183,21 @@ A future new check is appended as a **sibling job**, never as an extra step of a
 ## License
 
 MIT — see [LICENSE.md](LICENSE.md).
+
+[stable-version]: https://img.shields.io/github/v/release/vdhamer/Photo-Club-Hub-Data?style=plastic&color=violet
+[version-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/releases
+
+[tests-shield]: https://img.shields.io/github/actions/workflow/status/vdhamer/Photo-Club-Hub-Data/tests.yml?style=plastic&label=tests
+[tests-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/actions/workflows/tests.yml
+
+[contributors-shield]: https://img.shields.io/github/contributors/vdhamer/Photo-Club-Hub-Data?style=plastic
+[contributors-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/graphs/contributors
+
+[issues-shield]: https://img.shields.io/github/issues/vdhamer/Photo-Club-Hub-Data?style=plastic
+[issues-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/issues
+
+[discussions-shield]: https://img.shields.io/github/discussions/vdhamer/Photo-Club-Hub-Data?style=plastic&color=orange
+[discussions-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/discussions
+
+[license-shield]: https://img.shields.io/github/license/vdhamer/Photo-Club-Hub-Data?style=plastic
+[license-url]: https://github.com/vdhamer/Photo-Club-Hub-Data/blob/main/LICENSE.md

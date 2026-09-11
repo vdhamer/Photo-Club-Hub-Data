@@ -14,18 +14,30 @@ import CoreData // for NSManagedObjectContext, NSPersistentContainer, NSMergePol
 /// But the invariant belongs to the Data package because it owns the loading of the various Levels.
 public enum LevelLoader {
 
+    /// The built-in Level 1 root: the entry point of this project's own Include tree.
+    ///
+    /// The underscore matters. `root.level1.json` is the pre-Include flat file that app versions before
+    /// 2.9.0 still fetch, so the two names select different content for different audiences. Retiring
+    /// that split — which turns this constant back into `"root"` — is Data#45.
+    static let builtInLevel1RootName = "root_"
+
     /// Runs one complete load pass:
     /// - Level 0 (awaited to completion), then
     /// - Level 1, then
     /// - every Level 2 club loader concurrently; returning only once every loader has finished.
     /// In this manner a caller can get a guarantee that a load pass has been fully executed.
     ///
-    /// **Why Level 0 is awaited first.** This ordering is required, not stylistic. `Expertise` has a
-    /// uniqueness constraint on `id_`. Level 0 creates expertises with `isSupported=true`, while Level 2's
-    /// `findCreateUpdateUndefSupported()` submits them with the default `isSupported=false`. Whichever
-    /// context saves later wins per property, so a Level 2 save racing Level 0 corrupts the flag. Awaiting
-    /// Level 0 is what prevents the collision; the merge policy only decides which way an *unsequenced*
-    /// load would fail (see `MergePolicyTest`).
+    /// **Why Level 0 is awaited first.** `Expertise.update()` promotes `isSupported` from false to true and never
+    /// demotes, and `LoadOrderIndependenceTest` checks that a Level-2-then-Level-0 sequence reaches the same state as
+    /// the reverse. The `await` is about contention. `Expertise` has a uniqueness constraint on `id_`, and two contexts
+    /// that cannot see each other's uncommitted insert both create a row; the store then settles that collision
+    /// property by property, below the latch, so a promotion can be dropped (`MergePolicyTest`).
+    ///
+    /// Awaiting Level 0 commits every expertise on its list (with `isSupported == true`) before the Level 2 runs, so
+    /// those loaders find those rows rather than insert them. What is left to insert are ad-hoc expertises that are not
+    /// on the Level 0 list, where colliding clubs write the same value and the constraint deduplicates harmlessly. Same
+    /// move as `initConstants()` pre-creating the contended Language and OrganizationType rows; the merge policy only
+    /// decides how an *unsequenced* load fails.
     ///
     /// Level 1 is awaited too, but only for simplicity: Level 1 and Level 2 may overlap.
     ///
@@ -35,8 +47,20 @@ public enum LevelLoader {
     ///   the apps used to disagree about it and the invariant above is the package's to protect.
     public static func loadAllLevels(usedContainer: NSPersistentContainer = PersistenceController.shared.container,
                                      isBeingTested: Bool = false,
-                                     useOnlyInBundleFile: Bool = false // true avoids fetching the latest from GitHub
+                                     useOnlyInBundleFile: Bool = false, // can skip loading current version from GitHub
+                                     level1RootURL: URL? = nil
+                                     // ^ a Level 1 root named by the user instead of the built-in default one
+                                     //   (Photo-Club-Hub#829). nil leaves every behavior below unchanged.
+                                     //   non-nil expected to be used in specialized use-cases (e.g. stress testing)
                                     ) async {
+
+        // The hardcoded Level 2 clubs are skipped for any custom root, since those 15 clubs are the
+        // production tree's own content: loading them over another tree would inject organizations it
+        // never listed. Level 0 is deliberately not conditional. Its expertises and languages come from
+        // this project's own file, cost nothing when an external tree never references them, and the
+        // languages are needed either way. A tree wanting its own vocabulary is better served by a
+        // Level 0 override, once there is a use case, than by this package guessing whose data a URL holds.
+        let usesCustomRoot: Bool = level1RootURL != nil
 
         // MARK: - Level 0
 
@@ -49,15 +73,28 @@ public enum LevelLoader {
         // MARK: - Level 1
 
         // Load list of organizations from root_.level1.json file - which can pull in additional Level 1 "include" files
-        let fileName = "root_"
+        let fileName: String
+        if let level1RootURL {
+            fileName = Level1Source.fileName(of: level1RootURL)
+        } else {
+            fileName = Self.builtInLevel1RootName
+        }
+
         await Level1JsonReader.load(
             bgContext: makeBgContext(ctxName: "Level 1 loader for \(fileName)", usedContainer: usedContainer),
             fileName: fileName,
             isBeingTested: isBeingTested,
             useOnlyInBundleFile: useOnlyInBundleFile,
-            usedContainer: usedContainer) // propagate so the whole Include tree shares one storage container
+            usedContainer: usedContainer, // propagate so the whole Include tree shares one storage container
+            explicitRemoteURL: level1RootURL,
+            // A custom root has no embedded copy of its custom data, so there is nothing to fall
+            // back to. Saying so explicitly also stops a file from outside this project, from sharing a name
+            // with a bundled one, from quietly serving this project's clubs instead.
+            allowBundleFallback: !usesCustomRoot)
 
         // MARK: - Level 2
+
+        guard !usesCustomRoot else { return } // see the note above on why these clubs are production-only
 
         await loadAllLevel2Clubs(usedContainer: usedContainer,
                                  isBeingTested: isBeingTested,

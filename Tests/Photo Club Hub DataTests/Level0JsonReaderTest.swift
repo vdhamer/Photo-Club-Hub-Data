@@ -41,7 +41,7 @@ private let isBeingTested = true
 
         // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
         // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
-        Model.deleteCoreDataObjects(viewContext: viewContext, deletionScope: .expertisesOnly)
+        Model.deleteExpertises(viewContext: viewContext)
         #expect(Expertise.count(context: bgContext) == 0)
         #expect(LocalizedExpertise.count(context: bgContext) == 0)
         #expect(PhotographerExpertise.count(context: bgContext) == 0)
@@ -65,7 +65,7 @@ private let isBeingTested = true
 
         // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
         // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
-        Model.deleteCoreDataObjects(viewContext: viewContext, deletionScope: .expertisesOnly)
+        Model.deleteExpertises(viewContext: viewContext)
         #expect(Expertise.count(context: bgContext) == 0)
         #expect(LocalizedExpertise.count(context: bgContext) == 0)
         #expect(PhotographerExpertise.count(context: bgContext) == 0)
@@ -92,7 +92,7 @@ private let isBeingTested = true
 
         // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
         // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
-        Model.deleteCoreDataObjects(viewContext: viewContext, deletionScope: .expertisesOnly)
+        Model.deleteExpertises(viewContext: viewContext)
 
         _ = Level0JsonReader(bgContext: bgContext, // read root.Level0.json file
                              fileName: "rootTest",
@@ -111,7 +111,7 @@ private let isBeingTested = true
 
         // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
         // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
-        Model.deleteCoreDataObjects(viewContext: viewContext, deletionScope: .expertisesOnly)
+        Model.deleteExpertises(viewContext: viewContext)
         #expect(Language.count(context: bgContext, isoCode: "UR") == 0)
         #expect(LocalizedRemark.count(context: bgContext) == 0)
         #expect(LocalizedExpertise.count(context: bgContext) == 0)
@@ -136,7 +136,7 @@ private let isBeingTested = true
 
         // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
         // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
-        Model.deleteCoreDataObjects(viewContext: viewContext, deletionScope: .expertisesOnly)
+        Model.deleteExpertises(viewContext: viewContext)
         #expect(Language.count(context: bgContext, isoCode: "UR") == 0)
         #expect(LocalizedRemark.count(context: bgContext) == 0)
         #expect(LocalizedExpertise.count(context: bgContext) == 0)

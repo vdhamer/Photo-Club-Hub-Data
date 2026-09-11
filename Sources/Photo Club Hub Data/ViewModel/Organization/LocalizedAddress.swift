@@ -46,8 +46,20 @@ extension LocalizedAddress { // expose computed properties (some related to hand
         }
     }
 
-    var localizedTown: String { localizedTown_ ?? "" }
-    var localizedCountry: String { localizedCountry_ ?? "" }
+    /// Shown when a row exists but carries no usable name, which happens when Apple returns a placemark
+    /// without a city or region for the coordinates. That can happen for coordinates like (0,0),
+    /// which are in the middle of an ocean.
+    /// A *missing row* is a different question — "not geocoded yet for that language" —
+    /// and is answered by `Organization.localizedTown(for:)`.
+    ///
+    /// These are the single source for the placeholder text. The Core Data attributes are optional and
+    /// carry no `defaultValueString`, so a nil reaches these getters rather than a second spelling of
+    /// the same idea stored in the model.
+    public static let unknownTown = "Town?" // just naming a constant
+    public static let unknownCountry = "Country?" // just naming a constant
+
+    public var localizedTown: String { localizedTown_ ?? Self.unknownTown }
+    public var localizedCountry: String { localizedCountry_ ?? Self.unknownCountry }
 
     // MARK: - find (if it exists) or create (if it doesn't exist) a LocalizedAddress
 
@@ -58,7 +70,7 @@ extension LocalizedAddress { // expose computed properties (some related to hand
     public static func findCreateUpdate(bgContext: NSManagedObjectContext,
                                         organization: Organization, // part of unique identifier
                                         language: Language, // part of unique identifier
-                                        newLocalizedAddressStrings: LocalizedAddressStrings,
+                                        newLocalizedAddressFields: LocalizedAddressFields,
                                         newCoordinates: CLLocationCoordinate2D
                                 ) -> Bool { // true if something got updated (or created?)
 
@@ -87,7 +99,7 @@ extension LocalizedAddress { // expose computed properties (some related to hand
 
         // At this point, localizedAddress has the required ID, but could have outdated coordinates or localized strings
         // Adjusting these non-ID properties is handled in update()
-        let hasChanged = localizedAddress.update(newLocalizedAddressStrings: newLocalizedAddressStrings,
+        let hasChanged = localizedAddress.update(newLocalizedAddressFields: newLocalizedAddressFields,
                                                  newCoordinates: newCoordinates)
 
         do {
@@ -101,15 +113,15 @@ extension LocalizedAddress { // expose computed properties (some related to hand
         return hasChanged
     }
 
-    private func update(newLocalizedAddressStrings: LocalizedAddressStrings,
+    private func update(newLocalizedAddressFields: LocalizedAddressFields,
                         newCoordinates: CLLocationCoordinate2D) -> Bool {
         var changed = false
-        if self.localizedTown_ != newLocalizedAddressStrings.localizedTown {
-            self.localizedTown_ = newLocalizedAddressStrings.localizedTown
+        if self.localizedTown_ != newLocalizedAddressFields.localizedTown {
+            self.localizedTown_ = newLocalizedAddressFields.localizedTown
             changed = true
         }
-        if self.localizedCountry_ != newLocalizedAddressStrings.localizedCountry {
-            self.localizedCountry_ = newLocalizedAddressStrings.localizedCountry
+        if self.localizedCountry_ != newLocalizedAddressFields.localizedCountry {
+            self.localizedCountry_ = newLocalizedAddressFields.localizedCountry
             changed = true
         }
         if self.prevCoordinates != newCoordinates {
@@ -132,7 +144,10 @@ extension LocalizedAddress { // expose computed properties (some related to hand
 
 }
 
-public struct LocalizedAddressStrings: Sendable { // only used to decrease parameter count in a function by one
+/// The two non-identifying fields of a `LocalizedAddress`, bundled so `findCreateUpdate` stays within
+/// SwiftLint's parameter limit. "Fields" rather than "Strings": these are the parts of *one* address in
+/// *one* language, not the same address across languages — that dimension is the `LocalizedAddress` rows.
+public struct LocalizedAddressFields: Sendable {
     public let localizedTown: String // e.g. "Parijs" (NL) or "Paris" (EN)
     public let localizedCountry: String // e.g. "Frankrijk" (NL) or "France" (EN)
 
