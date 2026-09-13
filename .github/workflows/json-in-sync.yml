@@ -1,0 +1,112 @@
+name: JSON in sync
+
+# The Level 1/2 JSON files exist twice: in this package, and in the iOS app repo's `JSON/`. The iOS
+# copy is the live one — every shipped app fetches `dataSourcePath`
+# (raw.githubusercontent.com/vdhamer/Photo-Club-Hub/main/JSON/) at launch — while this repo's copy is
+# the bundled offline fallback. Nothing links the two, so they drift, and the drift is silent in the
+# worst possible direction: editing the copy here changes nothing users see, and looks like it worked.
+#
+# Two instances have been found by hand, both edits made here and invisible in production. This job
+# is the cheap stand-in until vdhamer/Photo-Club-Hub-Data#7 makes one copy authoritative and generates
+# the other, at which point drift stops being possible and this file can go.
+#
+# Note the intended end state is the reverse of today's: this package becomes the copy that is edited,
+# and the iOS repo's JSON/ becomes generated output. It has to keep being served either way, because
+# the URL is compiled into every shipped binary and raw.githubusercontent.com offers no redirect. So
+# "the iOS copy is the live one", above and in the failure message, is current fact rather than intent.
+#
+# Why not on push: the two repos are pushed independently, so a legitimate two-repo edit is out of
+# sync between the first push and the second. A push-time check would go red on correct work and
+# teach the maintainer to ignore it. A daily check never sees that window.
+#
+# Own file rather than a job in weekly-sweep.yml: that workflow's own comment says a check needing a
+# different cadence gets its own workflow, rather than one file with several cron lines.
+
+on:
+  schedule:
+    # Daily at 05:43 UTC. Cron here is UTC only, with no DST handling. Deliberately not on the hour:
+    # GitHub delays scheduled runs under load and the top of the hour is where everyone piles up.
+    # Scheduled runs are best-effort, so treat a late or missed run as normal.
+    - cron: '43 5 * * *'
+  workflow_dispatch: # cron only ever runs the copy on the default branch, so this is the way to test
+
+permissions:
+  contents: read
+
+jobs:
+
+  shared-json-identical:
+    name: shared JSON files identical in both repos
+    # Skipped in forks, which would otherwise compare a fork's own copy against vdhamer's and fail
+    # over a difference its owner made on purpose.
+    if: github.repository == 'vdhamer/Photo-Club-Hub-Data'
+    runs-on: ubuntu-latest
+
+    env:
+      # `gh` needs a token even for public reads, and the default one has ample scope for this.
+      GH_TOKEN: ${{ github.token }}
+      IOS_REPO: vdhamer/Photo-Club-Hub
+      IOS_DIR: JSON
+      PKG_DIR: Sources/Photo Club Hub Data/JSON
+
+    steps:
+      - name: Check out this package
+        uses: actions/checkout@v5
+
+      - name: Compare every file the two repos share
+        run: |
+          set -euo pipefail
+
+          # Only the intersection is compared. Six files currently live in one repo and not the
+          # other (see Data#7); failing on those would leave this job permanently red and therefore
+          # ignored. They are reported below as notices instead, so the gap stays visible without
+          # costing the check its meaning. Once Data#7 equalises the sets, this can tighten to set
+          # equality by turning that notice into an error.
+          gh api "repos/${IOS_REPO}/contents/${IOS_DIR}" --jq '.[] | select(.type=="file") | .name' \
+            | grep '\.json$' | sort > /tmp/ios.txt
+
+          (cd "${PKG_DIR}" && ls *.json) | sort > /tmp/pkg.txt
+
+          comm -12 /tmp/ios.txt /tmp/pkg.txt > /tmp/shared.txt
+          shared="$(wc -l < /tmp/shared.txt)"
+
+          # A wrong path or a renamed directory would make the loop run zero times and the step
+          # would pass having compared nothing. Silence is not success.
+          if [ "${shared}" -eq 0 ]; then
+            echo "::error::No JSON filenames are shared by the two repos — a path is wrong, not the data."
+            exit 1
+          fi
+
+          status=0
+          while IFS= read -r name; do
+            url="https://raw.githubusercontent.com/${IOS_REPO}/main/${IOS_DIR}/${name}"
+            curl -fsSL --retry 3 --retry-delay 5 -H 'Cache-Control: no-cache' "$url" -o /tmp/live.json ||
+              { echo "::error::Could not fetch ${url}"; status=1; continue; }
+
+            # -f rejects a 404, but an outage or a proxy can answer 200 with a body that is not the
+            # file. A pass has to mean two files were compared, not that both were empty.
+            test -s /tmp/live.json ||
+              { echo "::error::${url} returned an empty body"; status=1; continue; }
+
+            if ! diff -q /tmp/live.json "${PKG_DIR}/${name}" >/dev/null; then
+              echo "::error file=${PKG_DIR}/${name}::${name} differs between the two repos. \
+          The iOS copy is the one users receive; this copy is only the offline fallback."
+              diff -u --label "${IOS_REPO}/${IOS_DIR}/${name}" \
+                      --label "Photo-Club-Hub-Data/${PKG_DIR}/${name}" \
+                      /tmp/live.json "${PKG_DIR}/${name}" || true
+              status=1
+            fi
+          done < /tmp/shared.txt
+
+          echo
+          comm -23 /tmp/ios.txt /tmp/pkg.txt | while IFS= read -r n; do
+            echo "::notice::${n} exists only in ${IOS_REPO} (expected until Data#7)"
+          done
+          comm -13 /tmp/ios.txt /tmp/pkg.txt | while IFS= read -r n; do
+            echo "::notice::${n} exists only in this package (expected until Data#7)"
+          done
+
+          if [ "${status}" -eq 0 ]; then
+            echo "All ${shared} shared JSON files are identical."
+          fi
+          exit "${status}"
