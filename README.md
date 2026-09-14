@@ -144,7 +144,7 @@ Every suite runs against its own in-memory Core Data store.
 
 ### Tests run against frozen data
 
-Every test reads its JSON from a **frozen copy inside the package** (`Tests/Photo Club Hub DataTests/JSON/`), never from the network. Those copies are deliberately allowed to drift from the production files they were taken from — a fixture may be a year old, and that is the point: a test asserts against data it owns, so editing production data cannot turn this suite red.
+**Policy: a test that needs JSON reads a fixture from `Tests/Photo Club Hub DataTests/JSON/`, never a production file from `Sources/Photo Club Hub Data/JSON/` and never over the network.** Fixtures are deliberately allowed to drift from the production files they were taken from — a fixture may be a year old, and that is the point: a test asserts against data it owns, so editing production data cannot turn this suite red.
 
 In production the readers fetch from `https://raw.githubusercontent.com/vdhamer/Photo-Club-Hub/main/JSON/` and fall back to `Bundle.module`. `useOnlyInBundleFile: true` bypasses the remote read, and every reader call site in the tests passes it, so **a `swift test` run makes no HTTP requests at all**.
 
@@ -153,9 +153,13 @@ To re-verify that claim after changing reader code, temporarily point `dataSourc
 Two guardrails keep it that way:
 
 1. **`useOnlyInBundleFile` has no default value.** Every call site must state its intent, so a new test that simply forgets the argument is a compile error rather than a silent live read.
-2. **Fixtures carry a `Test` suffix where the name is free** — `rootTest.level0.json`, `museumsTest.level1.json`. The fixture name is what composes the remote URL, so a suffix production never uses guarantees a 404 and therefore the bundle copy, even if guardrail 1 is somehow bypassed.
+2. **No fixture shares its name with a production file.** The convention is a `Test` suffix — `rootTest.level0.json`, `museumsTest.level1.json`, `fgDeGenderTest.level2.json`. The fixture name is what composes the remote URL, so a name production never uses guarantees a 404 and therefore the bundle copy, even if guardrail 1 is somehow bypassed.
 
-Four Level 2 fixtures cannot take the suffix: `TemplateMin`, `TemplateMax`, `fgDeGender` and `fgWaalre` are loaded through their `*MembersProvider`, which composes the filename from the club's nickname. Their names do exist in production and do resolve, so those four rely on guardrail 1 alone. Keep that in mind when touching provider tests.
+The name matters locally too, and more than it may seem. `FetchAndProcessFile.urlForBundledResource` searches the package's own bundle before the test bundle, so a fixture named like a production file is never read: the production copy is found first, the test silently asserts against live data, and a routine member edit turns the suite red. The `*MembersProvider` types request a club's real nickname and would hit exactly that, so tests load a Level 2 fixture through `Level2JsonReader.load` with the fixture's `…Test` nickname instead, and the `nickName` inside the fixture matches it.
+
+One test reads production files anyway. `LevelLoaderTest` has the production file set as its subject: `LevelLoader.loadAllLevels()` hardcodes `root_`, so it loads every production file. It asserts only what holds for any valid data (load order, no reported errors, nothing downgraded), never counts or who has which expertise. Keep it that way.
+
+Freezing has a price: nothing in the suite notices when production gains a JSON field the fixtures lack. The weekly sweep covers that (see [Cross-repo checks](#cross-repo-checks)). It compares structure, not content, so it ignores a new member but fails when production uses a key path, such as `members[].optional.birthday`, that no fixture contains. The fix is to add the field to a fixture, re-check the counts the tests assert, and consider a test for the new field. If the field is merely in the wrong place, fix the production file instead.
 
 Three known issues:
 
@@ -165,9 +169,13 @@ Three known issues:
 
 ## Cross-repo checks
 
-`.github/workflows/weekly-sweep.yml` runs on GitHub Actions every Monday at 06:17 UTC and checks things no single repository can check on its own. Today that is one job: `scripts/gate-and-stamp.sh` must be byte-identical in Photo-Club-Hub and Photo-Club-Hub-HTML. Both apps stamp their builds with the same script, the two copies have drifted by hand before, and a repository cannot compare itself against a sibling — so the check lives here, in the one thing both apps depend on.
+`.github/workflows/weekly-sweep.yml` runs GitHub Actions every Monday at 06:17 UTC and checks things no single repository can check on its own. Today that is three jobs:
 
-Nothing is added to the package or to its build. The job reads the two app repos over public raw URLs, checks out nothing from this one, and needs no token; it is skipped in forks. A failed scheduled run emails the repository owner, which is how a red sweep gets noticed without anyone watching the Actions tab.
+- `scripts/gate-and-stamp.sh` must be byte-identical in Photo-Club-Hub and Photo-Club-Hub-HTML. Both apps stamp their builds with two copies of the same script, but a repository cannot compare itself against a sibling — so the check lives here, in the one thing both apps depend on.
+- Every JuiceBox `config.xml` (a web site index) referenced by a Level 2 file must be well-formed XML (`scripts/check-juicebox-galleries.py`).
+- Every JSON key path the production files use must occur in some test fixture (`scripts/check-fixture-coverage.py`), so a new JSON field cannot ship unnoticed by the tests. See [Tests run against frozen data](#tests-run-against-frozen-data).
+
+Nothing is added to the package or to its build. The jobs read only public repositories and websites, need no secrets, and are skipped in forks. A failed scheduled run emails the repository owner, which is how a red sweep gets noticed without anyone watching the Actions tab.
 
 **The file is invisible in Xcode's Project Navigator.** Xcode hides dot-prefixed entries, and a package has no `.xcodeproj` in which to add a file reference — so `.github`, `.swiftlint.yml` and `.gitignore` are all maintained inside Photo Club Hub Data - but shown nowhere. Open it in Xcode using `xed .github/workflows/weekly-sweep.yml`, or (if you want) from an editor that supports YAML syntax highlighting.
 
