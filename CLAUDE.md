@@ -27,6 +27,23 @@ before writing or reviewing any of it.
 - If the skill is not installed in your environment, say so rather than proceeding silently, and
   state plainly which concurrency questions you could not settle without compiling and testing.
 
+## Tests read fixtures, never production JSON
+
+A test that needs a JSON file reads a frozen fixture from `Tests/Photo Club Hub DataTests/JSON/`, not one of the
+production files in `Sources/Photo Club Hub Data/JSON/`. Production data is edited routinely (a new member, an
+extra expertise), and a test that asserts on it goes red on correct work.
+
+- Give every fixture a name no production file uses; the convention is a `Test` suffix
+  (`fgDeGenderTest.level2.json`). A fixture that shares a production file's name is silently shadowed: the bundle
+  lookup finds the package's own copy first, so the test reads production data while appearing to use its fixture.
+- Do not load a Level 2 fixture through a `*MembersProvider`, which requests the club's real nickname. Call
+  `Level2JsonReader.load` with the fixture's nickname, and make the `nickName` inside the fixture match it.
+- The one exception, `LevelLoaderTest`, has the production file set itself as its subject. What it may assert is
+  in README.md under "Tests run against frozen data".
+- The weekly sweep fails when production uses a JSON key path that no fixture contains
+  (`scripts/check-fixture-coverage.py`). Add the field to a fixture, re-check the counts the tests assert, and
+  consider a test for it. Do not weaken the check to get it green.
+
 ## The Level 1 entry point is `root_.level1.json`, not `root.level1.json`
 
 `LevelLoader.loadAllLevels()` hardcodes `let fileName = "root_"` (`LevelLoader.swift:52`), so both apps start
