@@ -9,6 +9,18 @@ TO-DO
 
 ### 3.4.0 (GitHub commit ???????) ??-09-2026
 
+STRUCTURAL
+
+* __Tests read only their own frozen JSON fixtures.__ Four Level 2 fixtures (`TemplateMin`, `TemplateMax`, `fgDeGender`, `fgWaalre`) had never actually been read. `FetchAndProcessFile.urlForBundledResource` searches the package's own bundle before the test bundle, so a fixture sharing a production file's name was shadowed by it, and the tests asserted against live data while appearing to use their fixtures. It surfaced when adding three expertises to one fgDeGender member turned CI red on correct work. The fixtures now carry a `Test` suffix with a matching `nickName` inside, and the tests load them through `Level2JsonReader.load` rather than the `*MembersProvider` types, which request a club's real nickname; the expected counts follow the frozen data. `LanguageUpgradeInPlaceTest` and `LoadOrderIndependenceTest` moved from the production `root.level0.json` to `rootTest.level0.json`, which leaves `LevelLoaderTest`, whose subject is the production file set itself, as the one test reading production files. The policy and that exception are written down in README.md ("Tests run against frozen data") and in CLAUDE.md. Tests and documentation only: nothing a consumer can observe changed.
+
+* __Weekly check that the fixtures keep up with production JSON.__ Frozen fixtures mean nothing in the suite notices when production gains a JSON field they lack. A new `weekly-sweep.yml` job runs `scripts/check-fixture-coverage.py`, which compares structure rather than content: every key path used by a production file (the iOS repo's live `JSON/` merged with this package's copy) must occur in some fixture of the same level. A new member adds no key path, so everyday data edits pass; a new or misplaced field fails the sweep, which is the cue to update a fixture, re-check the counts the tests assert, and consider a test for the new field. New values, such as a new expertise id, go unnoticed (Data#55).
+
+* __Weekly check that JuiceBox galleries are well-formed XML.__ _Placeholder: to be written at release time._ (Data#54)
+
+DATA
+
+* `fcDenDungen.level2.json`: removed a stray `birthday` placed directly under a member. The same value is also inside that member's `optional`, which is the only place the reader looks, so nothing a user sees changes. Removed identically from the iOS repo's live copy. Found by the new fixture check on its first run (Data#55).
+
 ---------------------------------------------------------------------------
 
 ### 3.3.0 (GitHub commit 16cdeef) 09-09-2026
