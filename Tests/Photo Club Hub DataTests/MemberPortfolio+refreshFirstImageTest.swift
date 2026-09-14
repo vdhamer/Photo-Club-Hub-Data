@@ -36,14 +36,11 @@ import CoreData // for NSMergePolicy
         bgContext.automaticallyMergesChangesFromParent = true
 
         let randomTownForTesting = String.random(length: 10)
-        _ = TemplateMinMembersProvider(bgContext: bgContext,
-                                       isBeingTested: true,
-                                       useOnlyInBundleFile: true,
-                                       randomTownForTesting: randomTownForTesting)
-
         let idPlus = OrganizationIdPlus(fullName: "Template Club With Minimal Data",
                                         town: randomTownForTesting, // new town to distinguish from normal club data
-                                        nickname: "TemplateMin")
+                                        nickname: "TemplateMinTest")
+        await Level2JsonReader.load(bgContext: bgContext, organizationIdPlus: idPlus, // frozen fixture, see README.md
+                                    isBeingTested: true, useOnlyInBundleFile: true)
 
         // All access to the private-queue bgContext must run on that context's own queue. Both the
         // findCreateUpdate() calls and the urlOfImageIndex property read (via level3URL) touch bgContext,

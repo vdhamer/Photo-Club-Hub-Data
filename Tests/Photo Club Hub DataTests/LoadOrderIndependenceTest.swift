@@ -31,12 +31,12 @@ import CoreData // for NSManagedObjectContext
 @Suite("Tests that Level 0 / Level 2 load order does not change the result")
 struct LoadOrderIndependenceTests {
 
-    // The bundled TemplateMax.level2.json club. Its two members between them reference the expertises
-    // Experimental, Street, Landscape, Travel and Minimal — all five of which root.level0.json declares,
+    // The frozen TemplateMaxTest.level2.json fixture. Its two members between them reference the expertises
+    // Experimental, Street, Landscape, Travel and Minimal — all five of which rootTest.level0.json declares,
     // so the Level-2-first arm really does exercise create-as-temporary followed by promotion.
     private static let templateMax = OrganizationIdPlus(fullName: "Template Club With Maximal Data",
                                                         town: "Rotterdam",
-                                                        nickname: "TemplateMax")
+                                                        nickname: "TemplateMaxTest")
 
     private func makeContext() -> NSManagedObjectContext {
         // A private in-memory store per arm, so the two orderings cannot see each other's records.
@@ -45,10 +45,12 @@ struct LoadOrderIndependenceTests {
         return context
     }
 
-    // useOnlyInBundleFile avoids the network so the test is deterministic; isBeingTested stays false so
-    // the production root.level0.json / TemplateMax.level2.json are used rather than test variants.
+    // useOnlyInBundleFile avoids the network so the test is deterministic. Both levels read frozen fixtures,
+    // chosen by file name for Level 0 and by nickname for Level 2, so editing production data cannot change
+    // the outcome. isBeingTested stays false, which keeps Level 2's check that the in-file town matches.
     private func loadLevel0(into context: NSManagedObjectContext) async {
         await Level0JsonReader.load(bgContext: context,
+                                    fileName: "rootTest",
                                     isBeingTested: false,
                                     useOnlyInBundleFile: true)
     }

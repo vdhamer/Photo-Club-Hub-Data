@@ -17,8 +17,8 @@ import CoreData // for NSManagedObjectContext, NSEntityDescription
 //
 // The package already unit-tests the predicate itself. This test deliberately covers the layer above:
 // a populated store opened through the app's Core Data stack, upgraded by a real Level 0 load. Note
-// the bundled root.level0.json genuinely contains uppercase codes ("EN", "NL", "DE"), which is how
-// such rows came to exist in the first place.
+// the production root.level0.json genuinely contains uppercase codes ("EN", "NL", "DE"), which is how
+// such rows came to exist in the first place. The rootTest.level0.json fixture loaded below keeps them.
 //
 // Every touch of bgContext goes through perform { }. The test plan runs with
 // -com.apple.CoreData.ConcurrencyDebug 1, which traps any access to a private-queue context from
@@ -62,8 +62,9 @@ struct LanguageUpgradeInPlaceTests {
         #expect(before == ["NL"], "precondition: exactly one row, uppercase. Got \(before)")
 
         // Run a real Level 0 load against that store. useOnlyInBundleFile avoids the network so the
-        // test is deterministic; isBeingTested stays false so the production root.level0.json is used.
+        // test is deterministic, and the frozen rootTest.level0.json keeps production data edits out of it.
         _ = Level0JsonReader(bgContext: bgContext,
+                             fileName: "rootTest",
                              isBeingTested: false,
                              useOnlyInBundleFile: true)
 

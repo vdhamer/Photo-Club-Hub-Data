@@ -30,8 +30,23 @@ import CoreData // for NSManagedObjectContext
         OrganizationType.initConstants(context: viewContext)
     }
 
-    // Read TemplateMin.level2.json and check for parsing errors.
-    @Test("Parse TemplateMin.level2.json") func templateMinParse() async {
+    // Loads a frozen Level 2 fixture the way a club's *MembersProvider loads its production file: create the
+    // club under `idPlus` first, so the assertions can find it in its random town, then read the file.
+    // The providers themselves cannot be used here. They request the club's real nickname, and a production
+    // file of that name is found before the fixture, so the test would silently read production data.
+    // See "Tests run against frozen data" in README.md.
+    private func loadFixture(_ idPlus: OrganizationIdPlus, into bgContext: NSManagedObjectContext) async {
+        await bgContext.perform {
+            _ = Organization.findCreateUpdate(context: bgContext, organizationTypeEnum: .club, idPlus: idPlus)
+        }
+        await Level2JsonReader.load(bgContext: bgContext,
+                                    organizationIdPlus: idPlus,
+                                    isBeingTested: true, // skips checking the file's town against idPlus.town
+                                    useOnlyInBundleFile: true)
+    }
+
+    // Read TemplateMinTest.level2.json and check for parsing errors.
+    @Test("Parse TemplateMinTest.level2.json") func templateMinParse() async {
         let bgContext = testPersistenceController.container.newBackgroundContext()
         bgContext.name = "TemplateMinTest"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
@@ -40,15 +55,10 @@ import CoreData // for NSManagedObjectContext
         #expect(Expertise.count(context: bgContext) == 0) // clearing is handled via "inMemory: true"
 
         let randomTownForTesting = String.random(length: 10) // e.g. "s8H2bEU3C6"
-
-        _ = TemplateMinMembersProvider(bgContext: bgContext,
-                                       isBeingTested: true,
-                                       useOnlyInBundleFile: true,
-                                       randomTownForTesting: randomTownForTesting)
-
         let idPlus = OrganizationIdPlus(fullName: "Template Club With Minimal Data",
                                         town: randomTownForTesting, // town to keep this separate from normal club data
-                                        nickname: "TemplateMin")
+                                        nickname: "TemplateMinTest")
+        await loadFixture(idPlus, into: bgContext)
 
         let predicateFormat: String = "town_ = %@" // avoid localization
         // Note that organizationType is not an identifying attribute.
@@ -72,8 +82,8 @@ import CoreData // for NSManagedObjectContext
 
     }
 
-    // Read TemplateMax.level2.json and check for parsing errors
-    @Test("Parse TemplateMax.level2.json") func templateMaxParse() async {
+    // Read TemplateMaxTest.level2.json and check for parsing errors
+    @Test("Parse TemplateMaxTest.level2.json") func templateMaxParse() async {
         let bgContext = testPersistenceController.container.newBackgroundContext()
         bgContext.name = "TemplateMaxTest"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
@@ -82,14 +92,10 @@ import CoreData // for NSManagedObjectContext
         #expect(Expertise.count(context: bgContext) == 0)
 
         let randomTownForTesting = String.random(length: 10)
-        _ = TemplateMaxMembersProvider(bgContext: bgContext,
-                                       isBeingTested: true,
-                                       useOnlyInBundleFile: true,
-                                       randomTownForTesting: randomTownForTesting)
-
         let idPlus = OrganizationIdPlus(fullName: "Template Club With Maximal Data",
                                         town: randomTownForTesting, // town to distinguish this from normal club data
-                                        nickname: "TemplateMax")
+                                        nickname: "TemplateMaxTest")
+        await loadFixture(idPlus, into: bgContext)
 
         let predicateFormat: String = "town_ = %@" // avoid localization
         // Note that organizationType is not an identifying attribute.
@@ -112,8 +118,8 @@ import CoreData // for NSManagedObjectContext
         }
     }
 
-    // Read fgDeGender.level2.json and check for parsing errors
-    @Test("Parse fgDeGender.level2.json") func fgDeGenderParse() async {
+    // Read fgDeGenderTest.level2.json and check for parsing errors
+    @Test("Parse fgDeGenderTest.level2.json") func fgDeGenderParse() async {
         let bgContext = testPersistenceController.container.newBackgroundContext()
         bgContext.name = "fgDeGender"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
@@ -125,10 +131,10 @@ import CoreData // for NSManagedObjectContext
         #expect(Expertise.count(context: bgContext) == 0)
 
         let randomTownForTesting = String.random(length: 10)
-        _ = FotogroepDeGenderMembersProvider(bgContext: bgContext, // The club has Expertises
-                                             isBeingTested: true,
-                                             useOnlyInBundleFile: true,
-                                             randomTownForTesting: randomTownForTesting)
+        let idPlus = OrganizationIdPlus(fullName: "Fotogroep de Gender",
+                                        town: randomTownForTesting, // town to distinguish this from normal club data
+                                        nickname: "fgDeGenderTest")
+        await loadFixture(idPlus, into: bgContext) // The club has Expertises
 
         let predicateFormat: String = "town_ = %@" // avoid localization
         // Note that organizationType is not an identifying attribute.
@@ -138,10 +144,6 @@ import CoreData // for NSManagedObjectContext
         let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
         fetchRequest.predicate = predicate
         let organizations: [Organization] = (try? viewContext.fetch(fetchRequest)) ?? []
-
-        let idPlus = OrganizationIdPlus(fullName: "Fotogroep de Gender",
-                                        town: randomTownForTesting, // town to distinguish this from normal club data
-                                        nickname: "fgDeGender")
 
         #expect(organizations.count == 1)
         if organizations.isEmpty == false {
@@ -154,7 +156,7 @@ import CoreData // for NSManagedObjectContext
 
         #expect(Expertise.count(context: bgContext) == 21)
         #expect(PhotographerExpertise.count(context: bgContext, expertiseID: "Minimal") == 2)
-        #expect(PhotographerExpertise.count(context: bgContext) == 50)
+        #expect(PhotographerExpertise.count(context: bgContext) == 49)
     }
 
     // Read and check for expertise merging
@@ -169,24 +171,20 @@ import CoreData // for NSManagedObjectContext
         Model.deleteExpertises(viewContext: viewContext) // remove Expertises
         #expect(Expertise.count(context: bgContext) == 0)
 
-        // note that club fgDeGender may already be loaded
-        // note that fgDeGenderMembersProvider runs asynchronously (via bgContext.perform {})
-        let randomTownForTestingG = String.random(length: 10)
-        _ = FotogroepDeGenderMembersProvider(bgContext: bgContext,
-                                             isBeingTested: true,
-                                             useOnlyInBundleFile: true,
-                                             randomTownForTesting: randomTownForTestingG)
+        await loadFixture(OrganizationIdPlus(fullName: "Fotogroep de Gender",
+                                             town: String.random(length: 10),
+                                             nickname: "fgDeGenderTest"),
+                          into: bgContext)
         #expect(Expertise.count(context: bgContext) == 21)
-        #expect(PhotographerExpertise.count(context: bgContext) == 50)
+        #expect(PhotographerExpertise.count(context: bgContext) == 49)
 
-        let randomTownForTestingW = String.random(length: 10)
-        _ = FotogroepWaalreMembersProvider(bgContext: bgContext,
-                                           isBeingTested: true,
-                                           useOnlyInBundleFile: true,
-                                           randomTownForTesting: randomTownForTestingW)
+        await loadFixture(OrganizationIdPlus(fullName: "Fotogroep Waalre",
+                                             town: String.random(length: 10),
+                                             nickname: "fgWaalreTest"),
+                          into: bgContext)
 
         #expect(Expertise.count(context: bgContext) == 22)
-        #expect(PhotographerExpertise.count(context: bgContext) == 50 + 44 - 2) // DeGender + Waalre - overlap
+        #expect(PhotographerExpertise.count(context: bgContext) == 49 + 44 - 2) // DeGender + Waalre - overlap
     }
 
 }
