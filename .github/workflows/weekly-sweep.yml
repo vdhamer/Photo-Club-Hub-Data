@@ -86,6 +86,48 @@ jobs:
             exit 1
           fi
 
+  juicebox-galleries-well-formed:
+    name: JuiceBox config.xml files parse
+    # Skipped in forks, which have no reason to poll third-party photo-club websites.
+    if: github.repository == 'vdhamer/Photo-Club-Hub-Data'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out this package
+        uses: actions/checkout@v5
+
+      - name: Validate every JuiceBox gallery referenced by a Level 2 file
+        # Roughly 190 portfolio URLs, of which about a third are JuiceBox galleries; the rest are
+        # ordinary web pages and are skipped. Takes two to three minutes, nearly all of it waiting
+        # on other people's servers, which is why this is weekly rather than per push.
+        run: ./scripts/check-juicebox-galleries.py "Sources/Photo Club Hub Data/JSON"
+
+  fixtures-cover-production-json:
+    name: Test fixtures hold every JSON field production uses
+    # Skipped in forks, whose fixtures have no reason to track vdhamer's live data.
+    if: github.repository == 'vdhamer/Photo-Club-Hub-Data'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out this package
+        uses: actions/checkout@v5
+
+      - name: Check out the live JSON
+        # The iOS repo's JSON/ is what shipped apps fetch. Public, so the default token is enough.
+        uses: actions/checkout@v5
+        with:
+          repository: vdhamer/Photo-Club-Hub
+          path: ios
+          sparse-checkout: JSON
+
+      - name: Compare key paths of fixtures and production files
+        # Structure, not content: a new member changes no key path, a new JSON field does. The package's
+        # own copy is read as well, because the two copies do not hold exactly the same files (Data#7).
+        run: |
+          ./scripts/check-fixture-coverage.py "Tests/Photo Club Hub DataTests/JSON" \
+                                              ios/JSON \
+                                              "Sources/Photo Club Hub Data/JSON"
+
   # Future modules would be added here as a new job. Initial candidates:
   #
   #   level2-json-valid       the *.level2.json files are syntactically valid JSON files
