@@ -141,11 +141,15 @@ class Level0JsonReader {
 
             let isoCode = jsonLanguage["isoCode"].stringValue
             let languageNameEN = jsonLanguage["languageNameEN"].stringValue
+            // A missing "isSupported" key reads as false, so a language is only supported when Level 0 says so.
+            // A language removed from this list keeps its flag until the store is reset: loads only merge.
+            let isSupported = jsonLanguage["isSupported"].boolValue
 
             let language = Language.findCreateUpdate(context: bgContext,
                                                      isoCode: isoCode,
-                                                     nameENOptional: languageNameEN)
-            print("Language <\(language.isoCode)> found")
+                                                     nameENOptional: languageNameEN,
+                                                     isSupportedOptional: isSupported)
+            print("Language <\(language.isoCode)> found\(isSupported ? " (supported)" : "")")
         }
     }
 }
