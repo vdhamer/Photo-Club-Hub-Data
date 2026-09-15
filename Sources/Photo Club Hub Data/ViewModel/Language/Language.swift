@@ -76,6 +76,45 @@ extension Language {
         return try? context.fetch(fetchRequest).first
     }
 
+    /// The supported languages are those the project as a whole is localized into. In September 2026 that is
+    /// English and Dutch, and the set is expected and designed to grow.
+    ///
+    /// Every supported language should be covered by each of these localization mechanisms:
+    ///   1. UI strings, in the String Catalogs of the three repos;
+    ///   2. more static strings in generated HTML web pages. Uses a dedicated String Catalog.
+    ///   3. organization remarks, in Level 1 JSON (`LocalizedRemark`);
+    ///   4. expertise names and usage texts, in Level 0 JSON (`LocalizedExpertise`);
+    ///   5. town and country names, fetched from Apple's geocoder by `OrganizationGeocoder` (`LocalizedAddress`);
+    ///   6. App Store texts and screenshots, maintained separately in App Store Connect.
+    /// Remarks and expertises may carry extra languages on individual records; the other four should not.
+    /// Nothing enforces any of this: the sets are kept identical by hand.
+    ///
+    /// The set is determined by finding every `Language` with at least one expertise translation, a name or
+    /// a usage text. That conflicts with the rule above: a single extra translation in Level 0 makes its
+    /// language supported. The risk is small, because Level 0 is the only source of expertise translations
+    /// (expertises found in Level 2 files, and the "Too many expertises" marker, carry none), and the
+    /// implementation may change at any time. Other `Language` rows exist without being supported:
+    /// `initConstants` creates six (Polish among them), Level 0 declares German, and a remark in any other
+    /// language (such as "pdc") adds that language. The HTML app generates its pages in the supported languages.
+    ///
+    /// The name states the result rather than how it is determined (Data#22).
+    /// "Supported" here is unrelated to `Expertise.isSupported`, which marks an expertise as defined in Level 0.
+    ///
+    /// Empty before Level 0 has loaded. Sorted by ISO code, for a stable order.
+    /// Like `find`, this returns managed objects, so call it on `context`'s queue.
+    public static func supportedLanguages(context: NSManagedObjectContext) -> [Language] {
+        let fetchRequest: NSFetchRequest<Language> = Language.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "localizedExpertises_.@count > 0") // avoid localization
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "isoCode_", ascending: true)]
+
+        do {
+            return try context.fetch(fetchRequest)
+        } catch {
+            ifDebugFatalError("Failed to fetch supported Languages: \(error)", file: #fileID, line: #line)
+            return [] // on non-Debug version, continue as if no language were supported: nothing gets geocoded
+        }
+    }
+
     // MARK: - find, create, update
 
     // Find existing Language object or create a new one.
