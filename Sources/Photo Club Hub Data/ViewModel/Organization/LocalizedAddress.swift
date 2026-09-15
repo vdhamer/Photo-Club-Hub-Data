@@ -142,6 +142,67 @@ extension LocalizedAddress { // expose computed properties (some related to hand
         }
     }
 
+    /// Counts, for every (organization × supported language) combination, the state of its translated address
+    /// (`LocalizedAddress`): how far reverse geocoding has got. Remarks (`LocalizedRemark`) also exist per
+    /// organization and language, but are not counted here. Each combination falls in exactly one group:
+    /// - `waiting`: `Organization.needsLocalizedAddress(for:)` is true, so the geocoder will ask Apple for it;
+    /// - `onErrorPlaceholders`): a current address holding "Town?" or "Country?", stays until next database reset;
+    /// - `completed`: a current address with a real town and country.
+    ///
+    /// Combinations rather than organizations, because each one is one request to Apple.
+    /// And because a client app (e.g. iOS) may do requests for the current system language only.
+    /// In case there are  no supported languages yet (before Level 0 has loaded) every count is 0.
+    /// What a running geocoder has queued, finished or dropped is not in the store and is not counted here:
+    /// once a sweep ends, the addresses it could not resolve simply count as `waiting` again.
+    ///
+    /// The fetches run inside `performAndWait`, so this may be called from any thread, and the result is `Sendable`.
+    public static func geocodingCounts(context: NSManagedObjectContext) -> GeocodingCounts {
+        context.performAndWait {
+            let noCounts = GeocodingCounts(completed: 0, waiting: 0, onErrorPlaceholders: 0)
+            let languages = Language.supportedLanguages(context: context)
+
+            guard !languages.isEmpty else { return noCounts }
+
+            let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "TRUEPREDICATE")
+            // load every organization's addresses in one extra query, not one query per organization on first use
+            fetchRequest.relationshipKeyPathsForPrefetching = ["localizedAddresses_"]
+            let organizations: [Organization]
+            do {
+                organizations = try context.fetch(fetchRequest)
+            } catch {
+                ifDebugFatalError("Failed to fetch Organizations for geocoding counts: \(error)",
+                                  file: #fileID, line: #line)
+                return noCounts // on non-Debug version, report nothing rather than a partial count
+            }
+
+            var completed = 0
+            var waiting = 0
+            var placeholders = 0
+
+            for organization in organizations { // all clubs and museums
+                for language in languages { // typically English and Dutch
+                    if organization.needsLocalizedAddress(for: language) {
+                        waiting += 1
+                    } else if organization.localizedAddress(for: language)?.holdsPlaceholder == true {
+                        placeholders += 1
+                    } else {
+                        completed += 1
+                    }
+                }
+            }
+            return GeocodingCounts(completed: completed,
+                                   waiting: waiting,
+                                   onErrorPlaceholders: placeholders)
+        }
+    }
+
+    /// Whether this row stores "Town?" or "Country?": Apple answered for these coordinates, but without
+    /// a city or a country. A nil attribute reads as the same placeholder through the getters above.
+    private var holdsPlaceholder: Bool {
+        localizedTown == Self.unknownTown || localizedCountry == Self.unknownCountry
+    }
+
 }
 
 /// The two non-identifying fields of a `LocalizedAddress`, bundled so `findCreateUpdate` stays within
@@ -155,4 +216,15 @@ public struct LocalizedAddressFields: Sendable {
         self.localizedTown = localizedTown
         self.localizedCountry = localizedCountry
     }
+}
+
+/// How far reverse geocoding has got: for every (organization × supported language) combination, the state of its
+/// translated address, as returned by `LocalizedAddress.geocodingCounts(context:)`. `total` is derived, so the
+/// three parts always add up.
+public struct GeocodingCounts: Sendable, Equatable {
+    public let completed: Int // a current row with a real town and country
+    public let waiting: Int // no row yet, or the organization moved: the geocoder will ask Apple
+    public let onErrorPlaceholders: Int // a current row holding "Town?" or "Country?": not asked again
+
+    public var total: Int { completed + waiting + onErrorPlaceholders } // organizations × supported languages
 }
