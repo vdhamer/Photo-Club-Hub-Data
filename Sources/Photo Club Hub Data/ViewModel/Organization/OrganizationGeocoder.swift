@@ -155,17 +155,15 @@ public struct OrganizationGeocoder: Sendable {
 
             var items: [GeocodeWorkItem] = []
             for org in organizations {
-                for language in languages {
-                    if org.needsLocalizedAddress(for: language) {
-                        items.append(GeocodeWorkItem(
-                            organizationObjectID: org.objectID,
-                            languageObjectID: language.objectID,
-                            latitude: org.coordinates.latitude,
-                            longitude: org.coordinates.longitude,
-                            languageCode: language.isoCode,
-                            organizationName: org.fullName
-                        ))
-                    }
+                for language in languages where org.needsLocalizedAddress(for: language) {
+                    items.append(GeocodeWorkItem(
+                        organizationObjectID: org.objectID,
+                        languageObjectID: language.objectID,
+                        latitude: org.coordinates.latitude,
+                        longitude: org.coordinates.longitude,
+                        languageCode: language.isoCode,
+                        organizationName: org.fullName
+                    ))
                 }
             }
             return items
