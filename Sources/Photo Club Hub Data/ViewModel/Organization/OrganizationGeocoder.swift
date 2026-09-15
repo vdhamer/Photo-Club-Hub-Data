@@ -136,19 +136,19 @@ public struct OrganizationGeocoder: Sendable {
     /// Fetches all (organization × language) pairs that need reverse-geocoding and returns them as work items.
     ///
     /// A pair needs geocoding when no `LocalizedAddress` exists yet, or when the stored `prevCoordinates`
-    /// differs from the organization's current coordinates. Only languages that have expertise translations
-    /// are fetched (currently EN and NL); the others exist in CoreData but are not used on the website.
+    /// differs from the organization's current coordinates: `Organization.needsLocalizedAddress(for:)` is
+    /// that single rule, shared with `LocalizedAddress.geocodingCounts(context:)`. Only the supported
+    /// languages are geocoded (`Language.supportedLanguages`, currently EN and NL); other languages exist
+    /// in CoreData but no page or app screen shows their town and country.
     private func buildWorkItems(bgContext: NSManagedObjectContext) -> [GeocodeWorkItem] {
         bgContext.performAndWait {
             let orgRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
             orgRequest.predicate = NSPredicate(format: "TRUEPREDICATE")
             let organizations: [Organization] = (try? bgContext.fetch(orgRequest)) ?? []
 
-            // Only languages with Expertise translations get pages on the website.
-            // Filtering here avoids a nested performAndWait inside the language loop.
-            let langRequest: NSFetchRequest<Language> = Language.fetchRequest()
-            langRequest.predicate = NSPredicate(format: "localizedExpertises_.@count > 0")
-            let languages = (try? bgContext.fetch(langRequest)) ?? []
+            // Fetched once, outside the loop below: no nested performAndWait, and one query instead of one
+            // per organization. Safe to call here because this closure already runs on bgContext's queue.
+            let languages = Language.supportedLanguages(context: bgContext)
             if languages.isEmpty {
                 ifDebugFatalError("No languages found for which reverse geoencoding is required.")
             }
@@ -156,8 +156,7 @@ public struct OrganizationGeocoder: Sendable {
             var items: [GeocodeWorkItem] = []
             for org in organizations {
                 for language in languages {
-                    let existing = org.localizedAddress(for: language)
-                    if existing == nil || org.coordinates != existing!.prevCoordinates {
+                    if org.needsLocalizedAddress(for: language) {
                         items.append(GeocodeWorkItem(
                             organizationObjectID: org.objectID,
                             languageObjectID: language.objectID,
