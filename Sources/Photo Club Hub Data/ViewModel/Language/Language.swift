@@ -89,22 +89,22 @@ extension Language {
     /// Remarks and expertises may carry extra languages on individual records; the other four should not.
     /// Nothing enforces any of this: the sets are kept identical by hand.
     ///
-    /// The set is determined by finding every `Language` with at least one expertise translation, a name or
-    /// a usage text. That conflicts with the rule above: a single extra translation in Level 0 makes its
-    /// language supported. The risk is small, because Level 0 is the only source of expertise translations
-    /// (expertises found in Level 2 files, and the "Too many expertises" marker, carry none), and the
-    /// implementation may change at any time. Other `Language` rows exist without being supported:
-    /// `initConstants` creates six (Polish among them), Level 0 declares German, and a remark in any other
-    /// language (such as "pdc") adds that language. The HTML app generates its pages in the supported languages.
+    /// The set is declared rather than derived: a language is supported when Level 0's `languages` list marks
+    /// it `"isSupported": true`. A missing key reads as false, so German, which Level 0 declares for other
+    /// reasons, is not supported, and an extra remark or expertise translation cannot make a language
+    /// supported by accident. Other `Language` rows exist without being supported: `initConstants` creates
+    /// six (Polish among them), and a remark in any other language (such as "pdc") adds that language.
+    /// A language dropped from Level 0's list keeps its flag until the store is reset, because loads only
+    /// merge (Data#39). The HTML app generates its pages in the supported languages.
     ///
-    /// The name states the result rather than how it is determined (Data#22).
     /// "Supported" here is unrelated to `Expertise.isSupported`, which marks an expertise as defined in Level 0.
+    /// "Supported" here marks that the language has full support within the project (the 6 mechanisms listed above).
     ///
-    /// Empty before Level 0 has loaded. Sorted by ISO code, for a stable order.
-    /// Like `find`, this returns managed objects, so call it on `context`'s queue.
+    /// Empty until Level 0 has been loaded from a file carrying the key. Sorted by ISO code, for a deterministic
+    /// order. Like `find`, this returns managed objects, so call it on `context`'s queue.
     public static func supportedLanguages(context: NSManagedObjectContext) -> [Language] {
         let fetchRequest: NSFetchRequest<Language> = Language.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "localizedExpertises_.@count > 0") // avoid localization
+        fetchRequest.predicate = NSPredicate(format: "isSupported == YES") // avoid localization
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "isoCode_", ascending: true)]
 
         do {
