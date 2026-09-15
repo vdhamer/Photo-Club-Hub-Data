@@ -118,10 +118,14 @@ extension Language {
     // MARK: - find, create, update
 
     // Find existing Language object or create a new one.
-    // Update existing attributes or fill the new object
+    // Update existing attributes or fill the new object.
+    // A nil `nameENOptional` or `isSupportedOptional` leaves that attribute as it is. Only the Level 0 reader
+    // passes `isSupportedOptional`: every other caller finds or creates languages for other reasons (remarks,
+    // expertise translations, `initConstants`) and must not change whether a language is supported.
     static func findCreateUpdate(context: NSManagedObjectContext, // can be foreground or background thread
                                  isoCode: String,
-                                 nameENOptional: String? = nil
+                                 nameENOptional: String? = nil,
+                                 isSupportedOptional: Bool? = nil
                                 ) -> Language {
         let isoCode = isoCode.lowercased() // "EN" → "en" — ISO 639-1 codes are lowercase in the standard
         // case-insensitive: shipped versions stored uppercase codes, so the store is not guaranteed
@@ -146,7 +150,9 @@ extension Language {
         }
 
         if let language = languages.first { // already exists, so update non-identifying attributes
-            if language.update(context: context, nameENOptional: nameENOptional) { // nameENOptional can be nil
+            if language.update(context: context, // both optionals can be nil
+                               nameENOptional: nameENOptional,
+                               isSupportedOptional: isSupportedOptional) {
                 print("Updated info for language \"\(language.nameEN)\"")
                 if Settings.extraCoreDataSaves {
                     save(context: context, language: language, create: false)
@@ -156,9 +162,11 @@ extension Language {
         } else {
             // cannot use Language() initializer because we must use supplied context
             let entity = NSEntityDescription.entity(forEntityName: "Language", in: context)!
-            let language = Language(entity: entity, insertInto: context)
+            let language = Language(entity: entity, insertInto: context) // isSupported starts at the model default
             language.isoCode = isoCode // immediately set it to a non-nil value
-            _ = language.update(context: context, nameENOptional: nameENOptional)
+            _ = language.update(context: context,
+                                nameENOptional: nameENOptional,
+                                isSupportedOptional: isSupportedOptional)
             if Settings.extraCoreDataSaves {
                 save(context: context, language: language, create: true)
             }
@@ -168,16 +176,21 @@ extension Language {
     }
 
     // Update non-identifying attributes/properties within an existing instance of class Language if needed.
-    // Returns whether an update was needed.
+    // Returns whether an update was needed. A nil argument leaves that attribute unchanged.
     private func update(context: NSManagedObjectContext,
-                        nameENOptional: String?) -> Bool { // change language.name if needed
-
-        guard let nameEN = nameENOptional else { return false } // nothing to change
+                        nameENOptional: String?, // nil: keep the English name
+                        isSupportedOptional: Bool? // nil: keep isSupported
+                       ) -> Bool {
 
         var modified: Bool = false
 
-        if self.nameEN != nameEN {
+        if let nameEN = nameENOptional, self.nameEN != nameEN {
             self.nameEN = nameEN
+            modified = true
+        }
+
+        if let isSupported = isSupportedOptional, self.isSupported != isSupported {
+            self.isSupported = isSupported
             modified = true
         }
 
