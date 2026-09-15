@@ -168,6 +168,19 @@ extension Organization {
         localizedAddresses.first { $0.language_ == language } // is that language available? else nil.
     }
 
+    /// Whether Apple's geocoder should be asked for this organization's town and country in `language`:
+    /// true when there is no `LocalizedAddress` row for that language yet, or when the stored row was
+    /// derived from coordinates that have since changed.
+    ///
+    /// This is the single rule for that decision. `OrganizationGeocoder` builds its work list with it and
+    /// `LocalizedAddress.geocodingCounts(context:)` counts with it, so the two cannot disagree.
+    /// A current row holding a placeholder ("Town?" or "Country?") does not qualify: Apple has already
+    /// answered for these coordinates.
+    public func needsLocalizedAddress(for language: Language) -> Bool {
+        guard let address = localizedAddress(for: language) else { return true } // never geocoded in this language
+        return address.prevCoordinates != coordinates // the organization moved since its localizeAddress was fetched
+    }
+
     /// The town in `language`, falling back to the unlocalized name the JSON supplied.
     ///
     /// A missing `LocalizedAddress` row means the pair has not been reverse-geocoded in that language,
