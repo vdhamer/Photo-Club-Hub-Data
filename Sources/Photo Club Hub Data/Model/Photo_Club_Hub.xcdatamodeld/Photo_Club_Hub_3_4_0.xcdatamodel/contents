@@ -13,6 +13,7 @@
     </entity>
     <entity name="Language" representedClassName="Language" syncable="YES">
         <attribute name="isoCode_" attributeType="String"/>
+        <attribute name="isSupported" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="languageNameEN_" optional="YES" attributeType="String"/>
         <relationship name="localizedAddresses_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="LocalizedAddress" inverseName="language_" inverseEntity="LocalizedAddress"/>
         <relationship name="localizedExpertises_" toMany="YES" deletionRule="Cascade" destinationEntity="LocalizedExpertise" inverseName="language_" inverseEntity="LocalizedExpertise" elementID="localizedKeywords_"/>

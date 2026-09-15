@@ -19,6 +19,7 @@ extension Language {
     }
 
     @NSManaged nonisolated public var isoCode_: String?
+    @NSManaged nonisolated public var isSupported: Bool
     @NSManaged nonisolated public var languageNameEN_: String?
     @NSManaged nonisolated public var localizedAddresses_: NSSet?
     @NSManaged nonisolated public var localizedExpertises_: NSSet?
