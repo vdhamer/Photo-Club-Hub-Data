@@ -86,27 +86,28 @@ let package = Package(
                 // A fixture must never share its name with a production JSON file: the loader looks in the
                 // package's own bundle first, so the production copy would be read instead of the fixture.
                 // Hence rootTest, fgDeGenderTest, and so on. See "Tests run against frozen data" in README.md.
-                .copy("JSON/Level0/abstractExpertise.level0.json"),
-                .copy("JSON/Level0/empty.level0.json"),
-                .copy("JSON/Level0/expertiseMissingIdString.level0.json"),
-                .copy("JSON/Level0/garbage.level0.json"),
-                .copy("JSON/Level0/language.level0.json"),
-                .copy("JSON/Level0/languages.level0.json"),
+                .copy("JSON/Level0/abstractExpertiseTest.level0.json"),
+                .copy("JSON/Level0/emptyTest.level0.json"),
+                .copy("JSON/Level0/expertiseMissingIdStringTest.level0.json"),
+                .copy("JSON/Level0/garbageTest.level0.json"),
+                .copy("JSON/Level0/languageTest.level0.json"),
+                .copy("JSON/Level0/languagesTest.level0.json"),
+                .copy("JSON/Level0/languageWithdrawnTest.level0.json"),
                 .copy("JSON/Level0/rootTest.level0.json"),
-                .copy("JSON/Level1/IncludeChild.level1.json"),
-                .copy("JSON/Level1/IncludeParent.level1.json"),
+                .copy("JSON/Level1/IncludeChildTest.level1.json"),
+                .copy("JSON/Level1/IncludeParentTest.level1.json"),
                 .copy("JSON/Level1/clubTemplatesTest.level1.json"),
-                .copy("JSON/Level1/garbage.level1.json"),
+                .copy("JSON/Level1/garbageTest.level1.json"),
                 .copy("JSON/Level1/museumsTest.level1.json"),
-                .copy("JSON/Level1/recursionA.level1.json"),
-                .copy("JSON/Level1/recursionB.level1.json"),
-                .copy("JSON/Level1/truncated.level1.json"),
+                .copy("JSON/Level1/recursionATest.level1.json"),
+                .copy("JSON/Level1/recursionBTest.level1.json"),
+                .copy("JSON/Level1/truncatedTest.level1.json"),
                 .copy("JSON/Level2/TemplateMaxTest.level2.json"),
                 .copy("JSON/Level2/TemplateMinTest.level2.json"),
                 .copy("JSON/Level2/fgDeGenderTest.level2.json"),
                 .copy("JSON/Level2/fgWaalreTest.level2.json"),
-                .copy("JSON/Level2/garbage.level2.json"),
-                .copy("JSON/Level2/missingIdPlus.level2.json")
+                .copy("JSON/Level2/garbageTest.level2.json"),
+                .copy("JSON/Level2/missingIdPlusTest.level2.json")
             ]
         ),
         .plugin(
