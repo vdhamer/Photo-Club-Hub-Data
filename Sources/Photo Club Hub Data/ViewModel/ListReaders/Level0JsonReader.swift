@@ -141,15 +141,19 @@ class Level0JsonReader {
 
             let isoCode = jsonLanguage["isoCode"].stringValue
             let languageNameEN = jsonLanguage["languageNameEN"].stringValue
-            // A missing "isSupported" key reads as false, so a language is only supported when Level 0 says so.
-            // A language removed from this list keeps its flag until the store is reset: loads only merge.
-            let isSupported = jsonLanguage["isSupported"].boolValue
+            // Absent means "no opinion", as with the role booleans in a Level 2 file (MemberRolesAndStatus):
+            // only an explicit true or false changes the stored flag. So a language keeps whatever it has,
+            // whether its entry is dropped from this list or merely loses its "isSupported" line. Withdrawing
+            // support therefore needs "isSupported": false, or a database reset, until the wider obsolete-value
+            // handling of Data#39 arrives.
+            let isSupportedOptional: Bool? = jsonLanguage["isSupported"].exists() ?
+                                             jsonLanguage["isSupported"].boolValue : nil
 
             let language = Language.findCreateUpdate(context: bgContext,
                                                      isoCode: isoCode,
                                                      nameENOptional: languageNameEN,
-                                                     isSupportedOptional: isSupported)
-            print("Language <\(language.isoCode)> found\(isSupported ? " (supported)" : "")")
+                                                     isSupportedOptional: isSupportedOptional)
+            print("Language <\(language.isoCode)> found\(language.isSupported ? " (supported)" : "")")
         }
     }
 }
