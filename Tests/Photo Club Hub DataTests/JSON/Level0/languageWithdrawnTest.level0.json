@@ -1,0 +1,13 @@
+{
+    "languages": [
+        {
+            "isoCode": "EN",
+            "languageNameEN": "English",
+            "isSupported": false
+        },
+        {
+            "isoCode": "NL",
+            "languageNameEN": "Dutch"
+        }
+    ]
+}
