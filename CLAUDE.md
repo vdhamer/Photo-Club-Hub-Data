@@ -33,9 +33,10 @@ A test that needs a JSON file reads a frozen fixture from `Tests/Photo Club Hub 
 production files in `Sources/Photo Club Hub Data/JSON/`. Production data is edited routinely (a new member, an
 extra expertise), and a test that asserts on it goes red on correct work.
 
-- Give every fixture a name no production file uses; the convention is a `Test` suffix
-  (`fgDeGenderTest.level2.json`). A fixture that shares a production file's name is silently shadowed: the bundle
-  lookup finds the package's own copy first, so the test reads production data while appearing to use its fixture.
+- Every fixture file name ends in `Test` (`fgDeGenderTest.level2.json`, `languagesTest.level0.json`), without exception.
+  The requirement is a name no production file uses; the suffix is how that is guaranteed at a glance. A fixture
+  sharing a production file's name is silently shadowed: the bundle lookup finds the package's own copy first, so
+  the test reads production data while appearing to use its fixture.
 - Do not load a Level 2 fixture through a `*MembersProvider`, which requests the club's real nickname. Call
   `Level2JsonReader.load` with the fixture's nickname, and make the `nickName` inside the fixture match it.
 - The one exception, `LevelLoaderTest`, has the production file set itself as its subject. What it may assert is

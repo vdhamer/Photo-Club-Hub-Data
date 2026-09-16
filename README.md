@@ -153,7 +153,7 @@ To re-verify that claim after changing reader code, temporarily point `dataSourc
 Two guardrails keep it that way:
 
 1. **`useOnlyInBundleFile` has no default value.** Every call site must state its intent, so a new test that simply forgets the argument is a compile error rather than a silent live read.
-2. **No fixture shares its name with a production file.** The convention is a `Test` suffix — `rootTest.level0.json`, `museumsTest.level1.json`, `fgDeGenderTest.level2.json`. The fixture name is what composes the remote URL, so a name production never uses guarantees a 404 and therefore the bundle copy, even if guardrail 1 is somehow bypassed.
+2. **Every fixture file name ends in `Test`** — `rootTest.level0.json`, `languagesTest.level0.json`, `museumsTest.level1.json`, `fgDeGenderTest.level2.json` — so no fixture can share its name with a production file. The fixture name is what composes the remote URL, so a name production never uses guarantees a 404 and therefore the bundle copy, even if guardrail 1 is somehow bypassed.
 
 The name matters locally too, and more than it may seem. `FetchAndProcessFile.urlForBundledResource` searches the package's own bundle before the test bundle, so a fixture named like a production file is never read: the production copy is found first, the test silently asserts against live data, and a routine member edit turns the suite red. The `*MembersProvider` types request a club's real nickname and would hit exactly that, so tests load a Level 2 fixture through `Level2JsonReader.load` with the fixture's `…Test` nickname instead, and the `nickName` inside the fixture matches it.
 
