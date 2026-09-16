@@ -167,6 +167,7 @@ extension LocalizedAddress { // expose computed properties (some related to hand
             fetchRequest.predicate = NSPredicate(format: "TRUEPREDICATE")
             // load every organization's addresses in one extra query, not one query per organization on first use
             fetchRequest.relationshipKeyPathsForPrefetching = ["localizedAddresses_"]
+
             let organizations: [Organization]
             do {
                 organizations = try context.fetch(fetchRequest)
