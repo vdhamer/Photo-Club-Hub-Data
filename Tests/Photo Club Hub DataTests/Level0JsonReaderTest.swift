@@ -31,9 +31,9 @@ private let isBeingTested = true
         OrganizationType.initConstants(context: viewContext)
     }
 
-    // Read empty.level0.json and check for parsing errors.
+    // Read emptyTest.level0.json and check for parsing errors.
     // Clears all CoreData expertises. Runs on background thread, adding bunch of extra complexity ;-(
-    @Test("Parse empty.level0.json") func emptyLevel0Parse() async {
+    @Test("Parse emptyTest.level0.json") func emptyLevel0Parse() async {
         let bgContext = testPersistenceController.container.newBackgroundContext()
         bgContext.name = "EmptyLevel0"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
@@ -47,7 +47,7 @@ private let isBeingTested = true
         #expect(PhotographerExpertise.count(context: bgContext) == 0)
 
         _ = Level0JsonReader(bgContext: bgContext,
-                             fileName: "empty",
+                             fileName: "emptyTest",
                              isBeingTested: isBeingTested,
                              useOnlyInBundleFile: true)
         #expect(Expertise.count(context: bgContext) == 0)
@@ -55,9 +55,9 @@ private let isBeingTested = true
         #expect(PhotographerExpertise.count(context: bgContext) == 0)
     }
 
-    // Read abstractExpertise.level0.json.
+    // Read abstractExpertiseTest.level0.json.
     // Clears all CoreData expertises. Runs on background thread, adding bunch of extra complexity ;-(
-    @Test("Parse abstractExpertise.level0.json") func abstractExpertiseLevel0Parse() async {
+    @Test("Parse abstractExpertiseTest.level0.json") func abstractExpertiseLevel0Parse() async {
         let bgContext = testPersistenceController.container.newBackgroundContext()
         bgContext.name = "AbstractExpertiseLevel0"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
@@ -72,7 +72,7 @@ private let isBeingTested = true
 
         bgContext.performAndWait {
             _ = Level0JsonReader(bgContext: bgContext,
-                                 fileName: "abstractExpertise",
+                                 fileName: "abstractExpertiseTest",
                                  isBeingTested: isBeingTested,
                                  useOnlyInBundleFile: true)
             try? bgContext.save()
@@ -101,9 +101,9 @@ private let isBeingTested = true
         #expect(Expertise.count(context: bgContext) == 29)
     }
 
-    // Read language.level0.json.
+    // Read languageTest.level0.json.
     // Clears all CoreData languages. Runs on background thread, adding bunch of extra complexity ;-(
-    @Test("Parse language.level0.json") func languageLevel0Parse() async {
+    @Test("Parse languageTest.level0.json") func languageLevel0Parse() async {
         let bgContext = testPersistenceController.container.newBackgroundContext()
         bgContext.name = "LanguageLevel0"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
@@ -117,7 +117,7 @@ private let isBeingTested = true
         #expect(LocalizedExpertise.count(context: bgContext) == 0)
 
         _ = Level0JsonReader(bgContext: bgContext,
-                             fileName: "language",
+                             fileName: "languageTest",
                              isBeingTested: isBeingTested,
                              useOnlyInBundleFile: true)
 
@@ -126,9 +126,9 @@ private let isBeingTested = true
         #expect(LocalizedExpertise.count(context: bgContext) == 0)
     }
 
-    // Read languages.level0.json.
+    // Read languagesTest.level0.json.
     // Clears all CoreData languages. Runs on background thread, adding bunch of extra complexity ;-(
-    @Test("Parse languages.level0.json") func languagesLevel0Parse() async {
+    @Test("Parse languagesTest.level0.json") func languagesLevel0Parse() async {
         let bgContext = testPersistenceController.container.newBackgroundContext()
         bgContext.name = "LanguagesLevel0"
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
@@ -142,7 +142,7 @@ private let isBeingTested = true
         #expect(LocalizedExpertise.count(context: bgContext) == 0)
 
         _ = Level0JsonReader(bgContext: bgContext,
-                             fileName: "languages",
+                             fileName: "languagesTest",
                              isBeingTested: isBeingTested,
                              useOnlyInBundleFile: true)
 

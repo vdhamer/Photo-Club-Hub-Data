@@ -145,8 +145,8 @@ private let isBeingTested = true
         #expect(allOrganizations().count == 2) // still 2, not 4
     }
 
-    // Read IncludeParent.level1.json, which has no organizations of its own but includes
-    // IncludeChild.level1.json (a leaf with one uniquely-named club). This verifies that the
+    // Read IncludeParentTest.level1.json, which has no organizations of its own but includes
+    // IncludeChildTest.level1.json (a leaf with one uniquely-named club). This verifies that the
     // `usedContainer:` seam routes an included file's load into this test's in-memory store.
     //
     // These two test data files exist only for this test. That matters:
@@ -167,21 +167,21 @@ private let isBeingTested = true
         let bgContext = makeBackgroundContext(named: "IncludeParentTest")
 
         await Level1JsonReader.load(bgContext: bgContext,
-                                    fileName: "IncludeParent",
+                                    fileName: "IncludeParentTest",
                                     isBeingTested: isBeingTested,
                                     useOnlyInBundleFile: true,
                                     usedContainer: testPersistenceController.container)
         // ^ usedContainer routes the included files' loads into the test's in-memory store
 
-        // The club from the *included* IncludeChild.level1.json must now be in the injected store.
+        // The club from the *included* IncludeChildTest.level1.json must now be in the injected store.
         let club = allOrganizations().first { $0.nickName == "IncludeChild" }
         #expect(club != nil)
         #expect(club?.fullName == "Include Child Club")
         #expect(club?.town == "Test Valley")
     }
 
-    // Read recursionA.level1.json, which Includes recursionB.level1.json, which in turn Includes
-    // recursionA.level1.json again — a deliberate A ⇄ B cycle. The level1History guard must detect
+    // Read recursionATest.level1.json, which Includes recursionBTest.level1.json, which in turn Includes
+    // recursionATest.level1.json again — a deliberate A ⇄ B cycle. The level1History guard must detect
     // the revisit of recursionA and cut the recursion short instead of looping forever.
     //
     // In a DEBUG (test) build, this guard reacts with ifDebugFatalError, a hard fatalError that would
@@ -201,7 +201,7 @@ private let isBeingTested = true
 
         let bgContext = makeBackgroundContext(named: "recursionATest")
         await Level1JsonReader.load(bgContext: bgContext,
-                                    fileName: "recursionA",
+                                    fileName: "recursionATest",
                                     isBeingTested: isBeingTested,
                                     useOnlyInBundleFile: true,
                                     usedContainer: testPersistenceController.container)

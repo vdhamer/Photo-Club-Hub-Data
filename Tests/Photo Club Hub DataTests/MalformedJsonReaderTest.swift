@@ -81,7 +81,7 @@ private let isBeingTested = true
         let bgContext = makeBackgroundContext(named: "garbageLevel0")
 
         _ = Level0JsonReader(bgContext: bgContext,
-                             fileName: "garbage",
+                             fileName: "garbageTest",
                              isBeingTested: isBeingTested,
                              useOnlyInBundleFile: true)
         waitForLoad(on: bgContext)
@@ -93,14 +93,14 @@ private let isBeingTested = true
     // A well-formed file whose single expertise is missing the required `idString`: the reader must skip it
     // (create nothing) and record the expected diagnostic via ifDebugFatalError.
     @Test("Level 0: expertise missing idString is reported and skipped") func level0MissingIdString() {
-        let bgContext = makeBackgroundContext(named: "expertiseMissingIdString")
+        let bgContext = makeBackgroundContext(named: "expertiseMissingIdStringTest")
 
         let spy = makeIfDebugFatalErrorSpy()
         installIfDebugFatalErrorSpy(spy)
         defer { removeIfDebugFatalErrorSpy() }
 
         _ = Level0JsonReader(bgContext: bgContext,
-                             fileName: "expertiseMissingIdString",
+                             fileName: "expertiseMissingIdStringTest",
                              isBeingTested: isBeingTested,
                              useOnlyInBundleFile: true)
         waitForLoad(on: bgContext)
@@ -118,7 +118,7 @@ private let isBeingTested = true
         let bgContext = makeBackgroundContext(named: "garbageLevel1")
 
         _ = Level1JsonReader(bgContext: bgContext,
-                             fileName: "garbage",
+                             fileName: "garbageTest",
                              isBeingTested: isBeingTested,
                              useOnlyInBundleFile: true)
         waitForLoad(on: bgContext)
@@ -132,7 +132,7 @@ private let isBeingTested = true
         let bgContext = makeBackgroundContext(named: "truncatedLevel1")
 
         _ = Level1JsonReader(bgContext: bgContext,
-                             fileName: "truncated",
+                             fileName: "truncatedTest",
                              isBeingTested: isBeingTested,
                              useOnlyInBundleFile: true)
         waitForLoad(on: bgContext)
@@ -149,7 +149,7 @@ private let isBeingTested = true
 
         let idPlus = OrganizationIdPlus(fullName: "Garbage Level 2 Club",
                                         town: "Nowhere",
-                                        nickname: "garbage") // → loads garbage.level2.json
+                                        nickname: "garbageTest") // → loads garbageTest.level2.json
 
         let spy = makeIfDebugFatalErrorSpy()
         installIfDebugFatalErrorSpy(spy)
@@ -172,7 +172,7 @@ private let isBeingTested = true
 
         let idPlus = OrganizationIdPlus(fullName: "Missing IdPlus Club",
                                         town: "Nowhere",
-                                        nickname: "missingIdPlus") // → loads missingIdPlus.level2.json
+                                        nickname: "missingIdPlusTest") // → loads missingIdPlusTest.level2.json
 
         let spy = makeIfDebugFatalErrorSpy()
         installIfDebugFatalErrorSpy(spy)
