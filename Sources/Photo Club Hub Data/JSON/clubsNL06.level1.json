@@ -9,6 +9,32 @@
 
         {
             "idPlus": {
+                "town": "Nijkerk",
+                "fullName": "Vereniging van Natuurfotografen Nijkerk",
+                "nickName": "vnfNijkerk"
+            },
+            "coordinates": {
+                "latitude": 52.23521,
+                "longitude": 5.46405
+            },
+            "optional": {
+                "website": "https://natuurfotografie.vnf-nijkerk.nl",
+                "level2URL": "https://www.example.com/vnfNijkerk.level2.json",
+                "remark": [
+                    {
+                        "language": "EN",
+                        "value": "Founded in 2014."
+                    },
+                    {
+                        "language": "NL",
+                        "value": "Opgericht in 2014."
+                    }
+                ]
+            }
+        },
+
+        {
+            "idPlus": {
                 "town": "Nijmegen",
                 "fullName": "Vereniging Natuurfotografen Nijmegen",
                 "nickName": "vnfNijmegen"
