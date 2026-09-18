@@ -48,6 +48,14 @@ public struct PersistenceController: Sendable {
             }
 		}
         container.viewContext.automaticallyMergesChangesFromParent = true
+
+        // Seed the OrganizationType rows (club, museum, unknown) as soon as the store is open, before any view
+        // or loader can run. Every organization points at one of these rows, and a Level 1 load creates
+        // organizations in one background context per include file: without the rows, those contexts race to
+        // insert the same one and Core Data throws on the relationship (Data#60). An existing store only fetches.
+        // A private context keeps it off the main thread, so any caller may construct a PersistenceController.
+        OrganizationType.initConstants(context: LevelLoader.makeBgContext(ctxName: "OrganizationType seeding",
+                                                                          usedContainer: container))
 	}
 
     public func save() {
