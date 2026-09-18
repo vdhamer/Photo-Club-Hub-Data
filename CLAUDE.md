@@ -50,7 +50,7 @@ extra expertise), and a test that asserts on it goes red on correct work.
 `LevelLoader.loadAllLevels()` starts the Level 1 tree at `builtInLevel1RootName` (`"root_"`, `LevelLoader.swift:22`)
 unless a caller passes `level1RootURL` (vdhamer/Photo-Club-Hub#829), which neither app does. So both apps start at
 `root_.level1.json`. That file is header-only: it includes `clubsNL.level1.json` (which in turn includes one
-`clubsNLxx` file per Fotobond afdeling, `xx` being the afdeling number, as an empty placeholder where no club is
+`clubsNLxx` file per Fotobond Afdeling, `xx` being the afdeling number, as an empty placeholder where no club is
 listed yet) plus `museums.level1.json`. Every club and museum record arrives through those includes, except the two
 template clubs, which only the hardcoded Level 2 loaders create (until Data#8).
 

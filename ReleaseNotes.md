@@ -12,6 +12,16 @@ TO-DO
 _Open for the next cycle. `PhotoClubHubDataVersion.semver` and the `Photo_Club_Hub_3_5_0` model version
 were opened when 3.4.0 was tagged; the number is a plan until its own tag exists, and may be overtaken._
 
+BEHAVIOR
+
+* __`PersistenceController` seeds the organization types as soon as the store opens.__
+Level 1 loads each include file in its own background context, and every club points at the same `club` row of `OrganizationType`. When that row did not exist yet, two contexts could both insert it, and Core Data threw on the relationship. Both apps were protected because they call `OrganizationType.initConstants` before loading, but `loadAllLevels` itself was not: `LevelLoaderTest`, which starts from an empty in-memory store, aborted once eleven club files loaded in parallel. `PersistenceController.init` now seeds the three rows on a private context before any view or loader runs, and on an existing store that only fetches. The apps' own calls become redundant once they resolve this version, and can be dropped then (Data#60).
+
+DATA
+
+* `clubsNL01`, `clubsNL02`, `clubsNL04` to `clubsNL12`, `clubsNL14`, `clubsNL15`, `clubsNL17` (new), `clubsNL03`, `clubsNL16`, `clubsNL.level1.json`
+Fourteen nature photography clubs, none of them Fotobond members, placed in one Level 1 file per Fotobond afdeling, each included from `clubsNL.level1.json`. Five more files (`clubsNL01`, `clubsNL09`, `clubsNL14`, `clubsNL15`, `clubsNL17`) are empty placeholders, so every afdeling now has a file to add clubs to. The fourteen new files are bundled through `Package.swift`. Mirrored identically in the iOS repo's live copy (Data#59).
+
 ---------------------------------------------------------------------------
 
 ### 3.4.0 (GitHub commit 3daae31) 17-09-2026
