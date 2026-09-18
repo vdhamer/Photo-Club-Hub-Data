@@ -47,10 +47,43 @@ extra expertise), and a test that asserts on it goes red on correct work.
 
 ## The Level 1 entry point is `root_.level1.json`, not `root.level1.json`
 
-`LevelLoader.loadAllLevels()` hardcodes `let fileName = "root_"` (`LevelLoader.swift:52`), so both apps start
-the Level 1 tree at `root_.level1.json`. That file is header-only: it includes `clubsNL.level1.json` (which in
-turn includes `clubsNL03` and `clubsNL16`) plus `museums.level1.json`. Every club and museum record arrives
-through those includes.
+`LevelLoader.loadAllLevels()` starts the Level 1 tree at `builtInLevel1RootName` (`"root_"`, `LevelLoader.swift:22`)
+unless a caller passes `level1RootURL` (vdhamer/Photo-Club-Hub#829), which neither app does. So both apps start at
+`root_.level1.json`. That file is header-only: it includes `clubsNL.level1.json` (which in turn includes one
+`clubsNLxx` file per Fotobond afdeling, `xx` being the afdeling number, as an empty placeholder where no club is
+listed yet) plus `museums.level1.json`. Every club and museum record arrives through those includes, except the two
+template clubs, which only the hardcoded Level 2 loaders create (until Data#8).
+
+```
+root_.level1.json                header only
+├── clubsNL.level1.json          header only
+│   ├── clubsNL01.level1.json    Groningen
+│   ├── clubsNL02.level1.json    Friesland
+│   ├── clubsNL03.level1.json    Drenthe-Vechtdal
+│   ├── clubsNL04.level1.json    Transijssel
+│   ├── clubsNL05.level1.json    Twente
+│   ├── clubsNL06.level1.json    Gelderland Zuid
+│   ├── clubsNL07.level1.json    Utrecht-'t Gooi
+│   ├── clubsNL08.level1.json    Noord-Holland Noord
+│   ├── clubsNL09.level1.json    Kennemerland
+│   ├── clubsNL10.level1.json    Amsterdam
+│   ├── clubsNL11.level1.json    Zuid-Holland Noord
+│   ├── clubsNL12.level1.json    Zuid-Holland Zuid
+│   ├── clubsNL14.level1.json    Zeeland              (there is no Afdeling 13)
+│   ├── clubsNL15.level1.json    Brabant West
+│   ├── clubsNL16.level1.json    Brabant Oost
+│   └── clubsNL17.level1.json    Limburg
+└── museums.level1.json          lists museums itself, and includes one file per country
+    ├── museumsAU.level1.json
+    ├── museumsCN.level1.json
+    ├── museumsDE.level1.json
+    ├── museumsGB.level1.json
+    ├── museumsJP.level1.json
+    ├── museumsNL.level1.json
+    └── museumsUS.level1.json
+```
+
+Outside the tree: `root.level1.json` (the legacy flat file, see below) and the template clubs' Level 1 files.
 
 `root.level1.json` (no underscore) is the legacy flat file from before the Include feature
 (vdhamer/Photo-Club-Hub#638). It still sits in both repos' JSON folders with stale copies of records, but no
