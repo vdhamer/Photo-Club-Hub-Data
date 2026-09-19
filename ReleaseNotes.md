@@ -7,7 +7,7 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
-### 3.5.0 (GitHub commit ???????) ??-??-2026
+### 3.5.0 (GitHub commit ???????) ??-09-2026
 
 _Open for the next cycle. `PhotoClubHubDataVersion.semver` and the `Photo_Club_Hub_3_5_0` model version
 were opened when 3.4.0 was tagged; the number is a plan until its own tag exists, and may be overtaken._
@@ -16,6 +16,9 @@ BEHAVIOR
 
 * __`PersistenceController` seeds the organization types as soon as the store opens.__
 Level 1 loads each include file in its own background context, and every club points at the same `club` row of `OrganizationType`. When that row did not exist yet, two contexts could both insert it, and Core Data threw on the relationship. Both apps were protected because they call `OrganizationType.initConstants` before loading, but `loadAllLevels` itself was not: `LevelLoaderTest`, which starts from an empty in-memory store, aborted once eleven club files loaded in parallel. `PersistenceController.init` now seeds the three rows on a private context before any view or loader runs, and on an existing store that only fetches. The apps' own calls become redundant once they resolve this version, and can be dropped then (Data#60).
+
+* __A Level 1 file without a bundled copy still loads from its online copy.__
+The loader looked for a bundled copy of each file before trying the online one, and gave up on the file when there was no bundled copy: skipped in release builds, a trap in debug builds. Because the Level 1 tree is read from live data, it can "Include" files newer than the app reading it, and on 19 Sept 2026 fourteen new `clubsNLxx` files did exactly that. All released versions of the app skipped them, and the debug build of the iOS app crashed on launch (with a console message). A missing bundled copy is now reported as an error only when the bundle is the sole source (`useOnlyInBundleFile`, as in the tests), where it really is a build mistake. Otherwise it is logged, and the online copy is used. Released apps keep the old behavior until their users update to the newer version (Data#62).
 
 DATA
 
