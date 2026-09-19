@@ -214,4 +214,64 @@ private let isBeingTested = true
         #expect(allOrganizations().filter { $0.nickName == "Antartica" }.count == 1)
     }
 
+    // A file that exists online but has no bundled copy must still load (Data#62).
+    // The Level 1 tree is read from live data, so it can include files newer than the build reading it.
+    // The loader previously gave up on such a file before trying its online copy:
+    // Previous result: file skipped in RELEASE builds, triggered a trap in DEBUG builds.
+    // Tests make no network requests, so the "online" copy is a temporary file reached through
+    // a file:// URL, under a name that no bundle contains.
+    @Test("A file without a bundled copy should load from its online copy")
+    func fileWithoutBundledCopyLoadsFromOnlineCopy() async throws {
+
+        let fileName = "notInBundleTest"
+        let jsonFileContent = """
+            { "clubs":
+                [ 
+                    {
+                        "idPlus": { "town": "Test Valley",
+                                    "fullName": "Not in bundle Club",
+                                    "nickName": "NotInBundle" },
+                        "coordinates": { "latitude": 51.12862, "longitude": 1.51063 },
+                        "optional": { }
+                    }
+                ]
+            }
+            """ // careful: jsonFileContent is just level1.json data, so don't add Swift comments for these lines
+        let onlineCopy = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(fileName)-\(UUID().uuidString).level1.json") // random file name
+        try jsonFileContent.write(to: onlineCopy, atomically: true, encoding: .utf8)
+        defer { try? FileManager.default.removeItem(at: onlineCopy) }
+
+        let bgContext = makeBackgroundContext(named: fileName)
+        await Level1JsonReader.load(bgContext: bgContext,
+                                    fileName: fileName,
+                                    isBeingTested: isBeingTested,
+                                    useOnlyInBundleFile: false,
+                                    usedContainer: testPersistenceController.container,
+                                    explicitRemoteURL: onlineCopy)
+
+        let club = allOrganizations().first { $0.nickName == "NotBundled" }
+        #expect(club?.fullName == "Not Bundled Club")
+    }
+
+    // The other half of Data#62: when the bundle is the only source, a missing bundled copy is still a build
+    // mistake (for example a file left out of Package.swift's resources), and must still be reported.
+    @Test("A missing bundled copy is still reported when the bundle is the only source")
+    func missingBundledCopyReportedWhenBundleIsOnlySource() async {
+
+        let spy = makeIfDebugFatalErrorSpy() // records the DEBUG-mode trap instead of crashing the test run
+        installIfDebugFatalErrorSpy(spy)
+        defer { removeIfDebugFatalErrorSpy() } // spy is process-global, so remove it promptly
+
+        let bgContext = makeBackgroundContext(named: "notBundledEitherTest")
+        await Level1JsonReader.load(bgContext: bgContext,
+                                    fileName: "notBundledEitherTest",
+                                    isBeingTested: isBeingTested,
+                                    useOnlyInBundleFile: true,
+                                    usedContainer: testPersistenceController.container)
+
+        #expect(spy.messages.contains { $0.contains("Failed to find internal URL") })
+        #expect(allOrganizations().isEmpty)
+    }
+
 }
