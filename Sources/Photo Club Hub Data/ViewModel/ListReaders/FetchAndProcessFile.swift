@@ -156,15 +156,22 @@ struct FetchAndProcessFile {
         // `<Package>_<Target>.bundle`). Resolve at runtime across both layouts so both repos use the same code.
         let fileInBundleURL: URL? = Self.urlForBundledResource(nameWithSubtype, withExtension: fileType)
 
-        // A missing bundled copy is a build mistake only when the bundle is a possible source. Data from
-        // outside this project has no embedded counterpart by definition, so absence is expected there.
+        // A missing bundled copy is a build mistake only when the bundle is the sole source (the tests, and any
+        // caller passing `useOnlyInBundleFile`), for example a file left out of Package.swift's resources.
+        // Otherwise it is normal: the Level 1 tree is read from live data, so it can "Include" files that are
+        // newer than this build. Those must still load from the online copy, so this only logs (Data#62).
+        // Data from outside this project has no embedded counterpart by definition, so there it is not checked.
         if fileFetchOptions.allowBundleFallback && fileInBundleURL == nil {
-            ifDebugFatalError("""
-                              Failed to find internal URL for \
-                              \(fileSelector.fileName).\(fileSubType).\(fileType). \
-                              Might be a filename or branch problem.
-                              """)
-            return nil
+            if fileFetchOptions.useOnlyInBundleFile {
+                ifDebugFatalError("""
+                                  Failed to find internal URL for \
+                                  \(fileSelector.fileName).\(fileSubType).\(fileType). \
+                                  Might be a filename or branch problem.
+                                  """)
+                return nil
+            }
+            print("Warning: no in-app copy of \(nameWithSubtype).\(fileType): "
+                  + "this build is likely older than the file, so only the online copy is available.")
         }
 
         let fileName = fileSelector.fileName
