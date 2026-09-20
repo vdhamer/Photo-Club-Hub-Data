@@ -7,10 +7,11 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
-### 3.5.0 (GitHub commit ???????) ??-09-2026
+### 3.6.0 (GitHub commit ca6e962) ??-10-2026
 
-_Open for the next cycle. `PhotoClubHubDataVersion.semver` and the `Photo_Club_Hub_3_5_0` model version
-were opened when 3.4.0 was tagged; the number is a plan until its own tag exists, and may be overtaken._
+---------------------------------------------------------------------------
+
+### 3.5.0 (GitHub commit ca6e962) 20-09-2026
 
 BEHAVIOR
 
@@ -26,7 +27,7 @@ DATA
 Fourteen nature photography clubs, none of them Fotobond members, placed in one Level 1 file per Fotobond afdeling, each included from `clubsNL.level1.json`. Five more files (`clubsNL01`, `clubsNL09`, `clubsNL14`, `clubsNL15`, `clubsNL17`) are empty placeholders, so every afdeling now has a file to add clubs to. The fourteen new files are bundled through `Package.swift`. Mirrored identically in the iOS repo's live copy (Data#59).
 
 * `clubsNL16`, `root.level1.json`, `fcVeghel.level2.json`
-The photo group in Veghel is "Fotogroep Zooomm" (nickname `fgZooomm`), as it spells itself, not "Zoomm". Renamed everywhere, including other clubs' remarks. Because a club is identified by name and town, a device that loaded the old spelling keeps it until the iOS app's 3.0.2 data reset. Mirrored identically in the iOS repo's live copy.
+One Club in Veghel is "Fotogroep Zooomm" (nickname `fgZooomm`), as it spells itself, not "Zoomm". Renamed everywhere, including other clubs' remarks. Because a club is identified by name and town, a device that loaded the old spelling keeps it until the iOS app's 3.0.2 data reset. Mirrored identically in the iOS repo's live copy.
 
 ---------------------------------------------------------------------------
 
