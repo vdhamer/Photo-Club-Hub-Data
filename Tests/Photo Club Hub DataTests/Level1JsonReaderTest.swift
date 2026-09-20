@@ -237,8 +237,9 @@ private let isBeingTested = true
                 ]
             }
             """ // careful: jsonFileContent is just level1.json data, so don't add Swift comments for these lines
-        let onlineCopy = FileManager.default.temporaryDirectory
-            .appendingPathComponent("\(fileName)-\(UUID().uuidString).level1.json") // random file name
+        let onlineCopy = FileManager.default
+            .temporaryDirectory
+            .appendingPathComponent("\(fileName)-\(UUID().uuidString).level1.json") // unique file name
         try jsonFileContent.write(to: onlineCopy, atomically: true, encoding: .utf8)
         defer { try? FileManager.default.removeItem(at: onlineCopy) }
 
@@ -250,8 +251,8 @@ private let isBeingTested = true
                                     usedContainer: testPersistenceController.container,
                                     explicitRemoteURL: onlineCopy)
 
-        let club = allOrganizations().first { $0.nickName == "NotBundled" }
-        #expect(club?.fullName == "Not Bundled Club")
+        let club = allOrganizations().first { $0.nickName == "NotInBundle" }
+        #expect(club?.fullName == "Not in bundle Club")
     }
 
     // The other half of Data#62: when the bundle is the only source, a missing bundled copy is still a build
