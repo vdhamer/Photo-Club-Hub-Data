@@ -159,8 +159,11 @@ struct FetchAndProcessFile {
         // A missing bundled copy is a build mistake only when the bundle is the sole source (the tests, and any
         // caller passing `useOnlyInBundleFile`), for example a file left out of Package.swift's resources.
         // Otherwise it is normal: the Level 1 tree is read from live data, so it can "Include" files that are
-        // newer than this build. Those must still load from the online copy, so this only logs (Data#62).
+        // newer than the last build. Those must still load from the online copy, so this only gets logged (Data#62).
         // Data from outside this project has no embedded counterpart by definition, so there it is not checked.
+        // This relies on `LevelLoaderTest`, which loads every production level from the bundle alone: a file left
+        // out of Package.swift therefore still fails CI, at every level, not only when someone runs a debug build.
+        // Keep that test reading production files bundle-only, or this stops being caught before a release.
         if fileFetchOptions.allowBundleFallback && fileInBundleURL == nil {
             if fileFetchOptions.useOnlyInBundleFile {
                 ifDebugFatalError("""
