@@ -226,7 +226,7 @@ private let isBeingTested = true
         let fileName = "notInBundleTest"
         let jsonFileContent = """
             { "clubs":
-                [ 
+                [
                     {
                         "idPlus": { "town": "Test Valley",
                                     "fullName": "Not in bundle Club",
