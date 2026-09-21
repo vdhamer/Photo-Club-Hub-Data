@@ -50,6 +50,23 @@ import CoreData // for NSManagedObjectContext
         #expect(photographer1.familyName == personName.familyName)
     }
 
+    // Two spellings of the same compound family name must yield one Photographer record, not two.
+    // PersonNameNormalizationTest shows that both spellings normalize to the same name parts. This test shows
+    // that equal parts are enough for the store to find the existing record, which is what a level2.json
+    // author relies on. See vdhamer/Photo-Club-Hub#841.
+    @Test("Two spellings of a compound family name yield one Photographer") func spellingsYieldOneRecord() {
+        let givenName = String.random(length: 10)
+        let asWritten = PersonName(givenName: givenName, infixName: "Van", familyName: "Heugten - van Nunen")
+        let asStored = PersonName(givenName: givenName, infixName: "van", familyName: "Heugten-van Nunen")
+
+        let photographer1 = Photographer.findCreateUpdate(context: viewContext, personName: asWritten)
+        let photographer2 = Photographer.findCreateUpdate(context: viewContext, personName: asStored)
+
+        #expect(photographer1 === photographer2) // same managed object, not a second copy
+        #expect(count(asStored) == 1) // exactly one record exists for this identity
+        #expect(photographer1.familyName == "Heugten-van Nunen") // stored in the normalized form
+    }
+
     // nil update semantics: a nil optional field must leave an already-set value untouched.
     @Test("nil optional field does not overwrite an existing value") func nilOptionalFieldDoesNotOverwrite() {
         let personName = PersonName(givenName: String.random(length: 10),

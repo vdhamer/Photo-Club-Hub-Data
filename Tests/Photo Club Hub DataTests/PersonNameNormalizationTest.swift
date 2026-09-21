@@ -45,6 +45,19 @@ import Testing
         #expect(name.familyName == input)
     }
 
+    // Normalization tidies the parts it is given but never moves text between them. By the #841 convention
+    // the first infix of a compound name belongs in infixName, yet an infix left at the start of familyName
+    // stays there: in a Flemish name such as "De Smet" the infix is part of the family name, and the parts
+    // alone cannot tell the two cases apart. Deciding where the infix goes is the job of whoever produced
+    // the parts, so "van Berg-Smit" with an empty infix and "Berg-Smit" with infix "van" remain two people.
+    @Test("An infix at the start of the family name is not moved to infixName",
+          arguments: ["van Berg-Smit", "De Smet"])
+    func leadingInfixStaysInFamilyName(input: String) {
+        let name = PersonName(givenName: "Coby", infixName: "", familyName: input)
+        #expect(name.infixName.isEmpty)
+        #expect(name.familyName == input)
+    }
+
     @Test("The infix is stored lowercase, so Van ... and van ... are one person",
           arguments: [("Van", "van"), ("van", "van"), ("VAN DER", "van der"),
                       ("Van Den", "van den"), (" van  de ", "van de"), ("", "")])
