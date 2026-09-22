@@ -22,11 +22,17 @@ import MapKit               // for MKReverseGeocodingRequest
 public struct OrganizationGeocoder: Sendable {
 
     private let maxAttempts: Int
-    private let cooldownSeconds: Int // server allows 50 requests (bacame 25??) every 60 seconds
+    private let cooldownSeconds: Int // measured (2026-09-23) at 50 requests per ~60 s; see the init parameter below
 
     /// - Parameters:
     ///   - maxAttempts: how often a single (organization × language) pair is retried before being dropped.
-    ///   - cooldownSeconds: pause after a failed call, sized to the geocoding server's rate-limit window.
+    ///   - cooldownSeconds: pause after a throttled call, sized to the geocoding server's rate-limit window.
+    ///     Apple documents that geocoding is rate-limited but doesn't say at what rate: `MKReverseGeocodingRequest`
+    ///     mentions no limit at all, and `CLGeocoder` only warns that too many requests in a short period fail.
+    ///     Measured 2026-09-23 (Data#65): exactly 50 requests succeed, as fast as they can be sent, after which
+    ///     every call fails with `MKError.loadingThrottled` (MKErrorDomain 3) until roughly 60 s after the burst
+    ///     started; the next 50 then succeed. Two cycles behaved identically, so 60 s is the right pause. Pacing
+    ///     at about one request per 1.2 s would stay under the limit and avoid the refusals altogether.
     public init(maxAttempts: Int = 3, cooldownSeconds: Int = 60) {
         self.maxAttempts = maxAttempts
         self.cooldownSeconds = cooldownSeconds
