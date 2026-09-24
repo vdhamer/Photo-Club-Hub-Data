@@ -87,8 +87,8 @@ Outside the tree: `root.level1.json` (the legacy flat file, see below) and the t
 
 `root.level1.json` (no underscore) is the legacy flat file from before the Include feature
 (vdhamer/Photo-Club-Hub#638). It still sits in both repos' JSON folders with stale copies of records, but no
-current app code path loads it — the only remaining caller of `Level1JsonReader`'s default `fileName: "root"`
-is a SwiftUI preview (`OrganizationViewMap.swift:103` in the iOS app).
+current code path loads it. `Level1JsonReader` has no default `fileName`, so loading it would take a caller
+naming `"root"` explicitly, and none in either app or in the tests does.
 
 It is not inert, though: `FetchAndProcessFile.dataSourcePath` points at
 `raw.githubusercontent.com/vdhamer/Photo-Club-Hub/main/JSON/`, so **app versions before 2.9.0 still fetch
