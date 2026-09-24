@@ -9,7 +9,16 @@ TO-DO
 
 ### 3.6.0 (GitHub commit ???????) ??-10-2026
 
-PLACEHOLDER FOR NEXT VERSION
+BEHAVIOR
+
+* __Every `PersistenceController` shares one copy of the data model.__
+Each instance used to load its own `NSManagedObjectModel`. Core Data maps an entity class such as `Organization` to the model that describes it, so two loaded copies made `Organization.entity()` ambiguous, and a SwiftUI `@FetchRequest` built from it threw "A fetch request must have an entity". The apps create only `shared`, so users never hit it. Xcode previews did: many previews run in one process, where `shared`, `preview` and the previews' own in-memory stores meet, and in the iOS app five previews failed or rendered depending on which previews had run before them. The model is now loaded once per process, in a `static` property.
+
+MODEL
+
+* __`Organization.isMapScrollLocked` is removed, from the model (`Photo_Club_Hub_3_6_0`) and from the public API.__
+It held whether an organization's map on the iOS Maps screen was locked, and was persisted across launches. The iOS app now keeps that lock as view state that starts locked. Therefore a map is always either locked on its club or unlocked on a view the user chose (vdhamer/Photo-Club-Hub#866). No app uses the attribute any more, and the HTML app has so far never displayed maps at all. The store's lightweight migration drops the column.
+Removing a public symbol would, formally, call for a major version under semantic versioning. This modification is deliberately done in a minor version instead: the only known consumers are the two Photo Club Hub apps, and neither uses it. An app commit that still uses `isMapScrollLocked` fails to compile once it resolves 3.6.0; for the iOS app that is `main` until vdhamer/Photo-Club-Hub#804 is merged.
 
 ---------------------------------------------------------------------------
 
