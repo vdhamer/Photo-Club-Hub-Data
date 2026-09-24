@@ -13,19 +13,36 @@ public struct PersistenceController: Sendable {
 
 	public let container: NSPersistentContainer
 
-	public init(inMemory: Bool = false) {
+    private static let modelName = "Photo_Club_Hub"
+
+    /// The data model, loaded once per process and shared by every `PersistenceController`.
+    ///
+    /// Previously, loading it per instance gave each store its own copy of the model.
+    /// Core Data maps each entity class to the model that describes it,
+    /// so with two copies claiming `Organization`, `Organization.entity()` is ambiguous,
+    /// and a `@FetchRequest` built from it throws "A fetch request must have an entity". The app only ever creates
+    /// `shared`, but Xcode runs many previews in one process, where `shared`, `preview` and previews' own
+    /// in-memory stores all meet, so previews failed depending on which ones ran before them.
+    ///
+    /// `nonisolated(unsafe)` because `NSManagedObjectModel` is not `Sendable`, yet this one is never mutated:
+    /// it is only handed to containers, and Core Data makes a model immutable once a coordinator uses it and
+    /// supports reading it from any thread. A `static let` is also initialized exactly once, thread-safely.
+    /// `@MainActor` would not fit: stores are created off the main thread too (tests, the HTML app's loaders).
+    nonisolated(unsafe) private static let model: NSManagedObjectModel = {
         // solution to access Coredata in non-main bundle found in https://developer.apple.com/forums/thread/652209
-        let name = "Photo_Club_Hub"
         let bundle: Bundle = Bundle.module // documentation: "resource bundle associated with the current Swift module"
-        let modelURL: URL? = bundle.url(forResource: name, withExtension: ".momd") // ManagedObjectModel
-        guard modelURL != nil else {
+        guard let modelURL = bundle.url(forResource: modelName, withExtension: ".momd") else { // ManagedObjectModel
             fatalError("Failed to find URL to the datamodel.")
         }
-        let model: NSManagedObjectModel? = NSManagedObjectModel(contentsOf: modelURL!)
-        guard model != nil else {
+        guard let model = NSManagedObjectModel(contentsOf: modelURL) else {
             fatalError("Failed to find the NSManagedObjectModel.")
         }
-        container = NSPersistentContainer(name: name, managedObjectModel: model!) // normally NSPersistContainer(name:)
+        return model
+    }()
+
+	public init(inMemory: Bool = false) {
+        container = NSPersistentContainer(name: Self.modelName, // normally NSPersistContainer(name:)
+                                          managedObjectModel: Self.model)
 
 		if inMemory {
 			container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
