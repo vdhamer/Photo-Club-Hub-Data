@@ -9,9 +9,9 @@ import CoreData
 import CoreLocation // needed for coordinate translation
 
 public struct PersistenceController: Sendable {
-	public static let shared = PersistenceController()
+    public static let shared = PersistenceController()
 
-	public let container: NSPersistentContainer
+    public let container: NSPersistentContainer
 
     private static let modelName = "Photo_Club_Hub"
 
@@ -40,13 +40,13 @@ public struct PersistenceController: Sendable {
         return model
     }()
 
-	public init(inMemory: Bool = false) {
+    public init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: Self.modelName, // normally NSPersistContainer(name:)
                                           managedObjectModel: Self.model)
 
-		if inMemory {
-			container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
-		}
+        if inMemory {
+            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+        }
 
         // https://beckyhansmeyer.com/tag/core-data/ and https://developer.apple.com/videos/play/wwdc2021/10017
         guard let description = container.persistentStoreDescriptions.first else {
@@ -60,10 +60,10 @@ public struct PersistenceController: Sendable {
         // it is needed to refresh the display when online content was merged to the core data database
         // but gives warning "View context accessed for persistent container <name> with no stores loaded
         container.loadPersistentStores { _, error in
-			if let error = (error as NSError?) {
-				fatalError("Unresolved error \(error), \(error.userInfo)") // don't know how to recover
+            if let error = (error as NSError?) {
+                fatalError("Unresolved error \(error), \(error.userInfo)") // don't know how to recover
             }
-		}
+        }
         container.viewContext.automaticallyMergesChangesFromParent = true
 
         // Seed the OrganizationType rows (club, museum, unknown) as soon as the store is open, before any view
@@ -73,7 +73,7 @@ public struct PersistenceController: Sendable {
         // A private context keeps it off the main thread, so any caller may construct a PersistenceController.
         OrganizationType.initConstants(context: LevelLoader.makeBgContext(ctxName: "OrganizationType seeding",
                                                                           usedContainer: container))
-	}
+    }
 
     public func save() {
         let context = container.viewContext
