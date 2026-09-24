@@ -20,7 +20,6 @@ extension Organization {
 
     @NSManaged nonisolated public var fotobondClubNumber_: NSNumber?
     @NSManaged nonisolated public var fullName_: String?
-    @NSManaged nonisolated public var isMapScrollLocked: Bool
     @NSManaged nonisolated public var latitude_: Double
     @NSManaged nonisolated public var level2URL_: URL?
     @NSManaged nonisolated public var longitude_: Double
