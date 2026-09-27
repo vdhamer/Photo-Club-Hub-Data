@@ -16,6 +16,22 @@ Two apps currently depend on this package (the list may grow):
 
 Keeping the data layer in one place removes the roughly 60 files that previously had to be manually kept in sync between these two repositories.
 
+## Where the package sits
+
+Both apps load the published club data through this package into a database of their own. The photos themselves stay on
+the clubs' websites: the apps only link to them.
+
+```mermaid
+flowchart LR
+  J[("club data<br/>published files")] --> P["Photo-Club-Hub-Data<br/>shared package"]
+  P --> D1[("database<br/>on the iPhone or iPad")]
+  P --> D2[("database<br/>on the Mac")]
+  D1 --> A["iOS app"]
+  D2 --> H["HTML app"] --> W["web pages<br/>on a club website"]
+  S[("photos<br/>on the club's website")] -.-> A
+  S -.-> W
+```
+
 ## Requirements
 
 | | |
