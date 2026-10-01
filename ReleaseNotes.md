@@ -7,6 +7,26 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
+### 3.7.0 (GitHub commit ???????) ??-10-2026
+
+DATA
+
+* `fegGemert.level2.json`
+The club's only listed member has left the club. He is marked as a former member (`isFormerMember`, with a `membershipEndDate` but no known start date) rather than removed: the file stays valid, so its loader stays as it is, and the next load updates the existing record without a data reset. Mirrored identically in the iOS repo's live copy.
+
+* `root.level0.json`
+12 typos fixed in the expertise descriptions ("usage", Dutch and English), also in the `rootTest.level0.json` test fixture. Expertise names and ids are unchanged. Abstract's `dateAdded` moved into `optional`, like all the others (not read by any code). Mirrored identically in the iOS repo's live copy.
+
+* `clubsNL03`, `clubsNL04`, `clubsNL16`, `clubTemplates` and `museums*.level1.json`
+About 80 typos and spelling errors fixed in the remarks about clubs and museums (Dutch, English and one German), and the English remarks now use US spelling. A Level 2 remark overrules the Level 1 one, so the same fixes went into four Level 2 files (`Persoonlijk03`, `fcVeghel`, `ffcShot71`, `fgOirschot`), and the `Persoonlijk16` Level 1 remark now copies its Level 2 wording. The `TemplateMax` remarks, which explain this override, were corrected in the bundled files and the matching test fixtures, and no longer mention the legacy `root.level1.json`. Only remark text changed, so no club's identity did. Mirrored identically in the iOS repo's live copy.
+
+STRUCTURAL
+
+* __New Core Data model version `Photo_Club_Hub_3_7_0`.__
+Byte-identical to `3_6_0` so far, and now the current version. `3_6_0` has shipped and stays untouched; any schema change in this release cycle goes into `3_7_0`. `PhotoClubHubDataVersion.semver` reads `"3.7.0"` accordingly, bumped at the start of the cycle.
+
+---------------------------------------------------------------------------
+
 ### 3.6.0 (GitHub commit 02acebe) 24-09-2026
 
 BEHAVIOR
