@@ -17,8 +17,16 @@ The club's only listed member has left the club. He is marked as a former member
 * `root.level0.json`
 12 typos fixed in the expertise descriptions ("usage", Dutch and English), also in the `rootTest.level0.json` test fixture. Expertise names and ids are unchanged. Abstract's `dateAdded` moved into `optional`, like all the others (not read by any code). Mirrored identically in the iOS repo's live copy.
 
+* `clubsNL17.level1.json`
+Fotoclub Océ (Venlo) added, the first club in Fotobond afdeling 17, at Level 1.
+
 * `clubsNL03`, `clubsNL04`, `clubsNL16`, `clubTemplates` and `museums*.level1.json`
 About 80 typos and spelling errors fixed in the remarks about clubs and museums (Dutch, English and one German), and the English remarks now use US spelling. A Level 2 remark overrules the Level 1 one, so the same fixes went into four Level 2 files (`Persoonlijk03`, `fcVeghel`, `ffcShot71`, `fgOirschot`), and the `Persoonlijk16` Level 1 remark now copies its Level 2 wording. The `TemplateMax` remarks, which explain this override, were corrected in the bundled files and the matching test fixtures, and no longer mention the legacy `root.level1.json`. Only remark text changed, so no club's identity did. Mirrored identically in the iOS repo's live copy.
+
+BEHAVIOR
+
+* __The "no remark" placeholder is now translated.__
+A club or museum without a usable remark showed "No remark currently available for club …" in English, also to Dutch users, because the lookup omitted `bundle:` and so searched the app's strings instead of this package's `PhotoClubHubData` table. Previews with *Show non-localized strings* displayed it in capitals. The word "club" or "museum" came from the raw type name and was never translated either, so there are now three strings (club, museum, unknown type), each with a Dutch translation. The three `localizedPlural` strings had the same missing `bundle:` and got it too.
 
 STRUCTURAL
 
