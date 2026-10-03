@@ -205,19 +205,53 @@
         }
       }
     },
-    "No remark currently available for %@ %@." : {
-      "comment" : "Shown below map if there is no usable remark in the OrganzationList.json file.",
+    "No remark currently available for %@." : {
+      "comment" : "Shown below a map if an organization of unknown type has no usable remark.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No remark currently available for %1$@ %2$@."
+            "state" : "translated",
+            "value" : "No remark currently available for organization %@."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geen bijzonderheden bekend over %1$@ %2$@."
+            "value" : "Geen bijzonderheden beschikbaar over organisatie %@."
+          }
+        }
+      }
+    },
+    "No remark currently available for club %@." : {
+      "comment" : "Shown below map if a club has no usable remark in its Level 1 or Level 2 file.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No remark currently available for club %@."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen bijzonderheden beschikbaar over club %@."
+          }
+        }
+      }
+    },
+    "No remark currently available for museum %@." : {
+      "comment" : "Shown below map if a museum has no usable remark in its Level 1 file.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No remark currently available for museum %@."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen bijzonderheden beschikbaar over museum %@."
           }
         }
       }
