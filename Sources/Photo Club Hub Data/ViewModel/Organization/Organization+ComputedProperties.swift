@@ -226,10 +226,24 @@ extension Organization {
         }
 
         // otherwise display an error message instead of a real remark
-        let clubOrMuseum: String = organizationType.organizationTypeName
-        return String(localized: "No remark currently available for \(clubOrMuseum) \(fullName).",
+        // One string per organization type, so that translators also get to translate "club" or "museum".
+        // The explicit bundle is needed because the PhotoClubHubData table lives in this package, not in the app.
+        if organizationType.isClub {
+            return String(localized: "No remark currently available for club \(fullName).",
+                          table: "PhotoClubHubData",
+                          bundle: Bundle.photoClubHubDataModule,
+                          comment: "Shown below map if a club has no usable remark in its Level 1 or Level 2 file.")
+        }
+        if organizationType.isMuseum {
+            return String(localized: "No remark currently available for museum \(fullName).",
+                          table: "PhotoClubHubData",
+                          bundle: Bundle.photoClubHubDataModule,
+                          comment: "Shown below map if a museum has no usable remark in its Level 1 file.")
+        }
+        return String(localized: "No remark currently available for organization \(fullName).",
                       table: "PhotoClubHubData",
-                      comment: "Shown below map if there is no usable remark in the OrganzationList.json file.")
+                      bundle: Bundle.photoClubHubDataModule,
+                      comment: "Shown below map if an organization of unknown type has no usable remark.")
     }
 
 }
