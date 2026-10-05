@@ -121,6 +121,13 @@ public extension OrganizationType {
         return self.organizationTypeName == OrganizationTypeEnum.museum.rawValue
     }
 
+    /// The type as an enum, which apps can use without Core Data (e.g. in SwiftUI previews).
+    /// Every `OrganizationType` is created from an `OrganizationTypeEnum` value (see `initConstants` and the callers of
+    /// `findCreateUpdate`), so the fallback to `.unknown` only catches a damaged store.
+    var organizationTypeEnum: OrganizationTypeEnum {
+        OrganizationTypeEnum(rawValue: organizationTypeName) ?? .unknown
+    }
+
     private static func save(context: NSManagedObjectContext, organizationType: OrganizationType, create: Bool) {
         do {
             try context.save()
