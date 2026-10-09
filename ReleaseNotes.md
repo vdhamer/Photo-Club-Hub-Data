@@ -28,6 +28,9 @@ BEHAVIOR
 * __The "no remark" placeholder is now translated.__
 A club or museum without a usable remark showed "No remark currently available for club …" in English, also to Dutch users, because the lookup omitted `bundle:` and so searched the app's strings instead of this package's `PhotoClubHubData` table. Previews with *Show non-localized strings* displayed it in capitals. The word "club" or "museum" came from the raw type name and was never translated either, so there are now three strings (club, museum, unknown type), each with a Dutch translation. The three `localizedPlural` strings had the same missing `bundle:` and got it too.
 
+* __A deceased member is always a former member.__
+The Level 2 reader marked a member with `"isDeceased": true` as former, but read `isFormerMember` afterwards, so an explicit `"isFormerMember": false` in the same `status` undid it. The rule is now applied after both keys are read. No live file has that combination. Found while working on vdhamer/Photo-Club-Hub#609; covered by the new `MemberRolesAndStatusTest`.
+
 STRUCTURAL
 
 * __New public `OrganizationType.organizationTypeEnum`.__

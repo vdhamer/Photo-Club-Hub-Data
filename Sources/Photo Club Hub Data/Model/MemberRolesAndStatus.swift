@@ -282,9 +282,6 @@ public struct MemberRolesAndStatus: Equatable {
         // process content of jsonStatus
         if jsonStatus["isDeceased"].exists() {
             status[.deceased] = jsonStatus["isDeceased"].boolValue
-            if status[.deceased] == true {
-                status[.former] = true // Deceased members are considered a strict subset of Former members
-            }
         }
         if jsonStatus["isFormerMember"].exists() {
             status[.former] = jsonStatus["isFormerMember"].boolValue
@@ -299,5 +296,10 @@ public struct MemberRolesAndStatus: Equatable {
             status[.prospective] = jsonStatus["isProspectiveMember"].boolValue
         }
 
+        // Deceased members are considered a strict subset of Former members.
+        // Checked after both keys are read, so an explicit "isFormerMember": false cannot undo it.
+        if status[.deceased] == true {
+            status[.former] = true
+        }
     }
 }
