@@ -37,7 +37,7 @@ STRUCTURAL
 Returns the type as an `OrganizationTypeEnum`, so an app can describe an organization's type without Core Data, e.g. in a SwiftUI preview. Falls back to `.unknown` for a stored name outside the enum, which only a damaged store can hold: every `OrganizationType` is created from an enum value. Moved here from the iOS app (vdhamer/Photo-Club-Hub#867), next to `isClub`, `isMuseum` and `isUnknown`. Additive, so a MINOR change.
 
 * __New Core Data model version `Photo_Club_Hub_3_7_0`.__
-Byte-identical to `3_6_0` so far, and now the current version. `3_6_0` has shipped and stays untouched; any schema change in this release cycle goes into `3_7_0`. `PhotoClubHubDataVersion.semver` reads `"3.7.0"` accordingly, bumped at the start of the cycle.
+Byte-identical to `3_6_0`, as this release has no schema change, and is now  the current version. `3_6_0` has shipped and stays untouched.
 
 ---------------------------------------------------------------------------
 
