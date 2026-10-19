@@ -58,6 +58,7 @@ let package = Package(
                 .copy("JSON/clubsNL16.level1.json"),
                 .copy("JSON/clubsNL17.level1.json"),
                 .copy("JSON/clubTemplates.level1.json"),
+                .copy("JSON/TemplateMax.level1.json"),
                 .copy("JSON/museums.level1.json"),
                 .copy("JSON/museumsAU.level1.json"),
                 .copy("JSON/museumsCN.level1.json"),
