@@ -38,6 +38,10 @@ STRUCTURAL
 
 * `TemplateMax.level1.json` is now a bundled resource (`Package.swift`), like the other Level 1 files.
 
+DOCUMENTATION
+
+* `CLAUDE.md` names the fourth repo, Photo-Club-Hub-Project, for project-wide work (vdhamer/Photo-Club-Hub-Project#1).
+
 ---------------------------------------------------------------------------
 
 ### 3.7.0 (GitHub commit 7f11398) 10-10-2026
