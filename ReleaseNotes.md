@@ -7,6 +7,39 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
+### 3.8.0 (GitHub commit ???????) ??-10-2026
+
+DATA
+
+All changes below are mirrored identically in the iOS repo's live copy, which is what the apps load; the files here are the bundled fallback.
+
+* `clubsNL06.level1.json`
+33 clubs added to the 3 nature clubs already listed: 13 Fotobond clubs and 18 independent ones from the second search pass of Data#68, reviewed in Data#77, plus two independent ones found on fotoexpositie.nl: the Oostgelders Fotografen en Kunstenaars Collectief (Aalten) and Fotocollectief Natuurmoment (Buren). The remarks of the 3 nature clubs were rewritten as well. Additions only, so no data reset is needed.
+
+* `clubsNL03.level1.json`
+7 independent clubs added from the first search pass of Data#68, reviewed with the afdeling's contact. Four existing clubs had their name or town corrected, which needs the data reset of vdhamer/Photo-Club-Hub#883. Afovera's pin moved to the centre of Assen, and every club has a remark.
+
+* `clubsNL04.level1.json`
+Fotoclub Positief (Hasselt) added, an independent club.
+
+* `clubsNL05.level1.json`
+Fotoclub Berkelland (Haarlo) added, Fotobond club 0588.
+
+* `clubsNL16.level1.json`
+Collectief de Verbeelding (Waalre) now links to its new site, collectief-de-verbeelding.nl: its old domain serves a casino site. Fotocollectief 2020 (Vught) moved by 0.0001° (about 10 m), because it shared its exact coordinates with another club. The clubs are now sorted by town.
+
+* `root.level1.json`
+"New York" is now "New York City", and Collectief de Verbeelding's website is corrected here too. Only app versions before 2.9.0 read this file.
+
+* `clubsNL03`, `clubsNL16`, `TemplateMax`, `Persoonlijk03` and `fcVeghel`
+The translations of each text are now listed in order of language code (DE, EN, FR, NL). The loader ignores the order; it only makes the files easier to read.
+
+STRUCTURAL
+
+* `TemplateMax.level1.json` is now a bundled resource (`Package.swift`), like the other Level 1 files.
+
+---------------------------------------------------------------------------
+
 ### 3.7.0 (GitHub commit 7f11398) 10-10-2026
 
 DATA
