@@ -5,7 +5,9 @@ Guidance for AI coding assistants (e.g. Claude Code) working in this repository.
 ## Planning & process live in GitHub, not local files
 
 GitHub is the technical and process source of truth across the Photo Club Hub repos
-(Photo-Club-Hub, Photo-Club-Hub-Data, Photo-Club-Hub-HTML). Implementation plans, design
+(Photo-Club-Hub, Photo-Club-Hub-Data, Photo-Club-Hub-HTML). Project-wide work lives in a fourth repo,
+[Photo-Club-Hub-Project](https://github.com/vdhamer/Photo-Club-Hub-Project): non-code tickets (written
+`Project#N`), the roadmap and its `scripts/roadmap/`, and the dashboard (Discussion #14). Implementation plans, design
 rationale, and follow-up work belong in **GitHub issues**, not in local `.md` files — the
 maintainer and other contributors do not read local planning files.
 
