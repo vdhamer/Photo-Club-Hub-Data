@@ -7,7 +7,7 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
-### 3.8.0 (GitHub commit ???????) ??-10-2026
+### 3.7.1 (GitHub commit ???????) ??-10-2026
 
 DATA
 
@@ -33,6 +33,14 @@ Collectief de Verbeelding (Waalre) now links to its new site, collectief-de-verb
 
 * `clubsNL03`, `clubsNL16`, `TemplateMax`, `Persoonlijk03` and `fcVeghel`
 The translations of each text are now listed in order of language code (DE, EN, FR, NL). The loader ignores the order; it only makes the files easier to read.
+
+* `fgWaalre.level2.json` and `fcEricamera.level2.json`
+All 38 portfolio links (`level3URL`) to vdhamer.com now use https, which that server offers since 23 Oct 2026 (vdhamer/Photo-Club-Hub-Project#5). This lets the apps drop their exception for plain http (vdhamer/Photo-Club-Hub#145).
+
+BEHAVIOR
+
+* __vdhamer.com URLs built in code use https.__
+`MemberPortfolio.emptyPortfolioURL`, the page shown for a member without a portfolio of their own, and the default `level2URL` of a club now start with `https://`, so they keep working once an app no longer allows plain http to vdhamer.com (Data#86). The test that expects the placeholder's `config.xml` URL changed with it.
 
 STRUCTURAL
 
