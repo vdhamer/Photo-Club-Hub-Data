@@ -26,7 +26,7 @@ Fotoclub Positief (Hasselt) added, an independent club.
 Fotoclub Berkelland (Haarlo) added, Fotobond club 0588.
 
 * `clubsNL16.level1.json`
-Collectief de Verbeelding (Waalre) now links to its new site, collectief-de-verbeelding.nl: its old domain serves a casino site. Fotocollectief 2020 (Vught) moved by 0.0001° (about 10 m), because it shared its exact coordinates with another club. The clubs are now sorted by town.
+Collectief de Verbeelding (Waalre) now links to its new site, collectief-de-verbeelding.nl: its old domain serves a casino site. Fotocollectief 2020 (Vught) moved by 0.0001° (about 10 m), because it shared its exact coordinates with another club. Fotocollectief ISO 2016 (Den Bosch) is no longer listed, which needs the data reset of vdhamer/Photo-Club-Hub#883. The clubs are now sorted by town.
 
 * `root.level1.json`
 "New York" is now "New York City", and Collectief de Verbeelding's website is corrected here too. Only app versions before 2.9.0 read this file.
@@ -39,12 +39,19 @@ All 38 portfolio links (`level3URL`) to vdhamer.com now use https, which that se
 
 BEHAVIOR
 
+* __One-time database reset.__
+A club is identified by `fullName` plus `town`, so the four `clubsNL03` corrections are not renames to the loader: each creates a second record beside the stale one, because obsolete Level 1 records are not pruned yet (Data#39). The clubs are Fotoclub Westerveld e.o. (town Westerveld → Wapserveen, and formerly "Fotoclub Westerveld en Omstreken"), FotoClub De Wolden, Vereniging van Natuurfotografen Drenthe and Fotogroep Meppel. The removal of Fotocollectief ISO 2016 (Den Bosch) from `clubsNL16` leaves a stale record for the same reason. The reset key therefore becomes `dataResetPending304b4669`, which wipes the database once at first launch of app 3.0.4 (4669) and reloads it clean; `dataResetPending302b4667` moves to `prevUserDefaultsKeys`. A consuming app must carry the same string in its `Settings.bundle/Root.plist` (vdhamer/Photo-Club-Hub#883).
+
+* __A changed nickname reaches existing installs.__
+`nickName` is now updated like the other non-identifying fields of a club: a new value in Level 1 replaces the stored one, and a missing one leaves it alone. Before, it was only ever set once, so a nickname change needed a data reset like a rename (Data#75, Question 1). Two tests in `OrganizationFindCreateUpdateTest` cover both cases.
+
 * __vdhamer.com URLs built in code use https.__
 `MemberPortfolio.emptyPortfolioURL`, the page shown for a member without a portfolio of their own, and the default `level2URL` of a club now start with `https://`, so they keep working once an app no longer allows plain http to vdhamer.com (Data#86). The test that expects the placeholder's `config.xml` URL changed with it.
 
 STRUCTURAL
 
 * `TemplateMax.level1.json` is now a bundled resource (`Package.swift`), like the other Level 1 files.
+* `FileOrganization+FindCreateUpdate.swift` is renamed to `Organization+FindCreateUpdate.swift` for consistency reasons.
 
 DOCUMENTATION
 
