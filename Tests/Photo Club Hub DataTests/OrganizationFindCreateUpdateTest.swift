@@ -113,6 +113,38 @@ import CoreData // for NSManagedObjectContext
         #expect(((try? viewContext.fetch(fetchRequest)) ?? []).count == 2)
     }
 
+    // nickName is updated like the other non-identifying fields, so a changed nickname reaches an existing
+    // install without a data reset (Data#75). For an organization with a hardcoded MembersProvider, Level 2 writes the
+    // provider's nickname after Level 1, so a change must be made in the Level 1 entry, the provider, and the
+    // Level 2 file's name and "club" block together (until Data#8 retires the providers).
+    @Test("a changed nickname replaces the stored one") func changedNicknameIsApplied() {
+        let idPlus = randomIdPlus()
+        let newNickname = "renamed\(String.random(length: 10))"
+
+        let org1 = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .club, idPlus: idPlus)
+        #expect(org1.nickName == idPlus.nickname)
+
+        let org2 = Organization.findCreateUpdate(
+            context: viewContext,
+            organizationTypeEnum: .club,
+            idPlus: OrganizationIdPlus(id: idPlus.id, nickname: newNickname))
+        #expect(org2 === org1) // same object: nickname is not part of the identity
+        #expect(org2.nickName == newNickname)
+    }
+
+    // A missing nickname reaches update() as "", which must leave the stored nickname alone (Data#75).
+    @Test("an empty nickname does not overwrite the stored one") func emptyNicknameDoesNotOverwrite() {
+        let idPlus = randomIdPlus()
+
+        let org1 = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .club, idPlus: idPlus)
+        let org2 = Organization.findCreateUpdate(
+            context: viewContext,
+            organizationTypeEnum: .club,
+            idPlus: OrganizationIdPlus(id: idPlus.id, nickname: ""))
+        #expect(org2 === org1) // same object
+        #expect(org2.nickName == idPlus.nickname) // unchanged by the empty nickname
+    }
+
     // MARK: - nil update semantics
 
     // A nil optional field must leave an already-set value untouched.

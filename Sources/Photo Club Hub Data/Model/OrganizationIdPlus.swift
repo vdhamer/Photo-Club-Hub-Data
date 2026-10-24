@@ -11,7 +11,7 @@ public struct OrganizationIdPlus: Sendable { // PhotoClubID plus non-identifying
     public var id: OrganizationID
     public var nickname: String
 
-    public init(id: OrganizationID, nickname: String) { // initializer exposes PhotoClubId level (not used, but works)
+    public init(id: OrganizationID, nickname: String) { // keeps the identity, sets only the nickname (used by tests)
         self.id = id
         self.nickname = nickname
     }
