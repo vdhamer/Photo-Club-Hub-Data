@@ -11,7 +11,7 @@ import CoreData // for NSMergePolicy
 
 @MainActor @Suite("Tests MemberPortfolio+refreshFirstImage") struct RefreshFirstImageTests {
 
-    let imageForUnknownClub: String = "http://www.vdHamer.com/fgWaalre/Empty_Website/config.xml"
+    let imageForUnknownClub: String = "https://www.vdhamer.com/fgWaalre/Empty_Website/config.xml"
 
     private let testPersistenceController: PersistenceController
 

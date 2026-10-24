@@ -121,7 +121,7 @@ extension Organization {
     public var level2URL: URL? {
         get {
             // use a default unless level2URL points to the club's own website
-            let defaultURL: URL? = URL(string: "http://www.vdhamer.com/\(self.nickName)/index.html")
+            let defaultURL: URL? = URL(string: "https://www.vdhamer.com/\(self.nickName)/index.html")
             guard let defaultURL else {
                 ifDebugFatalError("Bad URL: \(defaultURL?.absoluteString ?? "nil")")
                 return nil

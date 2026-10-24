@@ -21,7 +21,7 @@ extension MemberPortfolio: Comparable {
 
 extension MemberPortfolio { // expose computed properties (some related to handling optionals)
 
-    public static let emptyPortfolioURL: String = "http://www.vdHamer.com/fgWaalre/Empty_Website/"
+    public static let emptyPortfolioURL: String = "https://www.vdhamer.com/fgWaalre/Empty_Website/"
 
     public var membershipStartDate: Date? {
         get { return membershipStartDate_ }
