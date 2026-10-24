@@ -1,5 +1,5 @@
 //
-//  FileOrganization+FindCreateUpdate.swift
+//  Organization+FindCreateUpdate.swift
 //  Photo Club Hub
 //
 //  Created by Peter van den Hamer on 28/11/2025.
@@ -118,7 +118,8 @@ extension Organization {
 
         var modified: Bool = false
 
-        if self.nickName_  == nil, self.nickName_ != nickName {
+        // A missing JSON nickName arrives as "" (SwiftyJSON's .stringValue), and must not clear a stored one.
+        if !nickName.isEmpty, self.nickName_ != nickName {
             self.nickName_ = nickName
             modified = true }
 
