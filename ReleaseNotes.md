@@ -7,6 +7,17 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
+### 3.7.2 (GitHub commit ???????) ??-10-2026
+
+DATA
+
+All changes below are mirrored identically in the iOS repo's live copy, which is what the apps load; the files here are the bundled fallback.
+
+* `clubsNL16.level1.json` and `root.level1.json`
+Collectief de Verbeelding moved from Waalre to Eindhoven, town and pin. `town` is part of `OrganizationID`, so this is a rename to the loader: the one-time reset that iOS 3.0.4 runs with the key from 3.7.1 clears the old entry (vdhamer/Photo-Club-Hub#883), because the change reached the live copy before that build. In `clubsNL16` the club moved into the Eindhoven run, so the file stays sorted by town. Only app versions before 2.9.0 read `root.level1.json`; they get no reset and show the club twice.
+
+---------------------------------------------------------------------------
+
 ### 3.7.1 (GitHub commit a0ccbd0) 24-10-2026
 
 DATA
