@@ -40,6 +40,7 @@ let package = Package(
                 // copying can probably also be done with a single copy command at directory level
                 .copy("JSON/root.level0.json"),
 
+                .copy("JSON/clubsBE.level1.json"),
                 .copy("JSON/clubsNL.level1.json"),
                 .copy("JSON/clubsNL01.level1.json"),
                 .copy("JSON/clubsNL02.level1.json"),
