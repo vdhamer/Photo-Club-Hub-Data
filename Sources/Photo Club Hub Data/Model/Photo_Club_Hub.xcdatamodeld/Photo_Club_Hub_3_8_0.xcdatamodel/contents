@@ -73,6 +73,22 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
+    <entity name="LogEntry" representedClassName="LogEntry" syncable="YES">
+        <attribute name="author_" optional="YES" attributeType="String"/>
+        <attribute name="date_" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="isFormerOrganization_" optional="YES" attributeType="Boolean" usesScalarValueType="NO"/>
+        <attribute name="originalDataSourceLevel" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="YES"/>
+        <attribute name="position" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="text_" optional="YES" attributeType="String"/>
+        <relationship name="organization_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Organization" inverseName="logEntries_" inverseEntity="Organization"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="organization_"/>
+                <constraint value="originalDataSourceLevel"/>
+                <constraint value="position"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
     <entity name="MemberPortfolio" representedClassName="MemberPortfolio" elementID="Member" syncable="YES">
         <attribute name="featuredImage" optional="YES" attributeType="URI" elementID="latestImage_"/>
         <attribute name="featuredImageThumbnail_" optional="YES" attributeType="URI" elementID="latestThumbURL"/>
@@ -101,8 +117,10 @@
         </uniquenessConstraints>
     </entity>
     <entity name="Organization" representedClassName="Organization" elementID="PhotoClub" syncable="YES">
+        <attribute name="badWebsites_" optional="YES" attributeType="String"/>
         <attribute name="fotobondClubNumber_" optional="YES" attributeType="Integer 16" usesScalarValueType="NO" elementID="fotobondNumber"/>
         <attribute name="fullName_" attributeType="String" defaultValueString="DefaultPhotoClubName" elementID="name_"/>
+        <attribute name="isFormerOrganization" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="latitude_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="level2URL_" optional="YES" attributeType="URI" elementID="memberListURL_"/>
         <attribute name="longitude_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -115,6 +133,7 @@
         <attribute name="wikipedia" optional="YES" attributeType="URI"/>
         <relationship name="localizedAddresses_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="LocalizedAddress" inverseName="organization_" inverseEntity="LocalizedAddress"/>
         <relationship name="localizedRemarks_" toMany="YES" deletionRule="Cascade" destinationEntity="LocalizedRemark" inverseName="organization_" inverseEntity="LocalizedRemark"/>
+        <relationship name="logEntries_" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="LogEntry" inverseName="organization_" inverseEntity="LogEntry"/>
         <relationship name="members_" toMany="YES" deletionRule="Cascade" destinationEntity="MemberPortfolio" inverseName="organization_" inverseEntity="MemberPortfolio"/>
         <relationship name="organizationType_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="OrganizationType" inverseName="organizations_" inverseEntity="OrganizationType"/>
         <uniquenessConstraints>
@@ -174,6 +193,7 @@
         <memberEntity name="LocalizedRemark"/>
         <memberEntity name="Level1"/>
         <memberEntity name="LocalizedAddress"/>
+        <memberEntity name="LogEntry"/>
     </configuration>
     <configuration name="Level2">
         <memberEntity name="MemberPortfolio"/>
