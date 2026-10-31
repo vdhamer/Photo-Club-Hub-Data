@@ -8,6 +8,9 @@
 import CoreData // for NSManagedObject
 
 // One entry in an organization's logbook: one element of the `logbook` array in a Level 1 JSON file (Data#91).
+// `originalDataSourceLevel` is the level of the file where the entry was first found. Copying never changes it.
+// It is always 1 until Level 2 files can hold a logbook (Data#92).
+// `position` is the entry's index in that file's array, so it is only unique per organization and level.
 extension LogEntry { // expose computed properties (some related to handling optionals)
 
     @available(*, unavailable)

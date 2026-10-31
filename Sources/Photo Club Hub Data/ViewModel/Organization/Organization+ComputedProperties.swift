@@ -164,6 +164,19 @@ extension Organization {
         (localizedAddresses_ as? Set<LocalizedAddress>) ?? []
     }
 
+    // Sorted because a relationship is a set. Within one level, array order in the JSON is the only order (Data#91).
+    public var logEntries: [LogEntry] {
+        ((logEntries_ as? Set<LogEntry>) ?? []).sorted {
+            ($0.originalDataSourceLevel, $0.position) < ($1.originalDataSourceLevel, $1.position)
+        }
+    }
+
+    // Stored as one string with a URL per line. The encoding is internal, so it can change without apps noticing.
+    // Separated by newlines because a newline can't occur in a valid URL, whereas a ";" can.
+    public var badWebsites: [URL] {
+        (badWebsites_ ?? "").split(separator: "\n").compactMap { URL(string: String($0)) }
+    }
+
     public func localizedAddress(for language: Language) -> LocalizedAddress? {
         localizedAddresses.first { $0.language_ == language } // is that language available? else nil.
     }
