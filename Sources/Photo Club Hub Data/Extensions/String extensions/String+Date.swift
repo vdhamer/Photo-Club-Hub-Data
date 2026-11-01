@@ -10,25 +10,17 @@ import RegexBuilder // for Regex
 
 extension String {
 
+    // MARK: - String to date conversion
+
     // "2001-12-31" returns Dec 31st 2001
-    // "?" returns nil
+    // "?" returns nil without triggering ifDebugFatalError()
     public func extractDate() -> Date? {
-        guard self.isEmpty == false else {
+        guard self.isEmpty == false, self != "?" else {
             return nil
         }
         let date: Date?
 
-        let regex = Regex {
-            ChoiceOf {
-                One("?") // can probably be made stricter: <td>?2001-12-31</td> is currently interpreted as 2001-12-31
-                Capture(.date(format: "\(year: .defaultDigits)-\(month: .twoDigits)-\(day: .twoDigits)",
-                              locale: Locale.autoupdatingCurrent,
-                              timeZone: TimeZone.gmt))
-                              // timeZone prevents 2001-12-31 from becoming 2001-12-30 23:00:00 UTC
-            }
-        }
-
-        if let match = try? regex.wholeMatch(in: self) {
+        if let match = dateMatch() {
             let (_, capturedDate) = match.output
             date = capturedDate
         } else {
@@ -38,6 +30,26 @@ extension String {
         }
 
         return date
+    }
+
+    // Same as extractDate(), except that a malformed date doesn't trigger ifDebugFatalError: it simply returns nil.
+    // For data where a bad date is a reason to warn, but not to stop: a log entry must survive a date issue (Data#91).
+    func extractDateQuietly() -> Date? {
+        dateMatch()?.output.1
+    }
+
+    // MARK: - Regular expression used locally
+
+    // Matches the entire string, so " 2001-12-31" is not a match.
+    // A nil result means that the string is malformed.
+    private func dateMatch() -> Regex<(Substring, Date)>.Match? {
+        let regex = Regex {
+            Capture(.date(format: "\(year: .defaultDigits)-\(month: .twoDigits)-\(day: .twoDigits)",
+                          locale: Locale.autoupdatingCurrent,
+                          timeZone: TimeZone.gmt))
+                          // timeZone prevents 2001-12-31 from becoming 2001-12-30 23:00:00 UTC
+        }
+        return try? regex.wholeMatch(in: self)
     }
 
 }
