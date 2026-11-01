@@ -48,4 +48,13 @@ struct LogEntryFields {
     let author: String?
     let text: String?
     let isFormerOrganization: Bool? // nil means that this entry has no intention to change the state
+
+    // `date`, `author` and `text` are required and can't be blank. In Release the entry is still kept,
+    // because it may hold the isFormerClub key, and dropping it could bring a stopped club back.
+    func checkRequiredFields(fullName: String) {
+        let isBlank: (String?) -> Bool = { ($0 ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        if date == nil || isBlank(author) || isBlank(text) {
+            ifDebugFatalError("Log entry in \(fullName) lacks a required field: date, author or text")
+        }
+    }
 }
