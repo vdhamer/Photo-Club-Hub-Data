@@ -63,4 +63,9 @@ extension LogEntry { // expose computed properties (some related to handling opt
         isFormerOrganization_?.boolValue
     }
 
+    // Converts the stored Int16 to the enum. nil means the store holds a number that is not a known level.
+    public var dataSourceLevel: DataSourceLevel? {
+        DataSourceLevel(rawValue: originalDataSourceLevel)
+    }
+
 }
