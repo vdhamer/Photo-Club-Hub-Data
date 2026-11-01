@@ -7,6 +7,14 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
+### 3.8.0 (not yet released)
+
+STRUCTURAL
+
+* The package now depends on [WebURL](https://github.com/karwa/swift-url), pinned `.upToNextMinor(from: "0.4.2")` (resolved to 0.4.2, plus its dependency `swift-system` 1.8.1). `URL.canonicalString` uses it to decide whether two URLs name the same website, so a club's website is matched against the list of bad websites whatever its capitalization, scheme, `www.` prefix, default port, fragment or trailing slash (Data#93, Data#91). Both apps pick up the two new packages when they next resolve this package. WebURL is a 0.x package that has not changed since 2024; the risk of that was accepted in Data#93.
+
+---------------------------------------------------------------------------
+
 ### 3.7.2 (GitHub commit 1040ba0) 25-10-2026
 
 DATA
