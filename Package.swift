@@ -16,7 +16,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.2"),
         // Used to compare websites (`URL.canonicalString`). While 0.x, a MINOR version can break source compatibility.
-        .package(url: "https://github.com/karwa/swift-url", .upToNextMinor(from: "0.4.0"))
+        .package(url: "https://github.com/karwa/swift-url", .upToNextMinor(from: "0.4.2"))
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.

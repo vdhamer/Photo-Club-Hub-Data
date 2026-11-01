@@ -1,6 +1,24 @@
 {
-  "originHash" : "372b56e795f729d8f422de1a16e37ca87e4fc077eb63b27dffc78c601f1f9589",
+  "originHash" : "6fc6a66fedfd6f64dd27484431832befec00aa618733d47bd6598e6befe07543",
   "pins" : [
+    {
+      "identity" : "swift-system",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-system.git",
+      "state" : {
+        "revision" : "869129b7bf4ecc57b97d0193ad29690ca2134750",
+        "version" : "1.8.1"
+      }
+    },
+    {
+      "identity" : "swift-url",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/karwa/swift-url",
+      "state" : {
+        "revision" : "9306a962396a50d7d88e924afcd7ec67226763db",
+        "version" : "0.4.2"
+      }
+    },
     {
       "identity" : "swiftyjson",
       "kind" : "remoteSourceControl",
