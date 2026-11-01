@@ -114,7 +114,7 @@ let package = Package(
                 .copy("JSON/Level1/IncludeParentTest.level1.json"),
                 .copy("JSON/Level1/clubTemplatesTest.level1.json"),
                 .copy("JSON/Level1/garbageTest.level1.json"),
-                .copy("JSON/Level1/logbookBadDateTest.level1.json"),
+                .copy("JSON/Level1/logbookBadEntriesTest.level1.json"),
                 .copy("JSON/Level1/logbookChangedTest.level1.json"),
                 .copy("JSON/Level1/logbookTest.level1.json"),
                 .copy("JSON/Level1/museumsTest.level1.json"),
