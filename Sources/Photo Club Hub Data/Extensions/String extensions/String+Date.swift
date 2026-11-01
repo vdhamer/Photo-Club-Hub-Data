@@ -32,12 +32,6 @@ extension String {
         return date
     }
 
-    // Same as extractDate(), except that a malformed date doesn't trigger ifDebugFatalError: it simply returns nil.
-    // For data where a bad date is a reason to warn, but not to stop: a log entry must survive a date issue (Data#91).
-    func extractDateQuietly() -> Date? {
-        dateMatch()?.output.1
-    }
-
     // MARK: - Regular expression used locally
 
     // Matches the entire string, so " 2001-12-31" is not a match.
