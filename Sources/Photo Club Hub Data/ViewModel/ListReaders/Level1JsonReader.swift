@@ -214,18 +214,48 @@ class Level1JsonReader {
             jsonOrganizationOptionals["nlSpecific"]["fotobondNumber"].int16Value : nil
         let maintainerEmail = jsonOrganizationOptionals["maintainerEmail"].stringValue
         let localizedRemarks = jsonOrganizationOptionals["remark"].arrayValue
+        var optionalFields = OrganizationOptionalFields(
+            organizationWebsite: organizationWebsite,
+            level2URL: level2URL,
+            wikipedia: wikipedia,
+            fotobondClubNumber: FotobondClubNumber(id: fotobondClubNumberID),
+            maintainerEmail: maintainerEmail,
+            localizedRemarks: localizedRemarks
+        )
+        // A Level 1 record without these keys has no log or bad websites and isn't former, so always set them.
+        let logEntries: [LogEntryFields] = logEntries(jsonOptionals: jsonOrganizationOptionals,
+                                                      fullName: idPlus.fullName)
+        optionalFields.logEntries = logEntries
+        optionalFields.badWebsites = jsonOrganizationOptionals["badWebsites"].arrayValue.compactMap(\.string)
+        // The last entry with the key decides. If no entry has it, the organization is not former.
+        let decidingEntry: LogEntryFields? = logEntries.last { $0.isFormerOrganization != nil }
+        let isFormerOrganizationDefault = false
+        optionalFields.isFormerOrganization = decidingEntry?.isFormerOrganization ?? isFormerOrganizationDefault
         _ = Organization.findCreateUpdate(context: bgContext,
                                           organizationTypeEnum: organizationTypeEnum,
                                           idPlus: idPlus,
                                           coordinates: coordinates,
-                                          optionalFields: OrganizationOptionalFields(
-                                              organizationWebsite: organizationWebsite,
-                                              level2URL: level2URL,
-                                              wikipedia: wikipedia,
-                                              fotobondClubNumber: FotobondClubNumber(id: fotobondClubNumberID),
-                                              maintainerEmail: maintainerEmail,
-                                              localizedRemarks: localizedRemarks)
-                                          )
+                                          optionalFields: optionalFields)
+    }
+
+    /// Reads the `logbook` array of a Level 1 record (Data#91).
+    private static func logEntries(jsonOptionals: JSON, fullName: String) -> [LogEntryFields] {
+        var logEntries: [LogEntryFields] = []
+
+        for jsonLogEntry in jsonOptionals["logbook"].arrayValue {
+            // The two keys are aliases, accepted on any record, so a key copied from a club to a museum can't fail.
+            // `.bool` is nil for anything but a JSON boolean.
+            let isFormerOrganization: Bool? = jsonLogEntry["isFormerClub"].bool ?? jsonLogEntry["isFormerMuseum"].bool
+
+            let logEntry = LogEntryFields(date: jsonLogEntry["date"].stringValue.extractDate(),
+                                          author: jsonLogEntry["author"].string,
+                                          text: jsonLogEntry["text"].string,
+                                          isFormerOrganization: isFormerOrganization)
+            logEntry.checkRequiredFields(fullName: fullName) // can call ifDebugFatalError if fields are empty/missing
+            logEntries.append(logEntry)
+        }
+
+        return logEntries
     }
 
 }
