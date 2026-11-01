@@ -30,20 +30,31 @@ extension LogEntry { // expose computed properties (some related to handling opt
 
     // The calendar day on which the entry was written, held as midnight GMT, like membership dates and `bornDT`.
     // So format it in GMT when displaying it, to avoid it showing the previous day in the Americas (West of GMT).
-    // A missing or malformed JSON date doesn't drop the entry, because that entry may hold the isFormerClub key.
+    // A malformed JSON date stops a Debug build (see `extractDate()`).
+    // Otherwise, a missing or malformed date doesn't drop the entry, because that entry may hold the isFormerClub key.
     // The fallback is far enough from any real date to be noticed by someone reading the logbook.
     public var date: Date {
         date_ ?? Date.distantPast
     }
 
-    // Required in a Level 1 file. Reaching this fallback means that the file breaks that rule.
-    // The placeholder makes that visible to someone reading the logbook, where an empty string would look deliberate.
+    // `author` is required in a Level 1 LogEntry block, and not allowed to be blank.
+    // A file that breaks that rule gets a placeholder here, so someone reading the logbook can see the problem.
+    // An empty string would look deliberate.
+    // The stored value mirrors the file (Data#63), so it is nil if the key is missing, and blank if the file says so.
+    // That's why nonBlank() checks for both, instead of a plain `author_ ?? "Author?"`.
     public var author: String {
-        author_ ?? "Author?"
+        nonBlank(author_, otherwise: "Author?")
     }
 
+    // Same rule as for `author`: a missing or blank value isn't allowed, and is displayed as "Text?".
     public var text: String {
-        text_ ?? "Text?"
+        nonBlank(text_, otherwise: "Text?")
+    }
+
+    private func nonBlank(_ value: String?, otherwise placeholder: String) -> String {
+        guard let value, value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+            else { return placeholder }
+        return value
     }
 
     // nil means that this logEntry has no intention to change whether the organization is "former".
