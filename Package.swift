@@ -14,14 +14,16 @@ let package = Package(
             targets: ["Photo Club Hub Data"])
     ],
     dependencies: [
-        .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.2")
+        .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.2"),
+        // Used to compare websites (`URL.canonicalString`). While 0.x, a MINOR version can break source compatibility.
+        .package(url: "https://github.com/karwa/swift-url", .upToNextMinor(from: "0.4.0"))
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "Photo Club Hub Data",
-            dependencies: ["SwiftyJSON"],
+            dependencies: ["SwiftyJSON", .product(name: "WebURL", package: "swift-url")],
             exclude: [
                 // Handed to momc by the CompileCoreDataModel plugin, which finds it on disk rather than
                 // through the manifest. Without this exclusion Xcode ALSO applies its built-in
