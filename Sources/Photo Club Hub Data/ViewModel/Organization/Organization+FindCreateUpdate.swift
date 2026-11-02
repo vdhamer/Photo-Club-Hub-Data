@@ -15,6 +15,8 @@ extension Organization {
         fatalError("init() is not available. Use .findCreateUpdate instead.")
     }
 
+    // MARK: - findCreateUpdate() and private update()
+
     // Find existing organization or create a new one
     // Update new or existing organization's attributes
     // Thin wrapper that hops onto the context's own queue, so this is safe to call from any thread.
@@ -138,8 +140,30 @@ extension Organization {
             self.removeOrganization = removeOrganization
             modified = true }
 
-        if let website = optionalFields.organizationWebsite, self.organizationWebsite != website {
+        if let logEntries = optionalFields.logEntries,
+                            updateStoredLogEntries(fileRows: logEntries, level: .level1, bgContext: bgContext) {
+            modified = true }
+
+        if let isFormer = optionalFields.isFormerOrganization, self.isFormerOrganization != isFormer {
+            self.isFormerOrganization = isFormer
+            modified = true }
+
+        // Before the website, which depends on the bad websites being up to date.
+        if let badWebsites = optionalFields.badWebsites {
+            let newBadWebsites: String? = badWebsites.isEmpty ? nil : badWebsites.joined(separator: "\n")
+            if self.badWebsites_ != newBadWebsites {
+                self.badWebsites_ = newBadWebsites
+                modified = true }
+        }
+
+        // This check runs for every caller, because a Level 2 file can supply a website that Level 1 lists as bad.
+        if let website = optionalFields.organizationWebsite,
+                         self.organizationWebsite != website, !isBadListed(website) {
             self.organizationWebsite = website
+            modified = true }
+
+        if let storedWebsite = self.organizationWebsite, isBadListed(storedWebsite) {
+            self.organizationWebsite = nil
             modified = true }
 
         if let level2URL = optionalFields.level2URL, self.level2URL_ != level2URL {
@@ -194,6 +218,81 @@ extension Organization {
         }
         return modified
     }
+
+    // MARK: - LogEntry functionality
+
+    // Makes the stored rows match the array in the file:
+    // An existing row is updated in place, because the entry at a given position is the same entry
+    // unless someone edited it by hand.
+    // Rows past the end of the array are deleted.
+    // Each value is compared first, to avoid dirtying the context on every load.
+    private func updateStoredLogEntries(fileRows: [LogEntryFields],
+                                        level: DataSourceLevel, // the level of the file that fileRows came from
+                                        bgContext: NSManagedObjectContext) -> Bool {
+        var modified: Bool = false // value that is returned: did this change anything in the CoreData store
+
+        // what's originally in the CoreData store; that may change. Only rows of this level: each level has its own
+        // positions, so rows of different levels must never be matched, updated or deleted here.
+        let storedRows: [LogEntry] = self.logEntries.filter { $0.dataSourceLevel == level }
+
+        // Only called if there is no stored row at this position yet (new entry, or the file got longer)
+        func createRow(at position: Int16) -> LogEntry {
+            let entity = NSEntityDescription.entity(forEntityName: "LogEntry", in: bgContext)!
+            let newRow = LogEntry(entity: entity, insertInto: bgContext)
+            newRow.position = position
+            newRow.originalDataSourceLevel = level.rawValue // set explicitly rather than rely on the model's default
+            newRow.organization_ = self // link the new row to this organization
+            modified = true
+            return newRow
+        }
+
+        for (index, fileRow) in fileRows.enumerated() { // starting at logEntries[0], etc.; keeps the file's order
+            // The array index is the row's identity: the entry at index n in the file maps to the row at position n
+            let fileRowPosition = Int16(index) // index into fileRows array. The array order fully determines this.
+            // Reuse the existing stored row if there is one, so its values are compared and updated below.
+            // Note: fileRows (JSON) have an order and the position is determined by counting them ("index")
+            //       storedRows (database) are a set, so an extra position Int16 is added to sort them in order
+            let storedRow: LogEntry = storedRows.first(where: { $0.position == fileRowPosition }) // already exists
+                                      ?? createRow(at: fileRowPosition) // new row for that index value
+
+            // Copy each field only if it differs, so an unchanged file leaves the context clean
+            if storedRow.date_ != fileRow.date {
+                storedRow.date_ = fileRow.date
+                modified = true }
+            if storedRow.author_ != fileRow.author {
+                storedRow.author_ = fileRow.author
+                modified = true }
+            if storedRow.text_ != fileRow.text {
+                storedRow.text_ = fileRow.text
+                modified = true }
+            if storedRow.isFormerOrganization != fileRow.isFormerOrganization {
+                if let isFormer = fileRow.isFormerOrganization { // CoreData stores an optional Bool as NSNumber?
+                    storedRow.isFormerOrganization_ = NSNumber(value: isFormer)
+                } else {
+                    storedRow.isFormerOrganization_ = nil
+                }
+                modified = true
+            }
+        }
+
+        // The file got shorter: rows at positions beyond the last entry no longer exist in the file
+        for storedRow in storedRows where storedRow.position >= fileRows.count {
+            bgContext.delete(storedRow)
+            modified = true
+        }
+
+        return modified
+    }
+
+    // Is this website on the organization's list of bad websites (`badWebsites`, set by a Level 1 file)?
+    // Used in two directions: to refuse a new website that is listed as bad, and to clear a stored website
+    // that has since been listed as bad.
+    private func isBadListed(_ website: URL) -> Bool {
+        let websiteToCheck: String = website.canonicalString // computed once, outside the loop below
+        return badWebsites.contains { $0.canonicalString == websiteToCheck }
+    }
+
+    // MARK: - find variants
 
     // Thin wrapper that hops onto the context's own queue, so this is safe to call from any thread.
     public static func find(context: NSManagedObjectContext, // can be foreground or background context
