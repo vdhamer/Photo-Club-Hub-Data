@@ -1,0 +1,54 @@
+{
+    "level1Header": {
+        "level1URL": "https://raw.githubusercontent.com/vdhamer/Photo-Club-Hub/refs/heads/main/JSON/logbookBadEntriesTest.level1.json",
+        "level1URLIncludes": [ ],
+        "maintainerEmail": "vdhamer@msn.com"
+    },
+
+    "clubs": [
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Malformed Date Club", "nickName": "malformedDateClub" },
+            "coordinates": { "latitude": 52.6, "longitude": 6.6 },
+            "optional": {
+                "logbook": [
+                    { "date": "29-10-2026", "author": "generator", "text": "This entry has a malformed date.", "isFormerClub": true }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "No Date Club", "nickName": "noDateClub" },
+            "coordinates": { "latitude": 52.7, "longitude": 6.7 },
+            "optional": {
+                "logbook": [
+                    { "author": "generator", "text": "This entry has no date.", "isFormerClub": true }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Blank Fields Club", "nickName": "blankFieldsClub" },
+            "coordinates": { "latitude": 52.8, "longitude": 6.8 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-10-01", "text": "The author is missing." },
+                    { "date": "2026-10-02", "author": "", "text": "The author is blank." },
+                    { "date": "2026-10-03", "author": "generator" },
+                    { "date": "2026-10-04", "author": "generator", "text": "   " }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Quoted Flag Club", "nickName": "quotedFlagClub" },
+            "coordinates": { "latitude": 52.9, "longitude": 6.9 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-10-01", "author": "generator", "text": "The value is a string.", "isFormerClub": "true" }
+                ]
+            }
+        }
+
+    ]
+}

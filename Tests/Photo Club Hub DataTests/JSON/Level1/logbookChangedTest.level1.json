@@ -1,0 +1,36 @@
+{
+    "level1Header": {
+        "level1URL": "https://raw.githubusercontent.com/vdhamer/Photo-Club-Hub/refs/heads/main/JSON/logbookChangedTest.level1.json",
+        "level1URLIncludes": [ ],
+        "maintainerEmail": "vdhamer@msn.com"
+    },
+
+    "clubs": [
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Later Bad Website Club", "nickName": "laterBadWebsiteClub" },
+            "coordinates": { "latitude": 52.1, "longitude": 6.1 },
+            "optional": {
+                "badWebsites": [ "HTTPS://LATER-BAD.EXAMPLE.ORG" ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Changing Log Club", "nickName": "changingLogClub" },
+            "coordinates": { "latitude": 52.2, "longitude": 6.2 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-10-01", "author": "generator", "text": "Second version of this text." },
+                    { "date": "2026-10-02", "author": "generator", "text": "Second entry." }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Removed Log Club", "nickName": "removedLogClub" },
+            "coordinates": { "latitude": 52.3, "longitude": 6.3 },
+            "optional": { }
+        }
+
+    ]
+}

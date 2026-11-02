@@ -1,0 +1,143 @@
+{
+    "level1Header": {
+        "level1URL": "https://raw.githubusercontent.com/vdhamer/Photo-Club-Hub/refs/heads/main/JSON/logbookTest.level1.json",
+        "level1URLIncludes": [ ],
+        "maintainerEmail": "vdhamer@msn.com"
+    },
+
+    "clubs": [
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Last Key Club", "nickName": "lastKeyClub" },
+            "coordinates": { "latitude": 51.1, "longitude": 5.1 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-09-12", "author": "generator", "text": "Website went down.", "isFormerClub": true },
+                    { "date": "2026-10-29", "author": "afdeling contact", "text": "Still meeting.", "isFormerClub": false },
+                    { "date": "2026-10-28", "author": "list maintainer", "text": "Disbanded after all.", "isFormerClub": true },
+                    { "date": "2026-10-31", "author": "generator", "text": "Website still down." }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "No Log Club", "nickName": "noLogClub" },
+            "coordinates": { "latitude": 51.2, "longitude": 5.2 },
+            "optional": { }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Museum Key Club", "nickName": "museumKeyClub" },
+            "coordinates": { "latitude": 51.3, "longitude": 5.3 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-10-01", "author": "generator", "text": "Key copied from a museum.", "isFormerMuseum": true }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Both Keys Club", "nickName": "bothKeysClub" },
+            "coordinates": { "latitude": 51.4, "longitude": 5.4 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-10-01", "author": "generator", "text": "The keys disagree.", "isFormerClub": false, "isFormerMuseum": true }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Hijacked Club", "nickName": "hijackedClub" },
+            "coordinates": { "latitude": 51.8, "longitude": 5.8 },
+            "optional": {
+                "website": "https://www.hijacked.example.org/",
+                "badWebsites": [ "HTTPS://WWW.HIJACKED.EXAMPLE.ORG" ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Good Website Club", "nickName": "goodWebsiteClub" },
+            "coordinates": { "latitude": 51.9, "longitude": 5.9 },
+            "optional": {
+                "website": "https://good.example.org/",
+                "badWebsites": [ "https://old.example.org/", "https://older.example.org/" ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Unusual Bad Website Club", "nickName": "unusualBadWebsiteClub" },
+            "coordinates": { "latitude": 52.0, "longitude": 6.0 },
+            "optional": {
+                "badWebsites": [ "https://old.example.org/my page" ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Later Bad Website Club", "nickName": "laterBadWebsiteClub" },
+            "coordinates": { "latitude": 52.1, "longitude": 6.1 },
+            "optional": {
+                "website": "https://later-bad.example.org/"
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Changing Log Club", "nickName": "changingLogClub" },
+            "coordinates": { "latitude": 52.2, "longitude": 6.2 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-10-01", "author": "generator", "text": "First version of this text." },
+                    { "date": "2026-10-02", "author": "generator", "text": "Second entry." },
+                    { "date": "2026-10-03", "author": "generator", "text": "Third entry.", "isFormerClub": true }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Removed Log Club", "nickName": "removedLogClub" },
+            "coordinates": { "latitude": 52.3, "longitude": 6.3 },
+            "optional": {
+                "badWebsites": [ "https://old.example.org/" ],
+                "logbook": [
+                    { "date": "2026-10-01", "author": "generator", "text": "Disbanded.", "isFormerClub": true }
+                ]
+            }
+        }
+
+    ],
+
+    "museums": [
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Club Key Museum", "nickName": "clubKeyMuseum" },
+            "coordinates": { "latitude": 52.4, "longitude": 6.4 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-10-01", "author": "generator", "text": "Key copied from a club.", "isFormerClub": true }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Closed Museum", "nickName": "closedMuseum" },
+            "coordinates": { "latitude": 52.5, "longitude": 6.5 },
+            "optional": {
+                "website": "https://www.closed.example.org",
+                "badWebsites": [ "https://www.closed.example.org/" ],
+                "logbook": [
+                    { "date": "2026-10-01", "author": "generator", "text": "Museum has closed.", "isFormerMuseum": true }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Both Keys Museum", "nickName": "bothKeysMuseum" },
+            "coordinates": { "latitude": 52.6, "longitude": 6.6 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-10-01", "author": "generator", "text": "The keys disagree.", "isFormerClub": false, "isFormerMuseum": true }
+                ]
+            }
+        }
+
+    ]
+}
