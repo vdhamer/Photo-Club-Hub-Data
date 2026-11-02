@@ -128,6 +128,7 @@ let package = Package(
                 .copy("JSON/Level2/fgDeGenderTest.level2.json"),
                 .copy("JSON/Level2/fgWaalreTest.level2.json"),
                 .copy("JSON/Level2/garbageTest.level2.json"),
+                .copy("JSON/Level2/logbookKeysTest.level2.json"),
                 .copy("JSON/Level2/missingIdPlusTest.level2.json")
             ]
         ),
