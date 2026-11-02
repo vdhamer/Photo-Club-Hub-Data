@@ -224,6 +224,7 @@ class Level1JsonReader {
         )
         // A Level 1 record without these keys has no log or bad websites and isn't former, so always set them.
         let logEntries: [LogEntryFields] = logEntries(jsonOptionals: jsonOrganizationOptionals,
+                                                      organizationTypeEnum: organizationTypeEnum,
                                                       fullName: idPlus.fullName)
         optionalFields.logEntries = logEntries
         optionalFields.badWebsites = jsonOrganizationOptionals["badWebsites"].arrayValue.compactMap(\.string)
@@ -239,13 +240,22 @@ class Level1JsonReader {
     }
 
     /// Reads the `logbook` array of a Level 1 record (Data#91).
-    private static func logEntries(jsonOptionals: JSON, fullName: String) -> [LogEntryFields] {
+    private static func logEntries(jsonOptionals: JSON,
+                                   organizationTypeEnum: OrganizationTypeEnum,
+                                   fullName: String) -> [LogEntryFields] {
+        // The two keys are aliases, accepted on any record, so a key copied from a club to a museum can't fail.
+        // If one entry has both with different values, the record's own key wins.
+        let ownKey: String = organizationTypeEnum == .museum ? "isFormerMuseum" : "isFormerClub"
+        let otherKey: String = organizationTypeEnum == .museum ? "isFormerClub" : "isFormerMuseum"
         var logEntries: [LogEntryFields] = []
 
         for jsonLogEntry in jsonOptionals["logbook"].arrayValue {
-            // The two keys are aliases, accepted on any record, so a key copied from a club to a museum can't fail.
-            // `.bool` is nil for anything but a JSON boolean.
-            let isFormerOrganization: Bool? = jsonLogEntry["isFormerClub"].bool ?? jsonLogEntry["isFormerMuseum"].bool
+            // `.bool` is nil for anything but a JSON boolean, so a value such as "true" (quoted) counts as absent.
+            // That would silently keep a stopped club listed, so it stops a Debug build.
+            for key in [ownKey, otherKey] where jsonLogEntry[key].exists() && jsonLogEntry[key].bool == nil {
+                ifDebugFatalError("Log entry in \(fullName) has an \(key) that isn't true or false")
+            }
+            let isFormerOrganization: Bool? = jsonLogEntry[ownKey].bool ?? jsonLogEntry[otherKey].bool
 
             let logEntry = LogEntryFields(date: jsonLogEntry["date"].stringValue.extractDate(),
                                           author: jsonLogEntry["author"].string,
