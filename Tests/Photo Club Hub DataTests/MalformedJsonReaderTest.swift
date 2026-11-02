@@ -92,7 +92,8 @@ private let isBeingTested = true
 
     // A well-formed file whose single expertise is missing the required `idString`: the reader must skip it
     // (create nothing) and record the expected diagnostic via ifDebugFatalError.
-    @Test("Level 0: expertise missing idString is reported and skipped") func level0MissingIdString() {
+    @Test("Level 0: expertise missing idString is reported and skipped", .usesIfDebugFatalErrorSpy)
+    func level0MissingIdString() {
         let bgContext = makeBackgroundContext(named: "expertiseMissingIdStringTest")
 
         let spy = makeIfDebugFatalErrorSpy()
@@ -144,7 +145,8 @@ private let isBeingTested = true
 
     // Garbage (non-JSON) input: with no parseable `club` object the reader records the expected diagnostic
     // and creates no organization.
-    @Test("Level 2: garbage input is reported and creates nothing") func level2GarbageIsReported() {
+    @Test("Level 2: garbage input is reported and creates nothing", .usesIfDebugFatalErrorSpy)
+    func level2GarbageIsReported() {
         let bgContext = makeBackgroundContext(named: "garbageLevel2")
 
         let idPlus = OrganizationIdPlus(fullName: "Garbage Level 2 Club",
@@ -167,7 +169,8 @@ private let isBeingTested = true
 
     // A well-formed file whose `club` object is missing the required `idPlus`: checkIdPlus must report the
     // missing key and the reader must create no organization.
-    @Test("Level 2: club missing idPlus is reported and creates nothing") func level2MissingIdPlus() {
+    @Test("Level 2: club missing idPlus is reported and creates nothing", .usesIfDebugFatalErrorSpy)
+    func level2MissingIdPlus() {
         let bgContext = makeBackgroundContext(named: "level2MissingIdPlus")
 
         let idPlus = OrganizationIdPlus(fullName: "Missing IdPlus Club",

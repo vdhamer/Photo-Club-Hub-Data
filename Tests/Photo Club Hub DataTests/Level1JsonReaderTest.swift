@@ -192,7 +192,8 @@ private let isBeingTested = true
     // The .timeLimit is the "terminates" assertion: if the loop guard ever regresses, the include
     // recursion would otherwise hang the test and run indefinitely rather than fail.
     @Test("A cyclic Include (recursionA ⇄ recursionB) terminates",
-          .timeLimit(.minutes(1)))
+          .timeLimit(.minutes(1)),
+          .usesIfDebugFatalErrorSpy)
     func cyclicIncludeTerminates() async {
 
         let spy = makeIfDebugFatalErrorSpy() // keeps the loop guard's fatalError from killing the test run
@@ -257,7 +258,8 @@ private let isBeingTested = true
 
     // The other half of Data#62: when the bundle is the only source, a missing bundled copy is still a build
     // mistake (for example a file left out of Package.swift's resources), and must still be reported.
-    @Test("A missing bundled copy is still reported when the bundle is the only source")
+    @Test("A missing bundled copy is still reported when the bundle is the only source",
+          .usesIfDebugFatalErrorSpy)
     func missingBundledCopyReportedWhenBundleIsOnlySource() async {
 
         let spy = makeIfDebugFatalErrorSpy() // records the DEBUG-mode trap instead of crashing the test run

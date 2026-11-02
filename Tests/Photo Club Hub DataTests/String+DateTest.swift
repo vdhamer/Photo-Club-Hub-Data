@@ -31,7 +31,8 @@ import Testing
         #expect("".extractDate() == nil)
     }
 
-    @Test("Malformed input returns nil and fires diagnostic") func malformedInputReturnsNil() {
+    @Test("Malformed input returns nil and fires diagnostic", .usesIfDebugFatalErrorSpy)
+    func malformedInputReturnsNil() {
         let spy = makeIfDebugFatalErrorSpy()
         installIfDebugFatalErrorSpy(spy)
         defer { removeIfDebugFatalErrorSpy() } // spy is process-global, so remove it promptly

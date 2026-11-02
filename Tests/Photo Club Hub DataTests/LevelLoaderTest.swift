@@ -111,7 +111,8 @@ struct LevelLoaderTests {
                 "Level 2 downgraded these Level 0 expertises to temporary: \(downgraded.sorted())")
     }
 
-    @Test("Two load passes in one process do not trip the visited-file guard")
+    @Test("Two load passes in one process do not trip the visited-file guard",
+          .usesIfDebugFatalErrorSpy)
     func secondPassIsNotADuplicate() async {
         // The visited-file guard used to be a process-global singleton, so a second pass without an
         // intervening Model.deleteCoreDataObjects reported every Level 1 file as an infinite loop or
