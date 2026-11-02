@@ -23,6 +23,13 @@ extension MemberPortfolio { // expose computed properties (some related to handl
 
     public static let emptyPortfolioURL: String = "https://www.vdhamer.com/fgWaalre/Empty_Website/"
 
+    // Matches the portfolios whose club is current, meaning not former (Data#91). Apps combine it with their own
+    // filters, so that the Clubs tab agrees with the Maps tab and hides former clubs (#891).
+    // A computed var rather than a constant, because NSPredicate isn't Sendable.
+    public static var currentOrganizationPredicate: NSPredicate {
+        NSPredicate(format: "organization_.isFormerOrganization == NO")
+    }
+
     public var membershipStartDate: Date? {
         get { return membershipStartDate_ }
         set { membershipStartDate_ = newValue }

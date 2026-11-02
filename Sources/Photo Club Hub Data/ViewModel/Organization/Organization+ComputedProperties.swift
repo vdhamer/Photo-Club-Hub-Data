@@ -171,6 +171,13 @@ extension Organization {
         }
     }
 
+    // Matches the organizations that are current, meaning not former (Data#91).
+    // Apps combine it with their own filters, so that the Maps tab hides former clubs and museums (#891).
+    // A computed var rather than a constant, because NSPredicate isn't Sendable.
+    public static var currentPredicate: NSPredicate {
+        NSPredicate(format: "isFormerOrganization == NO")
+    }
+
     // Stored as one string with a URL per line. The encoding is internal, so it can change without apps noticing.
     // Separated by newlines because a newline can't occur in a valid URL, whereas a ";" can.
     public var badWebsites: [URL] {
