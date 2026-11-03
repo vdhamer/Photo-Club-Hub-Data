@@ -28,7 +28,8 @@ public struct PersistenceController: Sendable {
     /// it is only handed to containers, and Core Data makes a model immutable once a coordinator uses it and
     /// supports reading it from any thread. A `static let` is also initialized exactly once, thread-safely.
     /// `@MainActor` would not fit: stores are created off the main thread too (tests, the HTML app's loaders).
-    nonisolated(unsafe) private static let model: NSManagedObjectModel = {
+    /// Internal rather than private, so that the migration test can open a store of its own with this same copy.
+    nonisolated(unsafe) static let model: NSManagedObjectModel = {
         // solution to access Coredata in non-main bundle found in https://developer.apple.com/forums/thread/652209
         let bundle: Bundle = Bundle.module // documentation: "resource bundle associated with the current Swift module"
         guard let modelURL = bundle.url(forResource: modelName, withExtension: ".momd") else { // ManagedObjectModel

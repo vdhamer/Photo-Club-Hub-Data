@@ -39,7 +39,7 @@ This applies to `birthday`, `membershipStartDate`, `membershipEndDate` and a log
 MODEL
 
 * __Data model update__
-Adds the entity `LogEntry` (`date_`, `author_`, `text_`, an optional `isFormerOrganization_`, `position` and `originalDataSourceLevel`, unique per organization, level and position), and to `Organization` the attributes `isFormerOrganization` (default false) and `badWebsites_`, and the relationship `logEntries_` (deleting an organization deletes its log). `originalDataSourceLevel` is always 1 until Data#92 lets a Level 2 file hold a logbook; it is in the model now so that Data#92 needs no migration. All of this is additive, for a lightweight migration.
+Adds the entity `LogEntry` (`date_`, `author_`, `text_`, an optional `isFormerOrganization_`, `position` and `originalDataSourceLevel`, unique per organization, level and position), and to `Organization` the attributes `isFormerOrganization` (default false) and `badWebsites_`, and the relationship `logEntries_` (deleting an organization deletes its log). `originalDataSourceLevel` is always 1 until Data#92 lets a Level 2 file hold a logbook; it is in the model now so that Data#92 needs no migration. All of this is additive, for a lightweight migration. The new `CoreDataMigrationTest` migrates stores written with `3_7_0` (iOS 3.0.3 and 3.0.4) and `3_5_0` (iOS 3.0.2), and a copy of a real simulator store migrated in place with every row kept. To let that test use the shared model, `PersistenceController.model` is now internal instead of private.
 
 API
 
