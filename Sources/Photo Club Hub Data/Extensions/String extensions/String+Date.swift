@@ -26,7 +26,7 @@ extension String {
             let (_, capturedDate) = match.output
             date = capturedDate
         } else {
-            ifDebugFatalError("Failed to decode date value \(self): not a real calendar day written as YYYY-MM-DD",
+            ifDebugFatalError("Illegal date value \"\(self)\": not a real calendar day written as YYYY-MM-DD",
                               file: #fileID, line: #line) // likely deprecation of #fileID in Swift 6.0
             return nil // in release mode, a bad date is returned as nil and the app doesn't stop.
         }
