@@ -9,7 +9,50 @@ TO-DO
 
 ### 3.8.0 (not yet released)
 
+DATA
+
+* `fcVeghel.level2.json`
+One `membershipStartDate` was written `2022-02-8`; it is now `2022-02-08` because the parsing is now stricter.
+
+* `TemplateMax.level1.json`
+Shows `badWebsites` and a `logbook` on both clubs, and on a new fictional museum that has closed. The example data names nothing real. Mirrored identically in the iOS repo's live copy. The template club itself appears in both apps, but through `TemplateMax.level2.json`: this Level 1 file isn't loaded yet (Data#8), so these keys have no effect in the apps yet.
+
+BEHAVIOR
+
+* __Stopped clubs and museums stay in their Level 1 file, flagged, instead of being deleted.__
+A Level 1 record can now hold a `logbook`: an array of entries with `date`, `author` (a role, never a person's name) and `text`, plus an optional `isFormerClub` or `isFormerMuseum`. The last entry with either key decides whether the organization is former; if no entry has one, it isn't. The two keys are aliases accepted on any record, and if one entry has both with different values, the record's own key wins. Array order is the only order: no logic reads `date`. The entries are stored as `LogEntry` rows, updated in place on every load, and the result as `Organization.isFormerOrganization`. Removing the logbook from the file removes the rows and clears the flag. Only a Level 1 file decides this: a club's own Level 2 file can't (Data#91, Data#92).
+
+* __A website listed as bad is never stored.__
+A Level 1 record can now hold `badWebsites`, an array of URLs stored as written. A club's `website` that matches one is not stored, and a stored one is cleared, whichever file supplies it, Level 2 included. Matching uses `URL.canonicalString` (see STRUCTURAL) (Data#91).
+
+* __More bad data stops a Debug build.__
+A Release build keeps what it can, as before. New cases:
+  * A log entry without a `date`, `author` or `text`, or with a blank one. Each field gets its own message.
+  * A log entry dated more than one day before the entry above it. One day is allowed, for dates written in two time zones.
+  * An `isFormerClub` or `isFormerMuseum` that isn't `true` or `false`, such as a quoted `"true"`.
+  * A `badWebsites` that isn't an array, or holds something that isn't a string or can't be compared as a URL.
+  * A `logbook` or `badWebsites` in a Level 2 file's `club` block, which only Level 1 can supply until Data#92.
+
+* __Every JSON date must be a real calendar day written as `YYYY-MM-DD`.__
+This applies to `birthday`, `membershipStartDate`, `membershipEndDate` and a log entry's `date`, all read by `String.extractDate()`. Before, it also accepted forms like `2026-2-3` and `26-10-29`, and `?` as "unknown". Those now stop a Debug build like any malformed date, and a Release build leaves the date unset, as it already did for malformed dates. A missing key still means "no date". The one live date in a loose form is fixed (see DATA).
+
+MODEL
+
+* __Data model update__
+Adds the entity `LogEntry` (`date_`, `author_`, `text_`, an optional `isFormerOrganization_`, `position` and `originalDataSourceLevel`, unique per organization, level and position), and to `Organization` the attributes `isFormerOrganization` (default false) and `badWebsites_`, and the relationship `logEntries_` (deleting an organization deletes its log). `originalDataSourceLevel` is always 1 until Data#92 lets a Level 2 file hold a logbook; it is in the model now so that Data#92 needs no migration. All of this is additive, for a lightweight migration.
+
+API
+
+* __New `Organization.currentPredicate` and `MemberPortfolio.currentOrganizationPredicate`.__
+"Current" means not former. An app combines them with its own filters, so that the Maps and Clubs tabs leave out former clubs and museums (vdhamer/Photo-Club-Hub#891). They are computed properties, because `NSPredicate` isn't `Sendable`.
+
+* __New public `Organization.logEntries`, `Organization.badWebsites` and `Organization.isFormerOrganization`, and the `LogEntry` wrappers `date`, `author`, `text` and `isFormerOrganization`.__
+`logEntries` is sorted by level, then by position in the file. A missing or blank `author` or `text` reads as `Author?` or `Text?`, and a missing date as `Date.distantPast`, so a broken entry is visible to someone reading the log. Additive, so a MINOR change.
+
 STRUCTURAL
+
+* __Tests that install the `ifDebugFatalError` spy now run one at a time.__
+The spy is process-global, so two such tests running in parallel could remove each other's spy and abort the whole suite: with the new logbook tests, a parallel `swift test` aborted every time. The new test trait `.usesIfDebugFatalErrorSpy` runs those tests one at a time, while all others stay parallel. One gap remains, so Data#1 stays open and CI keeps `--no-parallel`.
 
 * The package now depends on [WebURL](https://github.com/karwa/swift-url), pinned `.upToNextMinor(from: "0.4.2")` (resolved to 0.4.2, plus its dependency `swift-system` 1.8.1). `URL.canonicalString` uses it to decide whether two URLs name the same website, so a club's website is matched against the list of bad websites whatever its capitalization, scheme, `www.` prefix, default port, fragment or trailing slash (Data#93, Data#91). Both apps pick up the two new packages when they next resolve this package. WebURL is a 0.x package that has not changed since 2024; the risk of that was accepted in Data#93.
 
