@@ -1,84 +1,88 @@
 {
+  "information" : {
+    "selectedModelKey" : "Photo_Club_Hub_3_8_0.xcdatamodel",
+    "currentColorMode" : "configurations"
+  },
   "entitiesPositions" : {
-    "Level1" : [
-      945,
-      1086
-    ],
-    "OrganizationType" : [
-      949,
-      395
-    ],
-    "Language" : [
-      405,
-      442
+    "Organization" : [
+      948,
+      505
     ],
     "Expertise" : [
-      -134.035000000001,
-      598.9700000000003
-    ],
-    "Photographer" : [
-      128,
-      601
-    ],
-    "LocalizedAddress" : [
-      680.964999999999,
-      732.9700000000003
-    ],
-    "Level3" : [
-      945,
-      1130
+      -137.035000000001,
+      600.9700000000003
     ],
     "LocalizedKeyword" : [
       -125,
       787
     ],
+    "Keyword" : [
+      -121,
+      556
+    ],
+    "Canvas...Position" : [
+      -308.035000000001,
+      309.97000000000025
+    ],
     "LocalizedDescription" : [
       981,
       688
     ],
-    "Organization" : [
-      948,
-      505
-    ],
-    "LocalizedExpertise" : [
-      -140.035000000001,
-      794.9700000000003
-    ],
-    "MemberPortfolio" : [
-      404,
-      725
+    "LocalizedAddress" : [
+      676.964999999999,
+      733.9700000000003
     ],
     "PhotographerExpertise" : [
       126.96499999999901,
       838.9700000000003
     ],
-    "LocalizedRemark" : [
-      683,
-      589
-    ],
     "PhotographerKeyword" : [
       136,
       810
     ],
-    "Canvas...Position" : [
-      -223.035000000001,
-      343.97000000000025
+    "LogEntry" : [
+      946.964999999999,
+      937.9700000000003
     ],
-    "Level0" : [
-      945,
-      1064
+    "LocalizedRemark" : [
+      680,
+      627
+    ],
+    "OrganizationType" : [
+      949,
+      395
+    ],
+    "Photographer" : [
+      128,
+      601
+    ],
+    "LocalizedExpertise" : [
+      -140.035000000001,
+      794.9700000000003
     ],
     "Level2" : [
-      945,
-      1108
+      -30,
+      483
     ],
-    "Keyword" : [
-      -121,
-      556
+    "Level3" : [
+      -30,
+      504
+    ],
+    "MemberPortfolio" : [
+      404,
+      725
+    ],
+    "Language" : [
+      405,
+      442
+    ],
+    "Level1" : [
+      -30,
+      461
+    ],
+    "Level0" : [
+      -30,
+      439
     ]
-  },
-  "information" : {
-    "selectedModelKey" : "Photo_Club_Hub_3_0_3.xcdatamodel",
-    "currentColorMode" : "configurations"
   }
 }
