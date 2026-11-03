@@ -12,10 +12,12 @@ extension String {
 
     // MARK: - String to date conversion
 
-    // "2001-12-31" returns Dec 31st 2001
-    // "?" returns nil without triggering ifDebugFatalError()
+    // The one date format of all JSON input: a real calendar day, written as YYYY-MM-DD.
+    // "2001-12-31" returns 31 Dec 2001.
+    // "" returns nil, because that is what SwiftyJSON's stringValue gives for a missing key, which means "no date".
+    // Anything else stops a Debug build, including "?", "2026-2-3" and "2026-13-01".
     public func extractDate() -> Date? {
-        guard self.isEmpty == false, self != "?" else {
+        guard self.isEmpty == false else {
             return nil
         }
         let date: Date?
@@ -24,7 +26,7 @@ extension String {
             let (_, capturedDate) = match.output
             date = capturedDate
         } else {
-            ifDebugFatalError("Failed to decode date from \(self) because RegEx didn't trigger",
+            ifDebugFatalError("Failed to decode date value \(self): not a real calendar day written as YYYY-MM-DD",
                               file: #fileID, line: #line) // likely deprecation of #fileID in Swift 6.0
             return nil // in release mode, a bad date is returned as nil and the app doesn't stop.
         }
@@ -37,6 +39,9 @@ extension String {
     // Matches the entire string, so " 2001-12-31" is not a match.
     // A nil result means that the string is malformed.
     private func dateMatch() -> Regex<(Substring, Date)>.Match? {
+        // The date parser below also accepts "2026-2-3" and "26-10-29", so the digits are counted first.
+        guard self.wholeMatch(of: #/\d{4}-\d{2}-\d{2}/#) != nil else { return nil }
+
         let regex = Regex {
             Capture(.date(format: "\(year: .defaultDigits)-\(month: .twoDigits)-\(day: .twoDigits)",
                           locale: Locale.autoupdatingCurrent,
