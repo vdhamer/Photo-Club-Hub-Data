@@ -49,12 +49,15 @@ struct LogEntryFields {
     let text: String?
     let isFormerOrganization: Bool? // nil means that this entry has no intention to change the state
 
-    // `date`, `author` and `text` are required and can't be blank. In Release the entry is still kept,
-    // because it may hold the isFormerClub key, and dropping it could bring a stopped club back.
-    func checkRequiredFields(fullName: String) {
-        let isBlank: (String?) -> Bool = { ($0 ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-        if date == nil || isBlank(author) || isBlank(text) {
-            ifDebugFatalError("Log entry in \(fullName) lacks a required field: date, author or text")
+    // `date`, `author` and `text` are required and can't be blank.
+    // Called before the entry is parsed, so each missing field gets a custom error message.
+    // In Release the entry is still kept, because it may hold the isFormerClub key and cause display of a stopped club back.
+    static func checkRequiredKeys(of jsonLogEntry: JSON, fullName: String) {
+        for key in ["date", "author", "text"] {
+            let value: String = (jsonLogEntry[key].string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            if value.isEmpty {
+                ifDebugFatalError("Log entry in \(fullName) has no \(key), or a blank or non-text one")
+            }
         }
     }
 }
