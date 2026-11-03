@@ -23,10 +23,6 @@ import Testing
         #expect(components.day == 31)
     }
 
-    @Test("Question mark returns nil") func questionMarkReturnsNil() {
-        #expect("?".extractDate() == nil)
-    }
-
     @Test("Empty string returns nil") func emptyStringReturnsNil() {
         #expect("".extractDate() == nil)
     }
@@ -40,7 +36,32 @@ import Testing
         let result = "not-a-date".extractDate()
 
         #expect(result == nil)
-        #expect(spy.messages.count == 1)
+        #expect(spy.messages.contains { $0.contains("not-a-date") }) // a count could include unrelated tests (Data#1)
+    }
+
+    // The date parser alone would accept the first two, so these check that the digits are counted too.
+    // The last two aren't real calendar days.
+    @Test("A date not written as YYYY-MM-DD, or not a real date, is malformed", .usesIfDebugFatalErrorSpy)
+    func looseOrImpossibleDateIsMalformed() {
+        let spy = makeIfDebugFatalErrorSpy()
+        installIfDebugFatalErrorSpy(spy)
+        defer { removeIfDebugFatalErrorSpy() } // spy is process-global, so remove it promptly
+
+        for text in ["2026-2-3", "26-10-29", "2026-13-01", "2026-02-29"] {
+            #expect(text.extractDate() == nil, "\(text)")
+            #expect(spy.messages.contains { $0.contains("Illegal date value \"\(text)\"") }, "\(text)")
+        }
+    }
+
+    // "?" once meant "unknown date". Nothing uses it, and a missing key already means that.
+    @Test("A question mark as a value is illegal", .usesIfDebugFatalErrorSpy)
+    func questionMarkIsMalformed() {
+        let spy = makeIfDebugFatalErrorSpy()
+        installIfDebugFatalErrorSpy(spy)
+        defer { removeIfDebugFatalErrorSpy() } // spy is process-global, so remove it promptly
+
+        #expect("?".extractDate() == nil)
+        #expect(spy.messages.contains { $0.contains("Illegal date value \"?\"") })
     }
 
 }
