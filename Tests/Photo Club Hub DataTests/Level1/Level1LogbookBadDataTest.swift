@@ -46,7 +46,7 @@ struct Level1LogbookBadDataTests {
         defer { removeIfDebugFatalErrorSpy() } // spy is process-global, so remove it promptly
 
         await store.loadLevel1File(fileName: "logbookBadEntriesTest")
-        #expect(spy.messages.contains { $0.contains("Failed to decode date value 29-10-2026") })
+        #expect(spy.messages.contains { $0.contains("Illegal date value \"29-10-2026\"") })
 
         let club = try store.organization("Malformed Date Club")
         #expect(club.isFormerOrganization == true)
@@ -117,7 +117,7 @@ struct Level1LogbookBadDataTests {
         defer { removeIfDebugFatalErrorSpy() } // spy is process-global, so remove it promptly
 
         await store.loadLevel1File(fileName: "logbookBadEntriesTest")
-        #expect(spy.messages.contains { $0.contains("Failed to decode date value 2026-2-3") })
+        #expect(spy.messages.contains { $0.contains("Illegal date value \"2026-2-3\"") })
         let entries = try store.organization("Loose Date Club").logEntries
         #expect(entries.count == 1)
         #expect(entries.first?.date_ == nil) // like any malformed date
