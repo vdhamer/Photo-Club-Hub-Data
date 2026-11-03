@@ -48,6 +48,55 @@
                     { "date": "2026-10-01", "author": "generator", "text": "The value is a string.", "isFormerClub": "true" }
                 ]
             }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Backwards Date Club", "nickName": "backwardsDateClub" },
+            "coordinates": { "latitude": 53.0, "longitude": 7.0 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-10-10", "author": "generator", "text": "Written first." },
+                    { "date": "2026-10-05", "author": "generator", "text": "Added below it, but dated five days earlier." }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Skipped Date Club", "nickName": "skippedDateClub" },
+            "coordinates": { "latitude": 53.05, "longitude": 7.05 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-10-10", "author": "generator", "text": "Written first." },
+                    { "author": "generator", "text": "Has no date, so the check skips it." },
+                    { "date": "2026-10-05", "author": "generator", "text": "Dated five days before the first entry." }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Loose Date Club", "nickName": "looseDateClub" },
+            "coordinates": { "latitude": 53.1, "longitude": 7.1 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-2-3", "author": "generator", "text": "The month and day lack a leading zero." }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Bad Website List Club", "nickName": "badWebsiteListClub" },
+            "coordinates": { "latitude": 53.2, "longitude": 7.2 },
+            "optional": {
+                "badWebsites": "https://www.not-in-an-array.example.org"
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Bad Website Entries Club", "nickName": "badWebsiteEntriesClub" },
+            "coordinates": { "latitude": 53.3, "longitude": 7.3 },
+            "optional": {
+                "badWebsites": [ 42, "not a url", "https://www.fine.example.org" ]
+            }
         }
 
     ]

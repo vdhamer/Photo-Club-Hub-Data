@@ -1,0 +1,22 @@
+{
+    "club": {
+        "idPlus": {
+            "town": "Logtown",
+            "fullName": "Level 2 Keys Club",
+            "nickName": "logbookKeysTest"
+        },
+        "coordinates": {
+            "latitude": 53.4,
+            "longitude": 7.4
+        },
+        "optional": {
+            "website": "https://www.level2-keys.example.org",
+            "badWebsites": [ "https://www.old-level2-keys.example.org" ],
+            "logbook": [
+                { "date": "2026-10-01", "author": "club", "text": "Written in the club's own file." }
+            ]
+        }
+    },
+
+    "members": [ ]
+}
