@@ -14,11 +14,11 @@ private let organizationTypesToLoad: [OrganizationTypeEnum] = [.club, .museum] /
 class Level1JsonReader {
 
     /// Fire-and-forget entry point for callers that don't need to know when loading completes
-    /// (the sync Level 1 tests and the MapView preview). The app and the Include
+    /// (the sync Level 1 tests and the MapView preview). The app and the "Include" hierarchy
     /// recursion use the awaitable `load(...)` instead (issue #760).
     ///
     /// Deliberately enqueues on `bgContext` directly (rather than `Task { await load(...) }`):
-    /// for a file WITHOUT Includes all work then runs in one block on the context's serial queue,
+    /// for a file WITHOUT `Includes` all work then runs in one block on the context's serial queue,
     /// so a caller-issued `bgContext.performAndWait { }` still acts as a completion barrier —
     /// the synchronous Level 1 reader tests rely on exactly that.
     init(bgContext: NSManagedObjectContext,
@@ -227,7 +227,8 @@ class Level1JsonReader {
                                                       organizationTypeEnum: organizationTypeEnum,
                                                       fullName: idPlus.fullName)
         optionalFields.logEntries = logEntries
-        optionalFields.badWebsites = jsonOrganizationOptionals["badWebsites"].arrayValue.compactMap(\.string)
+        optionalFields.badWebsites = extractBadWebsites(jsonOptionals: jsonOrganizationOptionals,
+                                                        fullName: idPlus.fullName)
         // The last entry with the key decides. If no entry has it, the organization is not former.
         let decidingEntry: LogEntryFields? = logEntries.last { $0.isFormerOrganization != nil }
         let isFormerOrganizationDefault = false
@@ -239,6 +240,8 @@ class Level1JsonReader {
                                           optionalFields: optionalFields)
     }
 
+    // MARK: - Level 1's LogBook support
+
     /// Reads the `logbook` array of a Level 1 record (Data#91).
     private static func logEntries(jsonOptionals: JSON,
                                    organizationTypeEnum: OrganizationTypeEnum,
@@ -248,8 +251,25 @@ class Level1JsonReader {
         let ownKey: String = organizationTypeEnum == .museum ? "isFormerMuseum" : "isFormerClub"
         let otherKey: String = organizationTypeEnum == .museum ? "isFormerClub" : "isFormerMuseum"
         var logEntries: [LogEntryFields] = []
+        var precedingDate: Date? // the date of the nearest entry above this one that has a usable date
+        let oneDay: TimeInterval = 24 * 60 * 60 // exact, because dates are held as midnight GMT, which has no DST
 
         for jsonLogEntry in jsonOptionals["logbook"].arrayValue {
+            LogEntryFields.checkRequiredKeys(of: jsonLogEntry, fullName: fullName) // can stop a Debug build
+
+            // Stops a Debug build if the date isn't a real calendar day written as YYYY-MM-DD.
+            let date: Date? = jsonLogEntry["date"].stringValue.extractDate()
+
+            // Array order is the only order (Data#91), so a date going back suggests an entry added in the wrong
+            // place. One day back is allowed, because of time zone differences.
+            // Entries without a usable date are skipped, so previousDate may belong to an entry further up.
+            if let date, let precedingDate, precedingDate.timeIntervalSince(date) > oneDay {
+                let format = Date.ISO8601FormatStyle().year().month().day() // in GMT, like the stored dates
+                ifDebugFatalError("Log entry in \(fullName) is dated \(date.formatted(format)), " +
+                                  "more than a day before \(precedingDate.formatted(format)) in an entry above it")
+            }
+            if let date { precedingDate = date }
+
             // `.bool` is nil for anything but a JSON boolean, so a value such as "true" (quoted) counts as absent.
             // That would silently keep a stopped club listed, so it stops a Debug build.
             for key in [ownKey, otherKey] where jsonLogEntry[key].exists() && jsonLogEntry[key].bool == nil {
@@ -257,15 +277,43 @@ class Level1JsonReader {
             }
             let isFormerOrganization: Bool? = jsonLogEntry[ownKey].bool ?? jsonLogEntry[otherKey].bool
 
-            let logEntry = LogEntryFields(date: jsonLogEntry["date"].stringValue.extractDate(),
+            let logEntry = LogEntryFields(date: date,
                                           author: jsonLogEntry["author"].string,
                                           text: jsonLogEntry["text"].string,
                                           isFormerOrganization: isFormerOrganization)
-            logEntry.checkRequiredFields(fullName: fullName) // can call ifDebugFatalError if fields are empty/missing
             logEntries.append(logEntry)
         }
 
         return logEntries
+    }
+
+    /// Reads and returns the `badWebsites` array of a Level 1 record (Data#91), keeping each string as written.
+    /// Anything unusable stops a Debug build: an entry that can't be recognized doesn't block its website,
+    /// so the apps would still show that website as a clickable link for the club.
+    private static func extractBadWebsites(jsonOptionals: JSON, fullName: String) -> [String] {
+        let fieldName = "badWebsites"
+        guard jsonOptionals[fieldName].exists() else { return [] }
+
+        let jsonBadWebsites: JSON = jsonOptionals[fieldName]
+        guard let jsonArray: [JSON] = jsonBadWebsites.array else {
+            ifDebugFatalError("\(fieldName) in \(fullName) isn't a valid array, so none of its websites are blocked")
+            return []
+        }
+
+        var badWebsites: [String] = []
+        for jsonBadWebsite in jsonArray {
+            guard let badWebsite: String = jsonBadWebsite.string else {
+                ifDebugFatalError("\(fieldName) in \(fullName) holds \(jsonBadWebsite), which isn't a string")
+                continue // can't be stored as written
+            }
+            badWebsites.append(badWebsite)
+            if let url = URL(string: badWebsite) {
+                _ = url.canonicalString // stops a Debug build if .canonicalString can't handle this URL string
+            } else {
+                ifDebugFatalError("\(fieldName) in \(fullName) holds \"\(badWebsite)\", which isn't a valid URL")
+            }
+        }
+        return badWebsites
     }
 
 }
