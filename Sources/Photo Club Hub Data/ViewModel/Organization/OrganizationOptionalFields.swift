@@ -51,7 +51,7 @@ struct LogEntryFields {
 
     // `date`, `author` and `text` are required and can't be blank.
     // Called before the entry is parsed, so each missing field gets a custom error message.
-    // In Release the entry is still kept, because it may hold the isFormerClub key and cause display of a stopped club back.
+    // In Release the entry is kept, because it may hold the isFormerClub key and cause display of a stopped club back.
     static func checkRequiredKeys(of jsonLogEntry: JSON, fullName: String) {
         for key in ["date", "author", "text"] {
             let value: String = (jsonLogEntry[key].string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)

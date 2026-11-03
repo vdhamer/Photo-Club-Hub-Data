@@ -1,0 +1,163 @@
+//
+//  Level0JsonReaderTest.swift
+//  Photo Club HubTests
+//
+//  Created by Peter van den Hamer on 13/03/2025.
+//
+
+import Testing
+@testable import Photo_Club_Hub_Data
+import CoreData // for NSManagedObjectContext
+
+private let isBeingTested = true
+
+@MainActor @Suite("Tests the Level 0 JSON reader") struct Level0JsonReaderTests {
+
+    private let testPersistenceController: PersistenceController
+    private let viewContext: NSManagedObjectContext
+
+    init () {
+        // Each test gets its own private in-memory store, so the app's concurrent background
+        // data-loading into PersistenceController.shared can't pollute the Expertise/PhotographerExpertise
+        // counts below. Swift Testing creates a fresh suite instance (and thus a fresh init) per test, so
+        // the store is effectively per-test — no deletion or cross-test isolation needed.
+        testPersistenceController = PersistenceController(inMemory: true)
+        viewContext = testPersistenceController.container.viewContext
+        viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+
+        // The empty store lacks the constant records the app seeds at launch; seed them here.
+        // Must run on the main-queue viewContext (initConstants does a bare save()). See #749.
+        Language.initConstants(context: viewContext)
+        OrganizationType.initConstants(context: viewContext)
+    }
+
+    // Read emptyTest.level0.json and check for parsing errors.
+    // Clears all CoreData expertises. Runs on background thread, adding bunch of extra complexity ;-(
+    @Test("Parse emptyTest.level0.json") func emptyLevel0Parse() async {
+        let bgContext = testPersistenceController.container.newBackgroundContext()
+        bgContext.name = "EmptyLevel0"
+        bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+        bgContext.automaticallyMergesChangesFromParent = true
+
+        // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
+        // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
+        Model.deleteExpertises(viewContext: viewContext)
+        #expect(Expertise.count(context: bgContext) == 0)
+        #expect(LocalizedExpertise.count(context: bgContext) == 0)
+        #expect(PhotographerExpertise.count(context: bgContext) == 0)
+
+        _ = Level0JsonReader(bgContext: bgContext,
+                             fileName: "emptyTest",
+                             isBeingTested: isBeingTested,
+                             useOnlyInBundleFile: true)
+        #expect(Expertise.count(context: bgContext) == 0)
+        #expect(LocalizedExpertise.count(context: bgContext) == 0)
+        #expect(PhotographerExpertise.count(context: bgContext) == 0)
+    }
+
+    // Read abstractExpertiseTest.level0.json.
+    // Clears all CoreData expertises. Runs on background thread, adding bunch of extra complexity ;-(
+    @Test("Parse abstractExpertiseTest.level0.json") func abstractExpertiseLevel0Parse() async {
+        let bgContext = testPersistenceController.container.newBackgroundContext()
+        bgContext.name = "AbstractExpertiseLevel0"
+        bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+        bgContext.automaticallyMergesChangesFromParent = true
+
+        // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
+        // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
+        Model.deleteExpertises(viewContext: viewContext)
+        #expect(Expertise.count(context: bgContext) == 0)
+        #expect(LocalizedExpertise.count(context: bgContext) == 0)
+        #expect(PhotographerExpertise.count(context: bgContext) == 0)
+
+        bgContext.performAndWait {
+            _ = Level0JsonReader(bgContext: bgContext,
+                                 fileName: "abstractExpertiseTest",
+                                 isBeingTested: isBeingTested,
+                                 useOnlyInBundleFile: true)
+            try? bgContext.save()
+        }
+        #expect(Expertise.count(context: bgContext) == 1)
+        #expect(LocalizedExpertise.count(context: bgContext) == 4)
+        #expect(PhotographerExpertise.count(context: bgContext) == 0)
+   }
+
+    // Read rootTest.level0.json and check for parsing errors.
+    // Clears all CoreData expertises. Runs on background thread, adding bunch of extra complexity ;-(
+    @Test("Parse rootTest.level0.json") func rootLevel0Parse() async {
+        let bgContext = testPersistenceController.container.newBackgroundContext()
+        bgContext.name = "RootLevel0"
+        bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+        bgContext.automaticallyMergesChangesFromParent = true
+
+        // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
+        // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
+        Model.deleteExpertises(viewContext: viewContext)
+
+        _ = Level0JsonReader(bgContext: bgContext,
+                             fileName: "rootTest",
+                             isBeingTested: isBeingTested,
+                             useOnlyInBundleFile: true)
+        #expect(Expertise.count(context: bgContext) == 29)
+    }
+
+    // Read languageTest.level0.json.
+    // Clears all CoreData languages. Runs on background thread, adding bunch of extra complexity ;-(
+    @Test("Parse languageTest.level0.json") func languageLevel0Parse() async {
+        let bgContext = testPersistenceController.container.newBackgroundContext()
+        bgContext.name = "LanguageLevel0"
+        bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+        bgContext.automaticallyMergesChangesFromParent = true
+
+        // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
+        // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
+        Model.deleteExpertises(viewContext: viewContext)
+        #expect(Language.count(context: bgContext, isoCode: "UR") == 0)
+        #expect(LocalizedRemark.count(context: bgContext) == 0)
+        #expect(LocalizedExpertise.count(context: bgContext) == 0)
+
+        _ = Level0JsonReader(bgContext: bgContext,
+                             fileName: "languageTest",
+                             isBeingTested: isBeingTested,
+                             useOnlyInBundleFile: true)
+
+        #expect(Language.count(context: bgContext, isoCode: "UR") == 1)
+        #expect(LocalizedRemark.count(context: bgContext) == 0)
+        #expect(LocalizedExpertise.count(context: bgContext) == 0)
+    }
+
+    // Read languagesTest.level0.json.
+    // Clears all CoreData languages. Runs on background thread, adding bunch of extra complexity ;-(
+    @Test("Parse languagesTest.level0.json") func languagesLevel0Parse() async {
+        let bgContext = testPersistenceController.container.newBackgroundContext()
+        bgContext.name = "LanguagesLevel0"
+        bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+        bgContext.automaticallyMergesChangesFromParent = true
+
+        // Deletion must run on the main-queue viewContext: deleteCoreDataObjects is a @MainActor
+        // main-thread API (its bare save() would trip _PFAssertSafeMultiThreadedAccess off-queue). See #749.
+        Model.deleteExpertises(viewContext: viewContext)
+        #expect(Language.count(context: bgContext, isoCode: "UR") == 0)
+        #expect(LocalizedRemark.count(context: bgContext) == 0)
+        #expect(LocalizedExpertise.count(context: bgContext) == 0)
+
+        _ = Level0JsonReader(bgContext: bgContext,
+                             fileName: "languagesTest",
+                             isBeingTested: isBeingTested,
+                             useOnlyInBundleFile: true)
+
+        #expect(Language.count(context: bgContext, isoCode: "EN") == 1)
+        #expect(Language.count(context: bgContext, isoCode: "NL") == 1)
+        #expect(Language.count(context: bgContext, isoCode: "DE") == 1)
+        #expect(Language.count(context: bgContext, isoCode: "UR") == 1)
+        #expect(Language.count(context: bgContext, isoCode: "UK") == 1)
+        #expect(Language.count(context: bgContext, isoCode: "FR") == 1) // from initConstants
+        #expect(Language.count(context: bgContext, isoCode: "ES") == 1) // from initConstants
+        #expect(Language.count(context: bgContext, isoCode: "PL") == 1) // from initConstants
+        #expect(Language.count(context: bgContext, isoCode: "XX") == 0)
+        #expect(Language.count(context: bgContext) == 8)
+        #expect(LocalizedRemark.count(context: bgContext) == 0)
+        #expect(LocalizedExpertise.count(context: bgContext) == 0)
+    }
+
+}
