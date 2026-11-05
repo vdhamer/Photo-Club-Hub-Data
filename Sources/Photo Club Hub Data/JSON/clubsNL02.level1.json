@@ -74,7 +74,7 @@
             },
             "optional": {
                 "website": "https://fotokringdezoeker.nl/",
-                "level2URL": "https://www.example.com/fkZoeker.level2.json",
+                "level2URL": "https://www.example.com/fkDeZoeker.level2.json",
                 "remark": [
                     {
                         "language": "EN",
