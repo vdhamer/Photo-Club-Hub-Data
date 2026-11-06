@@ -22,6 +22,9 @@ BEHAVIOR
 * __Stopped clubs and museums stay in their Level 1 file, flagged, instead of being deleted.__
 A Level 1 record can now hold a `logbook`: an array of entries with `date`, `author` (a role or, if appropriate, a person's name) and `text`, plus an optional `isFormerClub` or `isFormerMuseum`. The last entry with either key decides whether the organization is former; if no entry has one, it isn't. The two keys are aliases accepted on any record, and if one entry has both with different values, the record's own key wins. Array order is the only order: no logic reads `date`. The entries are stored as `LogEntry` rows, updated in place on every load, and the result as `Organization.isFormerOrganization`. Removing the logbook from the file removes the rows and clears the flag. Only a Level 1 file decides this: a club's own Level 2 file can't (Data#91, Data#92).
 
+* __`Organization.count(context:organizationTypeE:)` now leaves out former organizations.__
+It combines its type filter with `Organization.currentPredicate`, so the iOS README's count of photo clubs includes only active ones (vdhamer/Photo-Club-Hub#891). Its only caller is that README text, in the iOS app. No production JSON flags an organization as former yet, so the number won't change until one does.
+
 * __A website listed as bad is never stored.__
 A Level 1 record can now hold `badWebsites`, an array of URLs stored as written. A club's `website` that matches one is not stored, and a stored one is cleared, whichever file supplies it, Level 2 included. Matching uses `URL.canonicalString` (see STRUCTURAL) (Data#91).
 
