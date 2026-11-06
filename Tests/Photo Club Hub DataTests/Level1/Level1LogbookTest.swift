@@ -210,6 +210,16 @@ import CoreLocation // for CLLocationCoordinate2D
         #expect(fullNames.contains("Closed Museum") == false) // former, and a museum
     }
 
+    @Test("count excludes former organizations") func countExcludesFormer() async throws {
+        await store.loadLevel1File(fileName: "logbookTest")
+        // 10 clubs, of which Last Key, Museum Key, Changing Log and Removed Log Club are former.
+        #expect(Organization.count(context: store.viewContext, organizationTypeE: .club) == 6)
+        // 3 museums, all of them former.
+        #expect(Organization.count(context: store.viewContext, organizationTypeE: .museum) == 0)
+        #expect(try store.organization("No Log Club").isFormerOrganization == false) // counted
+        #expect(try store.organization("Last Key Club").isFormerOrganization == true) // not counted
+    }
+
     @Test("currentOrganizationPredicate leaves out the portfolios of former clubs")
     func currentOrganizationPredicateLeavesOutFormer() async throws {
         await store.loadLevel1File(fileName: "logbookTest")
