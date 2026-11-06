@@ -30,7 +30,7 @@ import CoreData // for NSManagedObjectContext
     @Test("Create a randomly named LocalizedExpertise") func addLocalizedExpertise() {
         let expertise = Expertise.findCreateUpdateTemporary(context: context, id: String.random(length: 5),
                                                               names: [], usages: [])
-        let language = Language.findCreateUpdate(context: context, isoCode: "NL")
+        let language = Language.findCreate(context: context, isoCode: "NL")
         let localizedName = String.random(length: 10)
         let localizedUsage = String.random(length: 20)
 
@@ -51,7 +51,7 @@ import CoreData // for NSManagedObjectContext
     @Test("Check that isoCode can handle lower case") func addLocalizedExpertiseLowerCase() {
         let expertise = Expertise.findCreateUpdateTemporary(context: context, id: String.random(length: 25),
                                                               names: [], usages: [])
-        let language = Language.findCreateUpdate(context: context, isoCode: "eN")
+        let language = Language.findCreate(context: context, isoCode: "eN")
         let localizedName = String.random(length: 10)
         let localizedUsage = String.random(length: 20)
 
@@ -69,7 +69,7 @@ import CoreData // for NSManagedObjectContext
     @Test("Is nil handled properly") func addLocalizedExpertiseNilUsage() {
         let expertise = Expertise.findCreateUpdateTemporary(context: context, id: String.random(length: 25),
                                                               names: [], usages: [])
-        let language = Language.findCreateUpdate(context: context, isoCode: "NL")
+        let language = Language.findCreate(context: context, isoCode: "NL")
         let localizedName = String.random(length: 10)
 
         let localizedExpertise =  LocalizedExpertise.findCreateUpdate(context: context,
@@ -85,7 +85,7 @@ import CoreData // for NSManagedObjectContext
     @Test("Is nil overwritten properly") func addLocalizedExpertiseReplaceNil() {
         let expertise = Expertise.findCreateUpdateTemporary(context: context, id: String.random(length: 25),
                                                               names: [], usages: [])
-        let language = Language.findCreateUpdate(context: context, isoCode: "NL")
+        let language = Language.findCreate(context: context, isoCode: "NL")
         let localizedName = String.random(length: 10)
 
         let localizedExpertise1 =  LocalizedExpertise.findCreateUpdate(context: context,
@@ -119,8 +119,8 @@ import CoreData // for NSManagedObjectContext
         let expertise = Expertise.findCreateUpdateTemporary(context: context,
                                                             id: String.random(length: 8),
                                                             names: [], usages: [])
-        let langNL = Language.findCreateUpdate(context: context, isoCode: "nl")
-        let langEN = Language.findCreateUpdate(context: context, isoCode: "en")
+        let langNL = Language.findCreate(context: context, isoCode: "nl")
+        let langEN = Language.findCreate(context: context, isoCode: "en")
         _ = LocalizedExpertise.findCreateUpdate(context: context, expertise: expertise,
                                                 language: langNL, localizedName: nlName, localizedUsage: nil)
         _ = LocalizedExpertise.findCreateUpdate(context: context, expertise: expertise,

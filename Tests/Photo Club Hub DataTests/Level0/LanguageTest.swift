@@ -27,8 +27,8 @@ import CoreData // for NSManagedObjectContext
     @Test("findCreateUpdate is idempotent for a given ISO code") func idempotentForSameCode() {
         let isoCode = "qx" + String.random(length: 6) // "qx" guarantees the code contains letters
 
-        let language1 = Language.findCreateUpdate(context: viewContext, isoCode: isoCode)
-        let language2 = Language.findCreateUpdate(context: viewContext, isoCode: isoCode)
+        let language1 = Language.findCreate(context: viewContext, isoCode: isoCode)
+        let language2 = Language.findCreate(context: viewContext, isoCode: isoCode)
 
         #expect(language1 === language2) // same managed object, not a second copy
         #expect(Language.count(context: viewContext, isoCode: isoCode) == 1) // exactly one record for this code
@@ -41,8 +41,8 @@ import CoreData // for NSManagedObjectContext
     @Test("ISO code is matched case-insensitively") func languageIDMatchedCaseInsensitively() {
         let isoCode = "qx" + String.random(length: 6) // "qx" guarantees lower/upper actually differ
 
-        let lower = Language.findCreateUpdate(context: viewContext, isoCode: isoCode.lowercased())
-        let upper = Language.findCreateUpdate(context: viewContext, isoCode: isoCode.uppercased())
+        let lower = Language.findCreate(context: viewContext, isoCode: isoCode.lowercased())
+        let upper = Language.findCreate(context: viewContext, isoCode: isoCode.uppercased())
 
         #expect(lower === upper) // both resolve to the same object
         #expect(lower.isoCode == isoCode.lowercased()) // stored code is normalized to lowercase
@@ -61,7 +61,7 @@ import CoreData // for NSManagedObjectContext
         legacy.isoCode_ = isoCode.uppercased() // bypasses the normalizing isoCode setter on purpose
         try? viewContext.save()
 
-        let found = Language.findCreateUpdate(context: viewContext, isoCode: isoCode.lowercased())
+        let found = Language.findCreate(context: viewContext, isoCode: isoCode.lowercased())
 
         #expect(found === legacy) // the legacy row is reused, not shadowed by a second one
         #expect(Language.count(context: viewContext, isoCode: isoCode) == 1) // no duplicate created
@@ -72,10 +72,12 @@ import CoreData // for NSManagedObjectContext
     @Test("nil nameENOptional does not overwrite an existing name") func nilNameDoesNotOverwrite() {
         let isoCode = "qx" + String.random(length: 6)
 
-        let language1 = Language.findCreateUpdate(context: viewContext, isoCode: isoCode, nameENOptional: "Klingon")
+        let language1 = Language.findCreateUpdate(context: viewContext, isoCode: isoCode, nameENOptional: "Klingon",
+                                                  isSupportedOptional: nil)
         #expect(language1.nameEN == "Klingon")
 
-        let language2 = Language.findCreateUpdate(context: viewContext, isoCode: isoCode, nameENOptional: nil)
+        let language2 = Language.findCreateUpdate(context: viewContext, isoCode: isoCode, nameENOptional: nil,
+                                                  isSupportedOptional: nil)
         #expect(language2 === language1) // same object
         #expect(language2.nameEN == "Klingon") // unchanged by the nil call
     }

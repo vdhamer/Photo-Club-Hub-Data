@@ -178,7 +178,7 @@ extension Expertise {
                 else { continue }
 
             let isoCode: String = localizedExpertise["language"].string!
-            let language = Language.findCreateUpdate(context: context, isoCode: isoCode)
+            let language = Language.findCreate(context: context, isoCode: isoCode)
 
             let localizedString: String = localizedExpertise["localizedString"].string!
             _ = LocalizedExpertise.findCreateUpdate(context: context,
@@ -190,7 +190,7 @@ extension Expertise {
             guard localizedUsage["language"].exists(), localizedUsage["localizedString"].exists() else { continue }
 
             let isoCode: String = localizedUsage["language"].string!
-            let language = Language.findCreateUpdate(context: context, isoCode: isoCode)
+            let language = Language.findCreate(context: context, isoCode: isoCode)
 
             let localizedDescription: String = localizedUsage["localizedString"].string!
             _ = LocalizedExpertise.findCreateUpdate(context: context,

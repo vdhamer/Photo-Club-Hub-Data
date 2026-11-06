@@ -191,8 +191,8 @@ extension Organization {
             let localizedRemarkNewValue: String? = localizedRemark["value"].stringValue
 
             if isoCode != nil && localizedRemarkNewValue != nil { // nil could occur if JSON file isn't schema compliant
-                let language = Language.findCreateUpdate(context: bgContext,
-                                                         isoCode: isoCode!) // find or construct the remark's Language
+                let language = Language.findCreate(context: bgContext,
+                                                   isoCode: isoCode!) // find or construct the remark's Language
                 // language updates doesn't set modified flag
 
                 let remarkNeedsPersisting: Bool = LocalizedRemark.findCreateUpdate(

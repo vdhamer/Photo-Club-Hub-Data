@@ -35,13 +35,16 @@ import CoreLocation // for CLLocationCoordinate2D
         // Flags set here rather than by reading Level 0: this suite is about the counts, not about the file.
         english = Language.findCreateUpdate(context: viewContext,
                                             isoCode: "en",
+                                            nameENOptional: nil,
                                             isSupportedOptional: true)
         dutch = Language.findCreateUpdate(context: viewContext,
                                           isoCode: "nl",
+                                          nameENOptional: nil,
                                           isSupportedOptional: true)
         // An unsupported language must stay out of every count, including out of `total`.
         _ = Language.findCreateUpdate(context: viewContext,
                                       isoCode: "de",
+                                      nameENOptional: nil,
                                       isSupportedOptional: false)
     }
 

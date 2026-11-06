@@ -109,9 +109,9 @@ import CoreData // for NSManagedObjectContext
         await loadTestLevel0()
 
         // "pdc" (Pennsylvania Dutch) stands in for the language of a Level 1 remark: a new row.
-        let remarkLanguage = Language.findCreateUpdate(context: viewContext, isoCode: "pdc")
+        let remarkLanguage = Language.findCreate(context: viewContext, isoCode: "pdc")
         // The same call shape reaching a language that Level 0 did flag must not withdraw that flag.
-        let existingLanguage = Language.findCreateUpdate(context: viewContext, isoCode: "en")
+        let existingLanguage = Language.findCreate(context: viewContext, isoCode: "en")
 
         #expect(remarkLanguage.isSupported == false)
         #expect(existingLanguage.isSupported == true)

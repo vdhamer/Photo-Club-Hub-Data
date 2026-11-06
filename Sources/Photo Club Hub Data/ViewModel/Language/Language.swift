@@ -11,7 +11,7 @@ extension Language {
 
     @available(*, unavailable)
     convenience init() {
-        fatalError("init() is not available. Use .findCreateUpdate instead.")
+        fatalError("init() is not available. Use .findCreate or .findCreateUpdate instead.")
     }
 
     private static var code2Name: [String: String] {
@@ -31,7 +31,8 @@ extension Language {
             _ = Language.findCreateUpdate(
                 context: context, // requires @MainActor
                 isoCode: language.key, // normalized to lowercase within findCreateUpdate
-                nameENOptional: language.value // e.g. "English"
+                nameENOptional: language.value, // e.g. "English"
+                isSupportedOptional: nil // only Level 0 decides which languages are supported
             )
         }
 
@@ -115,17 +116,27 @@ extension Language {
         }
     }
 
+    // MARK: - find or create, without updating
+
+    // Find existing Language object or create a new one, leaving its English name and `isSupported` as they are.
+    // For callers that only need the Language a record refers to (remarks, expertise translations), so that they
+    // cannot change whether a language is supported.
+    static func findCreate(context: NSManagedObjectContext, // can be foreground or background thread
+                           isoCode: String
+                          ) -> Language {
+        findCreateUpdate(context: context, isoCode: isoCode, nameENOptional: nil, isSupportedOptional: nil)
+    }
+
     // MARK: - find, create, update
 
     // Find existing Language object or create a new one.
     // Update existing attributes or fill the new object.
-    // A nil `nameENOptional` or `isSupportedOptional` leaves that attribute as it is. Only the Level 0 reader
-    // passes `isSupportedOptional`: every other caller finds or creates languages for other reasons (remarks,
-    // expertise translations, `initConstants`) and must not change whether a language is supported.
+    // A nil `nameENOptional` or `isSupportedOptional` leaves that attribute as it is: Level 0 may list a language
+    // without `isSupported`, and `initConstants` sets only the English name.
     static func findCreateUpdate(context: NSManagedObjectContext, // can be foreground or background thread
                                  isoCode: String,
-                                 nameENOptional: String? = nil,
-                                 isSupportedOptional: Bool? = nil
+                                 nameENOptional: String?,
+                                 isSupportedOptional: Bool?
                                 ) -> Language {
         let isoCode = isoCode.lowercased() // "EN" → "en" — ISO 639-1 codes are lowercase in the standard
         // case-insensitive: shipped versions stored uppercase codes, so the store is not guaranteed
