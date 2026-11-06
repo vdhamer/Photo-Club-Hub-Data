@@ -64,27 +64,61 @@ extension Organization {
         }
     }
 
-    // Appends " \(town)" to \(fullName) unless \(town) is already part of \(fullName).
+    // Appends " (\(town))" to \(fullName) unless \(town) is already part of \(fullName).
     // The following cases are tested in OrganizationTest:
     // "Fotogroep Waalre" and "Aalst" returns "Fotogroep Waalre (Aalst)"
     // "Fotogroep Waalre" and "Waalre" returns "Fotogroep Waalre"
-    // "Fotogroep Waalre" and "waalre" returns "Fotogroep Waalre"
+    // "Fotogroep Waalre" and "waalre" returns "Fotogroep Waalre (waalre)" because matching is case-sensitive
     // "Fotogroep Waalre" and "to" returns "Fotogroep Waalre (to)"
     // "Fotogroep Waalre" and "Waal" returns "Fotogroep Waalre (Waal)" if you use NLP-based word matching
     // "Fotoclub Den Dungen" and "Den Dungen" returns "Fotoclub Den Dungen"
-    // "Fotokring Sint-Michelsgestel" and "Sint-Michelsgestel" returns "Fotoclub Sint-Michelsgestel"
+    // "Fotokring Sint-Michielsgestel" and "Sint-Michielsgestel" returns "Fotokring Sint-Michielsgestel"
+    // Also the iOS Clubs tab's section id (#802), so it uses the stored town only. Users see fullNameLocalizedTown.
     @objc public var fullNameTown: String { // @objc needed for SectionedFetchRequest's sectionIdentifier
-        if fullName.containsWordUsingNLP(targetWord: town) {
+        if fullNameContains(town: town) {
             return fullName // fullname "Fotogroep Waalre" and town "Waalre" returns "Fotogroep Waalre"
         }
-
-        if fullName.contains(town) { // for "Fotoclub Den Dungen" and "Fotokring Sint-Michielsgestel"
-            if town.contains(" ") || town.contains("-") {
-                return fullName
-            }
-        }
-
         return "\(fullName) (\(town))" // fullname "Fotogroep Aalst" with "Waalre" returns "Fotogroep Aalst (Waalre)"
+    }
+
+    /// Returns `fullName` followed by the town in `language`, as users should see it.
+    ///
+    /// The name itself is never translated. The town is left out when `fullName` already contains either the
+    /// stored `town` or the localized one, so "Fotomuseum Den Haag" gets no suffix in any language (Data#88).
+    /// The town comes from `localizedTown(for:)`, with the stored `town` standing in when that gives the
+    /// "Town?" placeholder, so a club header or page title never shows the placeholder.
+    ///
+    /// | `fullName`          | `town`   | localized town   | Returns                    |
+    /// |---------------------|----------|------------------|----------------------------|
+    /// | Museum Ludwig       | Köln     | Keulen (nl)      | Museum Ludwig (Keulen)     |
+    /// | Museum Ludwig       | Köln     | Cologne (en)     | Museum Ludwig (Cologne)    |
+    /// | Fotomuseum Den Haag | Den Haag | The Hague (en)   | Fotomuseum Den Haag        |
+    /// | Museum Cologne      | Köln     | Cologne (en)     | Museum Cologne             |
+    /// | Museum Cologne      | Köln     | Keulen (nl)      | Museum Cologne (Keulen)    |
+    /// | Fotogroep Waalre    | Aalst    | no row yet       | Fotogroep Waalre (Aalst)   |
+    /// | Fotogroep Waalre    | Aalst    | "Town?"          | Fotogroep Waalre (Aalst)   |
+    ///
+    /// Each row is covered by a test in OrganizationTest.
+    /// Unlike `fullNameTown`, this is not an identity: it changes with the language and with geocoding.
+    public func fullNameLocalizedTown(for language: Language) -> String {
+        let translatedTown: String = localizedTown(for: language)
+        let shownTown: String = translatedTown == LocalizedAddress.unknownTown ? town : translatedTown
+        if fullNameContains(town: town) || fullNameContains(town: shownTown) {
+            return fullName
+        }
+        return "\(fullName) (\(shownTown))"
+    }
+
+    // Whether `fullName` already names `town`, so that appending " (town)" would repeat it.
+    // A one-word town must match a whole word ("Waal" is not in "Fotogroep Waalre"), using NLP to find the words.
+    // A town of several words or with a hyphen counts when it occurs anywhere ("Fotoclub Den Dungen"),
+    // because NLP compares one word at a time and so never matches it.
+    // Both checks are case-sensitive: "waalre" is not in "Fotogroep Waalre".
+    private func fullNameContains(town: String) -> Bool {
+        if fullName.containsWordUsingNLP(targetWord: town) {
+            return true
+        }
+        return fullName.contains(town) && (town.contains(" ") || town.contains("-"))
     }
 
     public var id: OrganizationID { // public because needed for Identifiable protocol

@@ -52,6 +52,9 @@ API
 * __New public `Organization.logEntries`, `Organization.badWebsites` and `Organization.isFormerOrganization`, and the `LogEntry` wrappers `date`, `author`, `text` and `isFormerOrganization`.__
 `logEntries` is sorted by level, then by position in the file. A missing or blank `author` or `text` reads as `Author?` or `Text?`, and a missing date as `Date.distantPast`, so a broken entry is visible to someone reading the log. Additive, so a MINOR change.
 
+* __New `Organization.fullNameLocalizedTown(for:)`.__
+The name as users should see it: `fullName` followed by the town in the required language, such as "Museum Ludwig (Keulen)" in Dutch. The town is left out when the name already contains the stored town or the localized one, so "Fotomuseum Den Haag" has no suffix in any language. Without a translation, or when Apple's geocoder returned no town, the stored `town` is shown. `fullNameTown` is unchanged, because the iOS Clubs tab uses it as a section id (Data#88). Additive, so a MINOR change.
+
 STRUCTURAL
 
 * __Tests that install the `ifDebugFatalError` spy now run one at a time.__

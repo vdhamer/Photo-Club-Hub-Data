@@ -13,6 +13,8 @@ import CoreData // for NSManagedObjectContext
 
     private let testPersistenceController: PersistenceController
     private let context: NSManagedObjectContext
+    private let english: Language
+    private let dutch: Language
 
     init () {
         // Use a private in-memory store rather than PersistenceController.shared. Sharing the singleton
@@ -21,6 +23,16 @@ import CoreData // for NSManagedObjectContext
         testPersistenceController = PersistenceController(inMemory: true)
         context = testPersistenceController.container.viewContext
         context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+
+        // Supported as Level 0 would mark them, without reading a Level 0 file.
+        english = Language.findCreateUpdate(context: context,
+                                            isoCode: "en",
+                                            nameENOptional: nil,
+                                            isSupportedOptional: true)
+        dutch = Language.findCreateUpdate(context: context,
+                                          isoCode: "nl",
+                                          nameENOptional: nil,
+                                          isSupportedOptional: true)
     }
 
     @Test("FullnameTown for Fotogroep Waalre in Aalst") func fotogroepWaalreInAalst() throws {
@@ -77,6 +89,80 @@ import CoreData // for NSManagedObjectContext
         club.fullName = "Fotokring Sint-Michielsgestel testsuffix\(randomSuffix)"
         club.town = "Sint-Michielsgestel" // this is where Natural Language Processing is thinks town is 2 words
         #expect(club.fullNameTown == "\(club.fullName)")
+    }
+
+    // MARK: - fullNameLocalizedTown(for:) (Data#88)
+
+    // Stores the town Apple's geocoder would have returned for `organization` in `language`.
+    private func storeLocalizedTown(_ localizedTown: String, for organization: Organization, in language: Language) {
+        let fields = LocalizedAddressFields(localizedTown: localizedTown, localizedCountry: "ExampleCountry")
+        LocalizedAddress.findCreateUpdate(bgContext: context,
+                                          organization: organization,
+                                          language: language,
+                                          newLocalizedAddressFields: fields,
+                                          newCoordinates: organization.coordinates)
+    }
+
+    @Test("fullNameLocalizedTown() shows a foreign town in the output language") func foreignTownLocalized() throws {
+        let randomSuffix = String.random(length: 10).canonicalCase
+        let museum = Organization(context: context)
+        museum.fullName = "Museum Ludwig testsuffix\(randomSuffix)"
+        museum.town = "Köln"
+        storeLocalizedTown("Keulen", for: museum, in: dutch)
+        storeLocalizedTown("Cologne", for: museum, in: english)
+
+        #expect(museum.fullNameLocalizedTown(for: dutch) == "\(museum.fullName) (Keulen)")
+        #expect(museum.fullNameLocalizedTown(for: english) == "\(museum.fullName) (Cologne)")
+        #expect(museum.fullNameTown == "\(museum.fullName) (Köln)") // the identity form keeps the stored town
+    }
+
+    @Test("fullNameLocalizedTown() doesn't append (town) if the name already contains the canonical version of town")
+    func nameContainsStoredTown() throws {
+        let randomSuffix = String.random(length: 10).canonicalCase
+        let museum = Organization(context: context)
+        museum.fullName = "Fotomuseum Den Haag testsuffix\(randomSuffix)"
+        museum.town = "Den Haag" // in local language as long as character set is Latin-based
+        storeLocalizedTown("Den Haag", for: museum, in: dutch)
+        storeLocalizedTown("The Hague", for: museum, in: english)
+
+        #expect(museum.fullNameLocalizedTown(for: dutch) == museum.fullName)
+        #expect(museum.fullNameLocalizedTown(for: english) == museum.fullName) // not "(The Hague)"
+    }
+
+    @Test("fullNameLocalizedTown() leaves out a town the name contains only as localized")
+    func nameContainsOnlyLocalizedTown() throws {
+        let randomSuffix = String.random(length: 10).canonicalCase
+        let museum = Organization(context: context)
+        museum.fullName = "Museum Cologne testsuffix\(randomSuffix)"
+        museum.town = "Köln" // in local language as long as character set is Latin-based
+        storeLocalizedTown("Keulen", for: museum, in: dutch)
+        storeLocalizedTown("Cologne", for: museum, in: english)
+
+        #expect(museum.fullNameLocalizedTown(for: english) == museum.fullName)
+        #expect(museum.fullNameLocalizedTown(for: dutch) == "\(museum.fullName) (Keulen)") // name has neither town
+    }
+
+    @Test("fullNameLocalizedTown() falls back to the canonical town if there is no LocalizedAddress")
+    func noLocalizedAddressFallsBack() throws {
+        let randomSuffix = String.random(length: 10).canonicalCase
+        let club = Organization(context: context)
+        club.fullName = "Fotogroep Waalre testsuffix\(randomSuffix)"
+        club.town = "Aalst"
+
+        #expect(club.localizedAddress(for: dutch) == nil)
+        #expect(club.fullNameLocalizedTown(for: dutch) == "\(club.fullName) (Aalst)")
+    }
+
+    @Test("fullNameLocalizedTown() falls back to the canonical town instead of showing Town?")
+    func unknownLocalizedTownFallsBack() throws {
+        let randomSuffix = String.random(length: 10).canonicalCase
+        let club = Organization(context: context)
+        club.fullName = "Fotogroep Waalre testsuffix\(randomSuffix)"
+        club.town = "Aalst"
+        storeLocalizedTown(LocalizedAddress.unknownTown, for: club, in: english)
+
+        #expect(club.localizedTown(for: english) == LocalizedAddress.unknownTown)
+        #expect(club.fullNameLocalizedTown(for: english) == "\(club.fullName) (Aalst)")
     }
 
 }
