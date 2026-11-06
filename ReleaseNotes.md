@@ -1,13 +1,13 @@
 TO-DO
 
 * Data#8: drive Level 2 from Level 1 data, which deletes the fourteen-club list in `LevelLoader.loadAllLevel2Clubs`
-* Data#1: make the suite safe to run in parallel, so CI can drop `swift test --no-parallel`
+* Data#1: make the test suite safe to run in parallel, so CI can drop `swift test --no-parallel`
 * Consider a SwiftLint step in CI as well, so violations gate pull requests rather than only local builds
 * Untested: to-many relationship conflicts under the merge policy (see Data#12)
 
 ---------------------------------------------------------------------------
 
-### 3.8.0 (not yet released)
+### 3.8.0 (GitHub commit 08c90f9) 06-11-2026
 
 DATA
 
