@@ -16,6 +16,11 @@ All changes below are mirrored identically in the iOS repo's live copy, which is
 * `museumsCN.level1.json`
 Fotografiska Shanghai and the Lianzhou Museum of Photography had each other's coordinates; swapped back. The Lianzhou remark (EN and NL) no longer blames the coordinates; its website still doesn't respond, which a new `logbook` entry records, without listing it in `badWebsites` because it may only be unreachable from outside China. Coordinates and a log entry only, so no data reset is needed: both museums are geocoded again because their coordinates changed (Data#98).
 
+API
+
+* __New `MemberPortfolio.roleDescriptionOfClubTown(languageBundle:language:)`.__
+The line "Member of Museum Ludwig (Keulen)" now shows the club's town the way the iOS Clubs tab section headers do, through `Organization.fullNameLocalizedTown(for:)`, so a member row can no longer read "(Köln)" under a header reading "(Keulen)". A `nil` language gives the stored town, as before. The existing `roleDescriptionOfClubTown(languageBundle:)` stays and passes `nil`, so the HTML app builds unchanged and no consumer breaks. The parameterless property `roleDescriptionOfClubTown` is deprecated and goes in the next MAJOR release: its only callers, in the iOS app, move to the new function in vdhamer/Photo-Club-Hub#890. The line no longer traps on a row deleted while the list animates (vdhamer/Photo-Club-Hub#802): it reads `organization_` and `photographer_` directly, and a row without a club gets the role description alone (Data#99).
+
 ---------------------------------------------------------------------------
 
 ### 3.8.0 (GitHub commit 08c90f9) 06-11-2026
