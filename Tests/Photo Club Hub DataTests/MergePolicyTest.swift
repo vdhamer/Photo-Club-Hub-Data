@@ -58,7 +58,7 @@ struct ExpertiseMergePolicyTests {
     private func collide(policy: NSMergePolicy, order: SaveOrder) -> Outcome {
         // A private in-memory store per call, so the cells of the matrix cannot see each other's records.
         let persistenceController = PersistenceController(inMemory: true)
-        let expertiseID = String.random(length: 10)
+        let expertiseID = "unitTest Expertise"
 
         let level0Context = persistenceController.container.newBackgroundContext()
         let level2Context = persistenceController.container.newBackgroundContext()
@@ -183,7 +183,7 @@ struct PhotographerMergePolicyTests {
     /// either saves, so the second save hits a genuine optimistic-locking conflict.
     private func concurrentUpdate(policy: NSMergePolicy) -> Outcome {
         let persistenceController = PersistenceController(inMemory: true)
-        let personName = PersonName(givenName: String.random(length: 10),
+        let personName = PersonName(givenName: "John",
                                     infixName: "",
                                     familyName: "UnitTestDummy")
 

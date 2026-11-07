@@ -16,6 +16,7 @@ import CoreData // for NSManagedObjectContext
 
     private let testPersistenceController: PersistenceController
     private let viewContext: NSManagedObjectContext
+    private let idPlus = OrganizationIdPlus(fullName: "UnitTest Club", town: "UnitTestTown", nickname: "nick")
 
     init () {
         // Use a private in-memory store rather than PersistenceController.shared. Sharing the singleton
@@ -35,19 +36,10 @@ import CoreData // for NSManagedObjectContext
         return ((try? viewContext.fetch(fetchRequest)) ?? []).count
     }
 
-    // Builds an OrganizationIdPlus that is unique to this test run.
-    private func randomIdPlus() -> OrganizationIdPlus {
-        OrganizationIdPlus(fullName: "UnitTest Club \(String.random(length: 10))",
-                           town: "UnitTestTown\(String.random(length: 10))",
-                           nickname: "nick\(String.random(length: 10))")
-    }
-
     // MARK: - idempotency
 
     // Calling findCreateUpdate twice with the same identity must return the same object (no duplicate).
     @Test("findCreateUpdate is idempotent for an identical idPlus") func idempotentForSameIdPlus() {
-        let idPlus = randomIdPlus()
-
         let org1 = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .club, idPlus: idPlus)
         let org2 = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .club, idPlus: idPlus)
 
@@ -65,8 +57,6 @@ import CoreData // for NSManagedObjectContext
     // you cannot have a club and a museum with the same name in the same town.
     @Test("same name+town cannot become a second organization of a different type")
     func sameNameTownDifferentTypeIsSameObject() {
-        let idPlus = randomIdPlus()
-
         let asClub = Organization.findCreateUpdate(context: viewContext,
                                                    organizationTypeEnum: .club,
                                                    idPlus: idPlus)
@@ -88,19 +78,19 @@ import CoreData // for NSManagedObjectContext
     // nicknames it hits ifDebugFatalError, which would crash this (debug) test run.
     @Test("two organizations may share a nickname (nickname is non-identifying)")
     func duplicateNicknameAllowed() {
-        let sharedNickname = "dup\(String.random(length: 10))" // both organizations will use this nickname
+        let sharedNickname = "dup" // both organizations will use this nickname
 
         let org1 = Organization.findCreateUpdate(
             context: viewContext,
             organizationTypeEnum: .club,
-            idPlus: OrganizationIdPlus(fullName: "UnitTest Club A \(String.random(length: 8))",
-                                       town: "UnitTestTownA\(String.random(length: 8))",
+            idPlus: OrganizationIdPlus(fullName: "UnitTest Club A",
+                                       town: "UnitTestTownA",
                                        nickname: sharedNickname))
         let org2 = Organization.findCreateUpdate(
             context: viewContext,
             organizationTypeEnum: .club,
-            idPlus: OrganizationIdPlus(fullName: "UnitTest Club B \(String.random(length: 8))",
-                                       town: "UnitTestTownB\(String.random(length: 8))",
+            idPlus: OrganizationIdPlus(fullName: "UnitTest Club B",
+                                       town: "UnitTestTownB",
                                        nickname: sharedNickname))
 
         #expect(org1 !== org2) // genuinely two different organizations
@@ -118,8 +108,7 @@ import CoreData // for NSManagedObjectContext
     // provider's nickname after Level 1, so a change must be made in the Level 1 entry, the provider, and the
     // Level 2 file's name and "club" block together (until Data#8 retires the providers).
     @Test("a changed nickname replaces the stored one") func changedNicknameIsApplied() {
-        let idPlus = randomIdPlus()
-        let newNickname = "renamed\(String.random(length: 10))"
+        let newNickname = "renamed"
 
         let org1 = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .club, idPlus: idPlus)
         #expect(org1.nickName == idPlus.nickname)
@@ -134,8 +123,6 @@ import CoreData // for NSManagedObjectContext
 
     // A missing nickname reaches update() as "", which must leave the stored nickname alone (Data#75).
     @Test("an empty nickname does not overwrite the stored one") func emptyNicknameDoesNotOverwrite() {
-        let idPlus = randomIdPlus()
-
         let org1 = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .club, idPlus: idPlus)
         let org2 = Organization.findCreateUpdate(
             context: viewContext,
@@ -149,8 +136,7 @@ import CoreData // for NSManagedObjectContext
 
     // A nil optional field must leave an already-set value untouched.
     @Test("nil optional field does not overwrite an existing value") func nilOptionalFieldDoesNotOverwrite() {
-        let idPlus = randomIdPlus()
-        let email = "test-\(String.random(length: 6))@example.com"
+        let email = "test@example.com"
 
         let org1 = Organization.findCreateUpdate(
             context: viewContext,
@@ -168,7 +154,6 @@ import CoreData // for NSManagedObjectContext
     // MARK: - throwing find(...) lookups
 
     @Test("find(organizationID:) returns a known organization") func findKnownOrganizationID() throws {
-        let idPlus = randomIdPlus()
         let created = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .club, idPlus: idPlus)
 
         let found = try Organization.find(context: viewContext, organizationID: idPlus.id)
@@ -176,15 +161,14 @@ import CoreData // for NSManagedObjectContext
     }
 
     @Test("find(organizationID:) throws for an unknown organization") func findUnknownOrganizationIDThrows() {
-        let unknownID = OrganizationID(fullName: "NoSuch Club \(String.random(length: 10))",
-                                       town: "NoSuchTown\(String.random(length: 10))")
+        let unknownID = OrganizationID(fullName: "NoSuch Club",
+                                       town: "NoSuchTown")
         #expect(throws: (any Error).self) {
             _ = try Organization.find(context: viewContext, organizationID: unknownID)
         }
     }
 
     @Test("find(nickname:) returns a known organization") func findKnownNickname() throws {
-        let idPlus = randomIdPlus()
         let created = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .club, idPlus: idPlus)
 
         let found = try Organization.find(context: viewContext, nickname: idPlus.nickname)
@@ -192,7 +176,7 @@ import CoreData // for NSManagedObjectContext
     }
 
     @Test("find(nickname:) throws for an unknown nickname") func findUnknownNicknameThrows() {
-        let unknownNickname = "noSuchNick\(String.random(length: 10))"
+        let unknownNickname = "noSuchNick"
         #expect(throws: (any Error).self) {
             _ = try Organization.find(context: viewContext, nickname: unknownNickname)
         }

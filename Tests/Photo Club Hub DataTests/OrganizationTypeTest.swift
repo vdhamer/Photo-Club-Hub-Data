@@ -33,7 +33,7 @@ import CoreData // for NSManagedObjectContext
 
     // Calling findCreateUpdate twice with the same type name must return the same object (no duplicate).
     @Test("findCreateUpdate is idempotent for a given type name") func idempotentForSameName() {
-        let orgTypeName = "unittest-" + String.random(length: 10) // avoid clashing with seeded club/museum/unknown
+        let orgTypeName = "unittest-type" // avoid clashing with seeded club/museum/unknown
 
         let type1 = OrganizationType.findCreateUpdate(context: viewContext, orgTypeName: orgTypeName)
         let type2 = OrganizationType.findCreateUpdate(context: viewContext, orgTypeName: orgTypeName)

@@ -25,7 +25,7 @@ import CoreData // for NSManagedObjectContext
 
     // Calling findCreateUpdate twice with the same ISO code must return the same object (no duplicate).
     @Test("findCreateUpdate is idempotent for a given ISO code") func idempotentForSameCode() {
-        let isoCode = "qx" + String.random(length: 6) // "qx" guarantees the code contains letters
+        let isoCode = "qxtest" // no real language has this code
 
         let language1 = Language.findCreate(context: viewContext, isoCode: isoCode)
         let language2 = Language.findCreate(context: viewContext, isoCode: isoCode)
@@ -39,7 +39,7 @@ import CoreData // for NSManagedObjectContext
     // querying, so this passes even with an exact-match predicate. For an uppercase value already in
     // the store, see matchesLegacyUppercaseRow() below.
     @Test("ISO code is matched case-insensitively") func languageIDMatchedCaseInsensitively() {
-        let isoCode = "qx" + String.random(length: 6) // "qx" guarantees lower/upper actually differ
+        let isoCode = "qxtest" // letters only, so its lower and upper case differ
 
         let lower = Language.findCreate(context: viewContext, isoCode: isoCode.lowercased())
         let upper = Language.findCreate(context: viewContext, isoCode: isoCode.uppercased())
@@ -54,7 +54,7 @@ import CoreData // for NSManagedObjectContext
     // exact-match predicate misses the row and findCreateUpdate silently creates a duplicate.
     @Test("findCreateUpdate matches a legacy uppercase row already in the store")
     func matchesLegacyUppercaseRow() {
-        let isoCode = "qx" + String.random(length: 6) // "qx" guarantees lower/upper actually differ
+        let isoCode = "qxtest" // letters only, so its lower and upper case differ
 
         let entity = NSEntityDescription.entity(forEntityName: "Language", in: viewContext)!
         let legacy = Language(entity: entity, insertInto: viewContext)
@@ -70,7 +70,7 @@ import CoreData // for NSManagedObjectContext
 
     // nil update semantics: nameENOptional == nil must leave an already-set name untouched.
     @Test("nil nameENOptional does not overwrite an existing name") func nilNameDoesNotOverwrite() {
-        let isoCode = "qx" + String.random(length: 6)
+        let isoCode = "qxtest"
 
         let language1 = Language.findCreateUpdate(context: viewContext, isoCode: isoCode, nameENOptional: "Klingon",
                                                   isSupportedOptional: nil)

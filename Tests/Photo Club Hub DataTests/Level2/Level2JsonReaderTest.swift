@@ -31,7 +31,7 @@ import CoreData // for NSManagedObjectContext
     }
 
     // Loads a frozen Level 2 fixture the way a club's *MembersProvider loads its production file: create the
-    // club under `idPlus` first, so the assertions can find it in its random town, then read the file.
+    // club under `idPlus` first, so the assertions can find it in its test town, then read the file.
     // The providers themselves cannot be used here. They request the club's real nickname, and a production
     // file of that name is found before the fixture, so the test would silently read production data.
     // See "Tests run against frozen data" in README.md.
@@ -54,9 +54,9 @@ import CoreData // for NSManagedObjectContext
 
         #expect(Expertise.count(context: bgContext) == 0) // clearing is handled via "inMemory: true"
 
-        let randomTownForTesting = String.random(length: 10) // e.g. "s8H2bEU3C6"
+        let testTown = "UnitTestTown"
         let idPlus = OrganizationIdPlus(fullName: "Template Club With Minimal Data",
-                                        town: randomTownForTesting, // town to keep this separate from normal club data
+                                        town: testTown, // town to keep this separate from normal club data
                                         nickname: "TemplateMinTest")
         await loadFixture(idPlus, into: bgContext)
 
@@ -64,7 +64,7 @@ import CoreData // for NSManagedObjectContext
         // Note that organizationType is not an identifying attribute.
         // This implies that you cannot have 2 organizations with the same Name and Town, but of a different type.
         let predicate = NSPredicate(format: predicateFormat,
-                                    argumentArray: [ randomTownForTesting ] )
+                                    argumentArray: [ testTown ] )
         let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
         fetchRequest.predicate = predicate
         let organizations: [Organization] = (try? viewContext.fetch(fetchRequest)) ?? []
@@ -91,9 +91,9 @@ import CoreData // for NSManagedObjectContext
 
         #expect(Expertise.count(context: bgContext) == 0)
 
-        let randomTownForTesting = String.random(length: 10)
+        let testTown = "UnitTestTown"
         let idPlus = OrganizationIdPlus(fullName: "Template Club With Maximal Data",
-                                        town: randomTownForTesting, // town to distinguish this from normal club data
+                                        town: testTown, // town to distinguish this from normal club data
                                         nickname: "TemplateMaxTest")
         await loadFixture(idPlus, into: bgContext)
 
@@ -101,7 +101,7 @@ import CoreData // for NSManagedObjectContext
         // Note that organizationType is not an identifying attribute.
         // This implies that you cannot have 2 organizations with the same Name and Town, but of a different type.
         let predicate = NSPredicate(format: predicateFormat,
-                                    argumentArray: [ randomTownForTesting ] )
+                                    argumentArray: [ testTown ] )
         let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
         fetchRequest.predicate = predicate
         let organizations: [Organization] = (try? viewContext.fetch(fetchRequest)) ?? []
@@ -130,9 +130,9 @@ import CoreData // for NSManagedObjectContext
         Model.deleteExpertises(viewContext: viewContext)
         #expect(Expertise.count(context: bgContext) == 0)
 
-        let randomTownForTesting = String.random(length: 10)
+        let testTown = "UnitTestTown"
         let idPlus = OrganizationIdPlus(fullName: "Fotogroep de Gender",
-                                        town: randomTownForTesting, // town to distinguish this from normal club data
+                                        town: testTown, // town to distinguish this from normal club data
                                         nickname: "fgDeGenderTest")
         await loadFixture(idPlus, into: bgContext) // The club has Expertises
 
@@ -140,7 +140,7 @@ import CoreData // for NSManagedObjectContext
         // Note that organizationType is not an identifying attribute.
         // This implies that you cannot have 2 organizations with the same Name and Town, but of a different type.
         let predicate = NSPredicate(format: predicateFormat,
-                                    argumentArray: [ randomTownForTesting ] )
+                                    argumentArray: [ testTown ] )
         let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
         fetchRequest.predicate = predicate
         let organizations: [Organization] = (try? viewContext.fetch(fetchRequest)) ?? []
@@ -151,7 +151,7 @@ import CoreData // for NSManagedObjectContext
             #expect(organizations[0].fullName == idPlus.fullName)
             #expect(organizations[0].town == idPlus.town)
             #expect(organizations[0].nickName == idPlus.nickname)
-            #expect(organizations[0].fotobondClubNumber?.id == nil) // club in randomTown → no fotobondNumber
+            #expect(organizations[0].fotobondClubNumber?.id == nil) // club in test town → no fotobondNumber
         }
 
         #expect(Expertise.count(context: bgContext) == 21)
@@ -172,14 +172,14 @@ import CoreData // for NSManagedObjectContext
         #expect(Expertise.count(context: bgContext) == 0)
 
         await loadFixture(OrganizationIdPlus(fullName: "Fotogroep de Gender",
-                                             town: String.random(length: 10),
+                                             town: "UnitTestTown",
                                              nickname: "fgDeGenderTest"),
                           into: bgContext)
         #expect(Expertise.count(context: bgContext) == 21)
         #expect(PhotographerExpertise.count(context: bgContext) == 49)
 
         await loadFixture(OrganizationIdPlus(fullName: "Fotogroep Waalre",
-                                             town: String.random(length: 10),
+                                             town: "UnitTestTown",
                                              nickname: "fgWaalreTest"),
                           into: bgContext)
 

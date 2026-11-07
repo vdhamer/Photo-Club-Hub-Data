@@ -24,7 +24,7 @@ import CoreData // for NSManagedObjectContext
     }
 
     @Test("Add a supported expertise") func addSupportedExpertise() throws {
-        let expertiseID = String.random(length: 10).canonicalCase
+        let expertiseID = "unitTest Expertise".canonicalCase
         let expertise = Expertise.findCreateUpdateSupported(context: context, id: expertiseID, names: [], usages: [])
         #expect(expertise.id == expertiseID.canonicalCase)
         #expect(expertise.isSupported == true)
@@ -34,7 +34,7 @@ import CoreData // for NSManagedObjectContext
     }
 
     @Test("Add a temporary expertise") func addTemporaryExpertise() throws {
-        let expertiseID = String.random(length: 10).canonicalCase
+        let expertiseID = "unitTest Expertise".canonicalCase
         let expertise = Expertise.findCreateUpdateTemporary(context: context, id: expertiseID, names: [], usages: [])
         #expect(expertise.id == expertiseID)
         #expect(expertise.isSupported == false)
@@ -43,14 +43,14 @@ import CoreData // for NSManagedObjectContext
     }
 
     @Test("Check capitalization of incoming ID strings") func checkIdCaplitalization() throws {
-        let expertiseID = "a " + String.random(length: 8)
+        let expertiseID = "a unitTest Expertise"
         let expertise = Expertise.findCreateUpdateSupported(context: context, id: expertiseID.canonicalCase,
                                                            names: [], usages: [])
         #expect(expertise.id == expertiseID.canonicalCase)
     }
 
     @Test("Supported expertise cannot be changed back to Temporary") func expertiseSupported2Temporary() {
-        var id = String.random(length: 10) // findCreateUpdate() converts this to .canonicalCase
+        var id = "unitTest Expertise" // findCreateUpdate() converts this to .canonicalCase
         let expertise1 = Expertise.findCreateUpdateSupported(context: context, id: id, names: [], usages: [])
         #expect(expertise1.isSupported == true)
         #expect(id.canonicalCase == expertise1.id)
@@ -68,7 +68,7 @@ import CoreData // for NSManagedObjectContext
     }
 
     @Test("Temporary expertise can be promoted to Supported") func expertiseTemporary2Supported() {
-        var id = String.random(length: 10) // findCreateUpdate() converts this to .canonicalCase
+        var id = "unitTest Expertise" // findCreateUpdate() converts this to .canonicalCase
         let expertise1 = Expertise.findCreateUpdateTemporary(context: context, id: id, names: [], usages: [])
         #expect(expertise1.isSupported == false)
         #expect(id.canonicalCase == expertise1.id)

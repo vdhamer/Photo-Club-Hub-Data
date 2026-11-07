@@ -23,16 +23,16 @@ import CoreData // for NSManagedObjectContext
         context = testPersistenceController.container.viewContext
         context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
 
-        let personName = PersonName(givenName: String.random(length: 10), infixName: "", familyName: "UnitTestDummy")
+        let personName = PersonName(givenName: "John", infixName: "", familyName: "UnitTestDummy")
         let optionalFields = PhotographerOptionalFields()
         photographer = Photographer.findCreateUpdate(context: context,
                                                      personName: personName,
                                                      optionalFields: optionalFields)
     }
 
-    @Test("Create a random expertise for a random photographer") func addPhotographerExpertise() {
+    @Test("Create an expertise for a photographer") func addPhotographerExpertise() {
 
-        let expertiseID = String.random(length: 10).canonicalCase
+        let expertiseID = "unitTest Expertise".canonicalCase
         let photographerExpertise = PhotographerExpertise.findCreateUpdate(
             context: context,
             photographer: photographer,
@@ -46,7 +46,7 @@ import CoreData // for NSManagedObjectContext
 
     @Test("Attempt to create duplicate PhotographerExpertise") func duplicatePhotographerExpertise() {
 
-        let expertiseID = String.random(length: 10).canonicalCase // internally expertise.id is capitalized
+        let expertiseID = "unitTest Expertise".canonicalCase // internally expertise.id is capitalized
         let photographerExpertise1 = PhotographerExpertise.findCreateUpdate(
             context: context,
             photographer: photographer,

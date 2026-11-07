@@ -38,6 +38,7 @@ struct PhotographerContentionTests {
         let saveError: String? // non-nil means the conflict was not resolved by the policy
     }
 
+    private let personName = PersonName(givenName: "John", infixName: "", familyName: "Doe")
     private static let knownBirthday = Date(timeIntervalSince1970: 123_456)
     private static let otherBirthday = Date(timeIntervalSince1970: 923_456)
 
@@ -86,15 +87,9 @@ struct PhotographerContentionTests {
         }
     }
 
-    private func randomPersonName() -> PersonName {
-        PersonName(givenName: "John", infixName: "", familyName: "Doe\(String.random(length: 10))")
-    }
-
     /// Seeds one committed photographer, then runs two loaders that never see each other's unsaved work.
     private func twoLoadersAfterSeeding(with incoming: Date?) -> Outcome {
         let controller = PersistenceController(inMemory: true)
-        let personName = randomPersonName()
-
         let seedContext = makeContext(in: controller)
         _ = Photographer.findCreateUpdate(context: seedContext, personName: personName,
                                           optionalFields: optionalFields(bornDT: Self.knownBirthday))
@@ -137,8 +132,6 @@ struct PhotographerContentionTests {
     /// insert and the collision is guaranteed rather than hoped for.
     private func concurrentCreation(nilLoaderSavesFirst: Bool) -> Outcome {
         let controller = PersistenceController(inMemory: true)
-        let personName = randomPersonName()
-
         let datedContext = makeContext(in: controller)
         let emptyContext = makeContext(in: controller)
         _ = Photographer.findCreateUpdate(context: datedContext, personName: personName,

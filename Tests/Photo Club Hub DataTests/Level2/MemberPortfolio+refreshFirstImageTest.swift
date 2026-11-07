@@ -35,9 +35,9 @@ import CoreData // for NSMergePolicy
         bgContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         bgContext.automaticallyMergesChangesFromParent = true
 
-        let randomTownForTesting = String.random(length: 10)
+        let testTown = "UnitTestTown"
         let idPlus = OrganizationIdPlus(fullName: "Template Club With Minimal Data",
-                                        town: randomTownForTesting, // new town to distinguish from normal club data
+                                        town: testTown, // new town to distinguish from normal club data
                                         nickname: "TemplateMinTest")
         await Level2JsonReader.load(bgContext: bgContext, organizationIdPlus: idPlus, // frozen fixture, see README.md
                                     isBeingTested: true, useOnlyInBundleFile: true)

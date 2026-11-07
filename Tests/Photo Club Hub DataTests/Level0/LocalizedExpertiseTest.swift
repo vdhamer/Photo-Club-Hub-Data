@@ -27,12 +27,12 @@ import CoreData // for NSManagedObjectContext
         Language.initConstants(context: context)
     }
 
-    @Test("Create a randomly named LocalizedExpertise") func addLocalizedExpertise() {
-        let expertise = Expertise.findCreateUpdateTemporary(context: context, id: String.random(length: 5),
+    @Test("Create a LocalizedExpertise") func addLocalizedExpertise() {
+        let expertise = Expertise.findCreateUpdateTemporary(context: context, id: "unitTest Expertise",
                                                               names: [], usages: [])
         let language = Language.findCreate(context: context, isoCode: "NL")
-        let localizedName = String.random(length: 10)
-        let localizedUsage = String.random(length: 20)
+        let localizedName = "Test name"
+        let localizedUsage = "Test usage"
 
         let localizedExpertise =  LocalizedExpertise.findCreateUpdate(context: context,
                                                                       expertise: expertise,
@@ -49,11 +49,11 @@ import CoreData // for NSManagedObjectContext
     }
 
     @Test("Check that isoCode can handle lower case") func addLocalizedExpertiseLowerCase() {
-        let expertise = Expertise.findCreateUpdateTemporary(context: context, id: String.random(length: 25),
+        let expertise = Expertise.findCreateUpdateTemporary(context: context, id: "unitTest Expertise",
                                                               names: [], usages: [])
         let language = Language.findCreate(context: context, isoCode: "eN")
-        let localizedName = String.random(length: 10)
-        let localizedUsage = String.random(length: 20)
+        let localizedName = "Test name"
+        let localizedUsage = "Test usage"
 
         let localizedExpertise =  LocalizedExpertise.findCreateUpdate(context: context,
                                                                       expertise: expertise,
@@ -67,10 +67,10 @@ import CoreData // for NSManagedObjectContext
     }
 
     @Test("Is nil handled properly") func addLocalizedExpertiseNilUsage() {
-        let expertise = Expertise.findCreateUpdateTemporary(context: context, id: String.random(length: 25),
+        let expertise = Expertise.findCreateUpdateTemporary(context: context, id: "unitTest Expertise",
                                                               names: [], usages: [])
         let language = Language.findCreate(context: context, isoCode: "NL")
-        let localizedName = String.random(length: 10)
+        let localizedName = "Test name"
 
         let localizedExpertise =  LocalizedExpertise.findCreateUpdate(context: context,
                                                                       expertise: expertise,
@@ -83,10 +83,10 @@ import CoreData // for NSManagedObjectContext
     }
 
     @Test("Is nil overwritten properly") func addLocalizedExpertiseReplaceNil() {
-        let expertise = Expertise.findCreateUpdateTemporary(context: context, id: String.random(length: 25),
+        let expertise = Expertise.findCreateUpdateTemporary(context: context, id: "unitTest Expertise",
                                                               names: [], usages: [])
         let language = Language.findCreate(context: context, isoCode: "NL")
-        let localizedName = String.random(length: 10)
+        let localizedName = "Test name"
 
         let localizedExpertise1 =  LocalizedExpertise.findCreateUpdate(context: context,
                                                                        expertise: expertise,
@@ -113,11 +113,11 @@ import CoreData // for NSManagedObjectContext
     // lowercase "nl", uppercase "NL", and lowercase "en" must all resolve correctly.
     @Test("selectedLocalizedExpertise resolves lowercase, uppercase, and English isoCode")
     func selectedLocalizedExpertiseIsoCodeCaseHandling() {
-        let nlName = String.random(length: 10)
-        let enName = String.random(length: 10)
+        let nlName = "Natuur"
+        let enName = "Nature"
 
         let expertise = Expertise.findCreateUpdateTemporary(context: context,
-                                                            id: String.random(length: 8),
+                                                            id: "unitTest Expertise",
                                                             names: [], usages: [])
         let langNL = Language.findCreate(context: context, isoCode: "nl")
         let langEN = Language.findCreate(context: context, isoCode: "en")

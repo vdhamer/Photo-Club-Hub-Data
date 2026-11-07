@@ -36,7 +36,7 @@ import CoreData // for NSManagedObjectContext
 
     // Calling findCreateUpdate twice with the same PersonName must return the same object (no duplicate).
     @Test("findCreateUpdate is idempotent for an identical PersonName") func idempotentForSameName() {
-        let personName = PersonName(givenName: String.random(length: 10),
+        let personName = PersonName(givenName: "John",
                                     infixName: "",
                                     familyName: "UnitTestDummy")
 
@@ -55,7 +55,7 @@ import CoreData // for NSManagedObjectContext
     // that equal parts are enough for the store to find the existing record, which is what a level2.json
     // author relies on. See vdhamer/Photo-Club-Hub#841.
     @Test("Two spellings of a compound family name yield one Photographer") func spellingsYieldOneRecord() {
-        let givenName = String.random(length: 10)
+        let givenName = "John"
         let asWritten = PersonName(givenName: givenName, infixName: "Van", familyName: "Heugten - van Nunen")
         let asStored = PersonName(givenName: givenName, infixName: "van", familyName: "Heugten-van Nunen")
 
@@ -69,10 +69,10 @@ import CoreData // for NSManagedObjectContext
 
     // nil update semantics: a nil optional field must leave an already-set value untouched.
     @Test("nil optional field does not overwrite an existing value") func nilOptionalFieldDoesNotOverwrite() {
-        let personName = PersonName(givenName: String.random(length: 10),
+        let personName = PersonName(givenName: "John",
                                     infixName: "",
                                     familyName: "UnitTestDummy")
-        let website = URL(string: "https://example.com/\(String.random(length: 8))")!
+        let website = URL(string: "https://example.com/unittest")!
 
         let photographer1 = Photographer.findCreateUpdate(
             context: viewContext,
