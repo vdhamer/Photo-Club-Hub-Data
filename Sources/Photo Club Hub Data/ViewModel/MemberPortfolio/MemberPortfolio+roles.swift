@@ -26,7 +26,7 @@ extension MemberPortfolio { // computed properties related to roles of members i
                                   bundle: languageBundle,
                                   comment: "To generate strings like \"secretary and admin\"")
 
-        if photographer.isDeceased { // deceased?
+        if photographer_?.isDeceased ?? false { // deceased? photographer_ is nil on a deleted row (#802)
             prefixList.append(MemberStatus.deceased.displayNameForHTML(languageBundle: languageBundle))
         }
 
@@ -79,17 +79,36 @@ extension MemberPortfolio { // computed properties related to roles of members i
         return MemberStatus.current.displayNameForHTML(languageBundle: languageBundle)
     }
 
-    // Backward-compatible property; uses the system locale via the default module bundle.
-    public var roleDescriptionOfClubTown: String { // is or was used in MemberPortfolio, check for dead code later
-        roleDescriptionOfClubTown(languageBundle: .photoClubHubDataModule)
-    }
+    /// Returns a localized String such as "Secretary and member of Fotogroep Argus ('s-Hertogenbosch)".
+    ///
+    /// One `language` sets both the words and the town, so the two cannot disagree (Data#99).
+    /// The words come from that language's `.lproj` in this package (`Bundle.photoClubHubDataModuleForLanguage`).
+    /// The club substring matches the Clubs tab section headers: `Organization.fullNameLocalizedTown(for:)`.
+    /// With `nil`, the words come from the whole package bundle, in the system's choice of language,
+    /// and the town is the stored town (`fullNameTown`).
+    /// `language` has no default value, so that no caller gets the stored town by forgetting to pass one.
+    /// A row whose `organization_` is nil, as on a deleted row (#802), gets only role description.
+    ///
+    /// - Parameter language: The language of the whole string, or `nil` for the system's language and the stored town.
+    public func roleDescriptionOfClubTown(language: Language?) -> String {
+        let languageBundle: Bundle = if let language {
+            Bundle.photoClubHubDataModuleForLanguage(language.isoCode)
+        } else {
+            Bundle.photoClubHubDataModule
+        }
+        let roles = roleDescription(languageBundle: languageBundle)
+        guard let organization = organization_ else { return roles }
 
-    public func roleDescriptionOfClubTown(languageBundle: Bundle) -> String {
         let of2 = String(localized: "of2",
                          table: "PhotoClubHubData",
                          bundle: languageBundle,
                          comment: "<person> of <photo club>")
-        return "\(roleDescription(languageBundle: languageBundle)) \(of2) \(self.organization.fullNameTown)"
+        let clubTown: String = if let language {
+            organization.fullNameLocalizedTown(for: language)
+        } else {
+            organization.fullNameTown
+        }
+        return "\(roles) \(of2) \(clubTown)"
     }
 
     public var memberRolesAndStatus: MemberRolesAndStatus {

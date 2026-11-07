@@ -7,7 +7,7 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
-### 3.8.1 (GitHub commit ???????) ??-11-2026
+### 3.9.0 (GitHub commit ???????) ??-11-2026
 
 DATA
 
@@ -18,8 +18,8 @@ Fotografiska Shanghai and the Lianzhou Museum of Photography had each other's co
 
 API
 
-* __New `MemberPortfolio.roleDescriptionOfClubTown(languageBundle:language:)`.__
-The line "Member of Museum Ludwig (Keulen)" now shows the club's town the way the iOS Clubs tab section headers do, through `Organization.fullNameLocalizedTown(for:)`, so a member row can no longer read "(Köln)" under a header reading "(Keulen)". A `nil` language gives the stored town, as before. The existing `roleDescriptionOfClubTown(languageBundle:)` stays and passes `nil`, so the HTML app builds unchanged and no consumer breaks. The parameterless property `roleDescriptionOfClubTown` is deprecated and goes in the next MAJOR release: its only callers, in the iOS app, move to the new function in vdhamer/Photo-Club-Hub#890. The line no longer traps on a row deleted while the list animates (vdhamer/Photo-Club-Hub#802): it reads `organization_` and `photographer_` directly, and a row without a club gets the role description alone (Data#99).
+* __`MemberPortfolio.roleDescriptionOfClubTown` now takes a `Language`, and only that.__
+The string "Member of Fotogroep Argus ('s-Hertogenbosch)" now shows the club's town the way the iOS Clubs tab section headers do, through `Organization.fullNameLocalizedTown(for:)`, so a member row can no longer read "(Den Bosch)" under a header reading "('s-Hertogenbosch)". `roleDescriptionOfClubTown(language:)` is now the only form: the parameterless property and `roleDescriptionOfClubTown(languageBundle:)` are gone. The one `language` sets both the words, from that language's `.lproj` in this package, and the town, so the two can't disagree. `language` has no default value, so no caller gets the stored town by forgetting it; passing `nil` gives the words in the system's choice of language and the stored town, as before. Removing public API is strictly MAJOR, but the only consumers are the two apps, and each changes its callers when it resolves this release: the iOS app's two in vdhamer/Photo-Club-Hub#890, which pass the same `Language` as the section headers, and the HTML app's one in `ExpertisePage.swift`, which passes `Language.find(context:isoCode:)` for the page's language and no longer builds the bundle itself. So it is treated as MINOR on the same reasoning as Data#19, Data#26, Data#28 and Data#40. The string no longer traps on a row deleted while the list animates (vdhamer/Photo-Club-Hub#802): it reads `organization_` and `photographer_` directly, and a row without a club gets the role description alone (Data#99).
 
 ---------------------------------------------------------------------------
 

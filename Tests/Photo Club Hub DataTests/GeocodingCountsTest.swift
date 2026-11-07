@@ -48,10 +48,8 @@ import CoreLocation // for CLLocationCoordinate2D
                                       isSupportedOptional: false)
     }
 
-    private func makeOrganization(at coordinates: CLLocationCoordinate2D) -> Organization {
-        let idPlus = OrganizationIdPlus(fullName: "UnitTest Club \(String.random(length: 10))",
-                                        town: "UnitTestTown\(String.random(length: 10))",
-                                        nickname: "nick\(String.random(length: 10))")
+    private func makeOrganization(town: String, at coordinates: CLLocationCoordinate2D) -> Organization {
+        let idPlus = OrganizationIdPlus(fullName: "UnitTest Club", town: town, nickname: "unitTest\(town)")
         let organization = Organization.findCreateUpdate(context: viewContext,
                                                          organizationTypeEnum: .club,
                                                          idPlus: idPlus)
@@ -81,7 +79,7 @@ import CoreLocation // for CLLocationCoordinate2D
 
     // No rows yet: both combinations of the one organization are waiting for Apple.
     @Test("an organization without addresses waits in every supported language") func noAddressesYet() {
-        _ = makeOrganization(at: amsterdamCoords)
+        _ = makeOrganization(town: "Amsterdam", at: amsterdamCoords)
 
         let counts = geocodingCounts()
 
@@ -93,7 +91,7 @@ import CoreLocation // for CLLocationCoordinate2D
 
     // A real town and country, derived from the coordinates the organization still has.
     @Test("current addresses in both languages count as completed") func bothLanguagesCurrent() {
-        let organization = makeOrganization(at: amsterdamCoords)
+        let organization = makeOrganization(town: "Amsterdam", at: amsterdamCoords)
         storeAddress(for: organization, in: english, town: "Amsterdam", country: "Netherlands",
                      derivedFrom: amsterdamCoords)
         storeAddress(for: organization, in: dutch, town: "Amsterdam", country: "Nederland",
@@ -108,7 +106,7 @@ import CoreLocation // for CLLocationCoordinate2D
 
     // The organization moved: the stored address was derived from coordinates it no longer has.
     @Test("an address derived from older coordinates is waiting again") func organizationMoved() {
-        let organization = makeOrganization(at: amsterdamCoords)
+        let organization = makeOrganization(town: "Amsterdam", at: amsterdamCoords)
         storeAddress(for: organization, in: english, town: "Amsterdam", country: "Netherlands",
                      derivedFrom: rotterdamCoords)
         storeAddress(for: organization, in: dutch, town: "Amsterdam", country: "Nederland",
@@ -126,7 +124,7 @@ import CoreLocation // for CLLocationCoordinate2D
 
     // Apple's server answered for these coordinates, but without a city: the placeholder is not asked again.
     @Test("a stored placeholder counts apart from waiting") func placeholderStored() {
-        let organization = makeOrganization(at: amsterdamCoords)
+        let organization = makeOrganization(town: "Amsterdam", at: amsterdamCoords)
         storeAddress(for: organization, in: english, town: LocalizedAddress.unknownTown, country: "Netherlands",
                      derivedFrom: amsterdamCoords)
         storeAddress(for: organization, in: dutch, town: "Amsterdam", country: "Nederland",
@@ -141,7 +139,7 @@ import CoreLocation // for CLLocationCoordinate2D
 
     // An unknown country is the other half of the same case.
     @Test("an unknown country also counts as a placeholder") func unknownCountryStored() {
-        let organization = makeOrganization(at: amsterdamCoords)
+        let organization = makeOrganization(town: "Amsterdam", at: amsterdamCoords)
         storeAddress(for: organization, in: english, town: "Amsterdam",
                      country: LocalizedAddress.unknownCountry, derivedFrom: amsterdamCoords)
 
@@ -155,7 +153,7 @@ import CoreLocation // for CLLocationCoordinate2D
 
     // Before Level 0 flags anything, there is nothing to count, and no optional to unwrap.
     @Test("no supported languages gives all zeros") func noSupportedLanguages() {
-        _ = makeOrganization(at: amsterdamCoords)
+        _ = makeOrganization(town: "Amsterdam", at: amsterdamCoords)
         for language in [english, dutch] {
             language.isSupported = false
         }
@@ -170,8 +168,8 @@ import CoreLocation // for CLLocationCoordinate2D
 
     // The invariant the struct is built around: total is derived by summing 3 parts. Should always add up.
     @Test("the parts always add up to total") func partsAddUp() {
-        let amsterdam = makeOrganization(at: amsterdamCoords)
-        let rotterdam = makeOrganization(at: rotterdamCoords)
+        let amsterdam = makeOrganization(town: "Amsterdam", at: amsterdamCoords)
+        let rotterdam = makeOrganization(town: "Rotterdam", at: rotterdamCoords)
         storeAddress(for: amsterdam, in: english,
                      town: "Amsterdam", country: "Netherlands",
                      derivedFrom: amsterdamCoords)
