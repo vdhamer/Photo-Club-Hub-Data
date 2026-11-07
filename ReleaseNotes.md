@@ -7,6 +7,17 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
+### 3.8.1 (GitHub commit ???????) ??-11-2026
+
+DATA
+
+All changes below are mirrored identically in the iOS repo's live copy, which is what the apps load; the files here are the bundled fallback.
+
+* `museumsCN.level1.json`
+Fotografiska Shanghai and the Lianzhou Museum of Photography had each other's coordinates; swapped back. The Lianzhou remark (EN and NL) no longer blames the coordinates; its website still doesn't respond, which a new `logbook` entry records, without listing it in `badWebsites` because it may only be unreachable from outside China. Coordinates and a log entry only, so no data reset is needed: both museums are geocoded again because their coordinates changed (Data#98).
+
+---------------------------------------------------------------------------
+
 ### 3.8.0 (GitHub commit 08c90f9) 06-11-2026
 
 DATA
