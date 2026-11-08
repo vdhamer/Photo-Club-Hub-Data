@@ -14,12 +14,23 @@ DATA
 All changes below are mirrored identically in the iOS repo's live copy, which is what the apps load; the files here are the bundled fallback.
 
 * `museumsCN.level1.json`
-Fotografiska Shanghai and the Lianzhou Museum of Photography had each other's coordinates; swapped back. The Lianzhou remark (EN and NL) no longer blames the coordinates; its website still doesn't respond, which a new `logbook` entry records, without listing it in `badWebsites` because it may only be unreachable from outside China. Coordinates and a log entry only, so no data reset is needed: both museums are geocoded again because their coordinates changed (Data#98).
+Fotografiska Shanghai and the Lianzhou Museum of Photography held each other's coordinates; swapped back. The Lianzhou remark (EN and NL) no longer blames the coordinates; its website still doesn't respond, which a new `logbook` entry records, without listing it in `badWebsites` because it may only be unreachable from outside China. Coordinates and a log entry only, so this needs no data reset of its own: both museums are geocoded again because their coordinates changed (Data#98).
 
 API
 
 * __`MemberPortfolio.roleDescriptionOfClubTown` now takes a `Language`, and only that.__
 The string "Member of Fotogroep Argus ('s-Hertogenbosch)" now shows the club's town the way the iOS Clubs tab section headers do, through `Organization.fullNameLocalizedTown(for:)`, so a member row can no longer read "(Den Bosch)" under a header reading "('s-Hertogenbosch)". `roleDescriptionOfClubTown(language:)` is now the only form: the parameterless property and `roleDescriptionOfClubTown(languageBundle:)` are gone. The one `language` sets both the words, from that language's `.lproj` in this package, and the town, so the two can't disagree. `language` has no default value, so no caller gets the stored town by forgetting it; passing `nil` gives the words in the system's choice of language and the stored town, as before. Removing public API is strictly MAJOR, but the only consumers are the two apps, and each changes its callers when it resolves this release: the iOS app's two in vdhamer/Photo-Club-Hub#890, which pass the same `Language` as the section headers, and the HTML app's one in `ExpertisePage.swift`, which passes `Language.find(context:isoCode:)` for the page's language and no longer builds the bundle itself. So it is treated as MINOR on the same reasoning as Data#19, Data#26, Data#28 and Data#40. The string no longer traps on a row deleted while the list animates (vdhamer/Photo-Club-Hub#802): it reads `organization_` and `photographer_` directly, and a row without a club gets the role description alone (Data#99).
+
+* __New `String.normalizedTypography`.__
+Replaces typographic apostrophes and single quotes (’ ‘ ‚ ʼ ‹ ›), double quotes (“ ” „ « »), hyphens and dashes (‐ ‑ – — −) and no-break spaces by the plain characters a user can type directly. The package uses it for what it stores (see BEHAVIOR); an app uses it on search text, so that "’s-Hertogenbosch" typed with the iOS keyboard's Smart Punctuation finds "'s-Hertogenbosch" (Data#100).
+
+BEHAVIOR
+
+* __Organization names and towns, and Apple's towns and countries, are stored with plain typography.__
+Some Level 1 names accidentally held a curly apostrophe or an en dash ("Dia- en Fotoclub ’s-Gravenzande", "The Photographers’ Gallery", "MOMus–Thessaloniki Museum of Photography"), and Apple's geocoder writes "'s‑Hertogenbosch" with a non-breaking hyphen. Searches with plain text missed these, and "Dia- en Fotoclub ’s-Gravenzande" got a redundant "('s-Gravenzande)" suffix because its town is written with a plain apostrophe. `OrganizationID.init` now normalizes `fullName` and `town`, so every lookup and every new organization uses the plain form, whichever file supplies it (Level 1, a Level 2 `idPlus` or a hardcoded provider). `OrganizationID.fullName` and `.town` are now `let`. The `Organization.fullName` and `.town` setters normalize too, and so does `LocalizedAddressFields.init`. So the JSON may keep its typographic spelling. Users now see these names with straight apostrophes and hyphens. Remarks, nicknames, URLs and photographer names are not normalized (Data#100).
+
+* __Data reset.__
+Normalizing changes the identity (`fullName` + `town`) of the organizations above, which would otherwise leave a duplicate of each on every device. `Settings.userDefaultsKey` is now `dataResetPending305b4670`, for iOS 3.0.5 build 4670, and `dataResetPending304b4669` joins `prevUserDefaultsKeys`. The iOS app's `Settings.bundle/Root.plist` toggle must use the same id (Data#100).
 
 ---------------------------------------------------------------------------
 
