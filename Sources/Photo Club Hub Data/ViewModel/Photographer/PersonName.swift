@@ -40,14 +40,26 @@ public struct PersonName {
                 givenName: String,
                 infixName: String,
                 familyName: String) {
-        // Normalized before being stored: see `normalized(infixName:)` and `normalized(familyName:)`.
+        // Normalized before being stored: see `normalized(givenName:)`, `normalized(infixName:)` and
+        // `normalized(familyName:)`. This is the only way a name reaches a `Photographer`, whose name setters are
+        // private, so every lookup and every new photographer sees the normalized form.
+        //
+        // All three start with `String.normalizedTypography` (Data#100). Several infixes end in an apostrophe:
+        // "'t", "d'", "l'", "s'". iOS and macOS autocorrect a typed apostrophe to U+2019, websites use it freely,
+        // and the RvIG table uses U+0027, so the same name arrives in at least two forms. Since the name *is* the
+        // identity key, those forms would be two different people. Picking one is what makes them one person;
+        // U+0027 is the one, because that is what the reference table and a keyboard produce. The same holds
+        // for a compound family name written with an en dash, and for a no-break space between two given names.
+        // Changing what normalizedTypography maps changes the identity of stored photographers, so it needs a new
+        // data reset key (`Settings.userDefaultsKey`): rows already in a store are never rewritten.
+        let given = Self.normalized(givenName: givenName)
         let infix = Self.normalized(infixName: infixName)
         let family = Self.normalized(familyName: familyName)
 
         // if fullNameWithParenthesizedRole not provide, synthesize it without a  role
         self.fullNameWithParenthesizedRole = fullNameWithParenthesizedRole != nil ? fullNameWithParenthesizedRole! :
-                                             givenName + " " + (infix.isEmpty ? "" : "\(infix) ") + family
-        self.givenName = givenName
+                                             given + " " + (infix.isEmpty ? "" : "\(infix) ") + family
+        self.givenName = given
         self.infixName = infix
         self.familyName = family
     }
@@ -92,6 +104,14 @@ public struct PersonName {
                                           "d'", "da", "de", "di", "do", "du", "el", "im", "in", "l'", "la", "le",
                                           "lo", "of", "op", "s'", "te", "to", "zu", "a", "d", "i", "l", "s", "t"]
 
+    /// Plain typography and no surrounding spaces, because `givenName` is part of the key a `Photographer` is
+    /// looked up by: "Jan " and "Jan" would otherwise be two different people. Unlike the infix, the case is kept,
+    /// and unlike the family name, there is no compound-name rule: given names have no such variants.
+    private static func normalized(givenName: String) -> String {
+        givenName.normalizedTypography
+            .trimmingCharacters(in: .whitespaces)
+    }
+
     /// Lowercases the infix, because `infixName` is part of the key a `Photographer` is looked up by.
     ///
     /// "Van" and "van" would otherwise be two different people, and the second one arrives silently:
@@ -99,23 +119,10 @@ public struct PersonName {
     /// infix onto the surname, such as "Vanantwerpen", are family names rather than infixes and never
     /// reach this field.
     private static func normalized(infixName: String) -> String {
-        straightApostrophes(in: infixName)
+        infixName.normalizedTypography
             .trimmingCharacters(in: .whitespaces)
             .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
             .lowercased()
-    }
-
-    /// Rewrites typographic apostrophes as the plain ASCII one, U+0027.
-    ///
-    /// Several infixes end in an apostrophe: "'t", "d'", "l'", "s'". iOS and macOS autocorrect a typed
-    /// apostrophe to U+2019, websites use it freely, and the RvIG table uses U+0027, so the same name
-    /// arrives in at least two forms. Since the name *is* the identity key, those forms would be two
-    /// different people. Picking one is what makes them one person; U+0027 is the one, because that is
-    /// what the reference table and a keyboard produce.
-    private static func straightApostrophes(in text: String) -> String {
-        text.replacingOccurrences(of: "\u{2019}", with: "'")   // right single quotation mark
-            .replacingOccurrences(of: "\u{02BC}", with: "'")   // modifier letter apostrophe
-            .replacingOccurrences(of: "\u{00B4}", with: "'")   // acute accent, a common mistyping
     }
 
     /// Writes a compound (usually married) family name in a standard way, whatever way it arrived.
@@ -130,7 +137,7 @@ public struct PersonName {
     /// in a form, or the scavenger providing a suggested name by reading a website.
     private static func normalized(familyName: String) -> String {
         // one hyphen, no spaces around it
-        var result = straightApostrophes(in: familyName)
+        var result = familyName.normalizedTypography
             .replacingOccurrences(of: #"\s*-\s*"#, with: "-", options: .regularExpression)
         // the second family name keeps the space before its own infix, and that infix is lowercased,
         // so "Heugten-Van-Nunen" becomes "Heugten-van Nunen"

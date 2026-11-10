@@ -38,6 +38,8 @@ extension String {
         "\u{02BC}": "'", // modifier letter apostrophe
         "\u{2039}": "'", // single left-pointing angle quotation mark
         "\u{203A}": "'", // single right-pointing angle quotation mark
+        "\u{00B4}": "'", // acute accent standing on its own, a common mistyping of the apostrophe ("foto´s").
+                         // An accented letter such as é is a different character, so real accents stay.
 
         // double quotes
         "\u{201C}": "\"", // left double quotation mark
