@@ -29,7 +29,7 @@ extension Organization {
     @NSManaged nonisolated public var nickName_: String?
     @NSManaged nonisolated public var organizationWebsite: URL?
     @NSManaged nonisolated public var pinned: Bool
-    @NSManaged nonisolated public var removeOrganization: Bool
+    @NSManaged nonisolated public var obsolete: Bool
     @NSManaged nonisolated public var town_: String?
     @NSManaged nonisolated public var wikipedia: URL?
     @NSManaged nonisolated public var localizedAddresses_: NSSet?

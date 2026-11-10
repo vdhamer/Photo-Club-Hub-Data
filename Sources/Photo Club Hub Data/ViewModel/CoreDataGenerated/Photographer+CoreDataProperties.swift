@@ -23,6 +23,9 @@ extension Photographer {
     @NSManaged nonisolated public var givenName_: String?
     @NSManaged nonisolated public var infixName_: String?
     @NSManaged nonisolated public var isDeceased: Bool
+    // Not read or written yet. Reserved for pruning: marks a photographer that no club's Level 2 file listed during
+    // a load, for the sweep that Data#39 describes (like Organization.obsolete and MemberPortfolio.obsolete).
+    @NSManaged nonisolated public var obsolete: Bool
     @NSManaged nonisolated public var photographerImage: URL?
     @NSManaged nonisolated public var photographerWebsite: URL?
     @NSManaged nonisolated public var memberships_: NSSet?

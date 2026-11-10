@@ -22,7 +22,7 @@ extension MemberPortfolio { // findCreateUpdate() records in Member table
                                         organization: Organization,
                                         photographer: Photographer,
                                         // remove records for members that disappeared from lists:
-                                        removeMember: Bool = false,
+                                        obsolete: Bool = false,
                                         // non-identifying attributes of a Member:
                                         optionalFields: MemberOptionalFields = MemberOptionalFields() // empty default
     ) -> MemberPortfolio {
@@ -36,7 +36,7 @@ extension MemberPortfolio { // findCreateUpdate() records in Member table
             findCreateUpdate_(bgContext: bgContext,
                               organization: organization,
                               photographer: photographer,
-                              removeMember: removeMember,
+                              obsolete: obsolete,
                               optionalFields: optionalFields)
         }
     }
@@ -46,7 +46,7 @@ extension MemberPortfolio { // findCreateUpdate() records in Member table
                                           organization: Organization,
                                           photographer: Photographer,
                                           // remove records for members that disappeared from lists:
-                                          removeMember: Bool = false,
+                                          obsolete: Bool = false,
                                           // non-identifying attributes of a Member:
                                           optionalFields: MemberOptionalFields = MemberOptionalFields() // empty default
     ) -> MemberPortfolio {
@@ -68,7 +68,7 @@ extension MemberPortfolio { // findCreateUpdate() records in Member table
         if let memberPortfolio = memberPortfolios.first {
             // already exists, so make sure secondary attributes are up to date
             if memberPortfolio.update(bgContext: bgContext,
-                                      removeMember: removeMember,
+                                      obsolete: obsolete,
                                       optionalFields: optionalFields) {
                 print("""
                       \(memberPortfolio.organization.fullName): \
@@ -82,7 +82,7 @@ extension MemberPortfolio { // findCreateUpdate() records in Member table
             memberPortfolio.organization_ = organization
             memberPortfolio.photographer_ = photographer
             _ = memberPortfolio.update(bgContext: bgContext,
-                                       removeMember: removeMember,
+                                       obsolete: obsolete,
                                        optionalFields: optionalFields
                                        )
             print("""
@@ -96,7 +96,7 @@ extension MemberPortfolio { // findCreateUpdate() records in Member table
     // Update non-identifying attributes/properties within existing instance of class MemberPortfolio
     // swiftlint:disable:next function_body_length
     private func update(bgContext: NSManagedObjectContext,
-                        removeMember: Bool, // used to remove club members that disappeared from lists
+                        obsolete: Bool, // used to remove club members that disappeared from lists
                         optionalFields: MemberOptionalFields
                 ) -> Bool {
         var needsSaving: Bool = false
@@ -113,7 +113,7 @@ extension MemberPortfolio { // findCreateUpdate() records in Member table
         let changed5 = updateIfChangedOptional(update: &self.featuredImage, with: optionalFields.featuredImage)
         let changed6 = updateIfChanged(update: &self.featuredImageThumbnail,
                                        with: optionalFields.featuredImageThumbnail)
-        let changed7 = updateIfChanged(update: &self.removeMember, with: removeMember)
+        let changed7 = updateIfChanged(update: &self.obsolete, with: obsolete)
         let changed8 = updateIfChanged(update: &self.fotobondMemberNumber, with: optionalFields.fotobondMemberNumber)
         needsSaving = changed1 || changed2 || changed3 || changed4 ||
                       changed5 || changed6 || changed7 || changed8 // forces execution of updateIfChanged()
@@ -148,8 +148,8 @@ extension MemberPortfolio { // findCreateUpdate() records in Member table
                                     """)}
                 if changed7 { print("""
                                     \(organization.fullNameTown): \
-                                    Changed removeMember flag for \(photographer.fullNameFirstLast) \
-                                    to \(removeMember) ??
+                                    Changed obsolete flag for \(photographer.fullNameFirstLast) \
+                                    to \(obsolete) ??
                                     "<noLatestRemoveMember>")
                                     """)}
                 if changed8 { print("""

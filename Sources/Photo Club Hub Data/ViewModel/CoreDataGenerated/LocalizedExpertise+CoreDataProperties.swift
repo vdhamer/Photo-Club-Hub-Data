@@ -19,6 +19,9 @@ extension LocalizedExpertise {
     }
 
     @NSManaged nonisolated public var name_: String?
+    // Not read or written yet. Reserved for pruning: marks a translation that the Level 0 file no longer listed
+    // during a load, for the sweep that Data#39 describes.
+    @NSManaged nonisolated public var obsolete: Bool
     @NSManaged nonisolated public var usage: String?
     @NSManaged nonisolated public var expertise_: Expertise?
     @NSManaged nonisolated public var language_: Language?

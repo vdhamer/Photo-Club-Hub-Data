@@ -20,6 +20,9 @@ extension Expertise {
 
     @NSManaged nonisolated public var id_: String?
     @NSManaged nonisolated public var isSupported: Bool
+    // Not read or written yet. Reserved for pruning: marks an expertise that no JSON file listed during a load,
+    // like Organization.obsolete and MemberPortfolio.obsolete, for the two-phase sweep that Data#39 describes.
+    @NSManaged nonisolated public var obsolete: Bool
     @NSManaged nonisolated public var localizedExpertises_: NSSet?
     @NSManaged nonisolated public var photographerExpertises_: NSSet?
 

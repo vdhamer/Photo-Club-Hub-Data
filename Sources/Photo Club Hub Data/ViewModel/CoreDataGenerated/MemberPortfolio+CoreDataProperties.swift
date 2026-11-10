@@ -34,7 +34,7 @@ extension MemberPortfolio {
     @NSManaged nonisolated public var level3URL_: URL?
     @NSManaged nonisolated public var membershipEndDate_: Date?
     @NSManaged nonisolated public var membershipStartDate_: Date?
-    @NSManaged nonisolated public var removeMember: Bool
+    @NSManaged nonisolated public var obsolete: Bool
     @NSManaged nonisolated public var organization_: Organization?
     @NSManaged nonisolated public var photographer_: Photographer?
 

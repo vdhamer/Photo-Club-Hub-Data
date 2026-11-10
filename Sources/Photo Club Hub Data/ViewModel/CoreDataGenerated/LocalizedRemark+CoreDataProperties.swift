@@ -19,6 +19,9 @@ extension LocalizedRemark {
     }
 
     @NSManaged nonisolated public var localizedString: String?
+    // Not read or written yet. Reserved for pruning: marks a remark whose language neither of the organization's
+    // files (Level 1, its own Level 2) listed during a load, for the sweep that Data#39 describes.
+    @NSManaged nonisolated public var obsolete: Bool
     @NSManaged nonisolated public var language_: Language?
     @NSManaged nonisolated public var organization_: Organization?
 

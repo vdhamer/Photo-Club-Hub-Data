@@ -176,7 +176,7 @@ extension Level2JsonReader {
             bgContext: bgContext,
             organization: club,
             photographer: photographer,
-            removeMember: false, // remove records for members that no longer on list
+            obsolete: false, // remove records for members that no longer on list
             optionalFields: MemberOptionalFields(
                 featuredImage: featuredImage,
                 featuredImageThumbnail: featuredImage,

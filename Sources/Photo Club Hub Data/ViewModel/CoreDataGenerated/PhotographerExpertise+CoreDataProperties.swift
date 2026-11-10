@@ -19,6 +19,10 @@ extension PhotographerExpertise {
     }
 
     @NSManaged nonisolated public var expertise_: Expertise?
+    // Not read or written yet. Reserved for pruning: marks a photographer's expertise that none of their
+    // clubs' Level 2 files listed during a load, like Organization.obsolete and MemberPortfolio.obsolete,
+    // for the sweep that Data#39 describes.
+    @NSManaged nonisolated public var obsolete: Bool
     @NSManaged nonisolated public var photographer_: Photographer?
 
 }
