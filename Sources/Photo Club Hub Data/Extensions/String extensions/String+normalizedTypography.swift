@@ -15,7 +15,8 @@
 extension String {
 
     /// The string with typographic apostrophes, quotes, hyphens, dashes and spaces replaced by plain ones.
-    /// Example: "Dia- en Fotoclub ’s‑Gravenzande" (with 2 different types of dash) becomes "Dia- en Fotoclub 's-Gravenzande" (regular dashes).
+    /// Example: "Dia- en Fotoclub ’s‑Gravenzande" (with 2 different types of dash) becomes
+    /// "Dia- en Fotoclub 's-Gravenzande" (regular dashes).
     public var normalizedTypography: String {
 
         // fast return of unmodified strings if they are ASCII only. This should return in almost all cases.
