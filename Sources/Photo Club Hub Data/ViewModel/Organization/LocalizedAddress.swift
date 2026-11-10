@@ -213,9 +213,12 @@ public struct LocalizedAddressFields: Sendable {
     public let localizedTown: String // e.g. "Parijs" (NL) or "Paris" (EN)
     public let localizedCountry: String // e.g. "Frankrijk" (NL) or "France" (EN)
 
+    // Stored plain: Apple's geocoder writes "'s‑Hertogenbosch" with a non-breaking hyphen (Data#100).
+    // A row stored before that keeps its hyphen until the next geocoding, which only a coordinate change triggers,
+    // so the data reset that came with Data#100 is what clears it. See OrganizationID.init.
     public init(localizedTown: String, localizedCountry: String) { // explicit initializer because it needs to be public
-        self.localizedTown = localizedTown
-        self.localizedCountry = localizedCountry
+        self.localizedTown = localizedTown.normalizedTypography
+        self.localizedCountry = localizedCountry.normalizedTypography
     }
 }
 
