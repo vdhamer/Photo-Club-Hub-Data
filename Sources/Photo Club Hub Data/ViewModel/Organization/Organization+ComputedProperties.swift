@@ -154,17 +154,18 @@ extension Organization {
 
     public var level2URL: URL? {
         get {
-            // use a default unless level2URL points to the club's own website
-            let defaultURL: URL? = URL(string: "https://www.vdhamer.com/\(self.nickName)/index.html")
-            guard let defaultURL else {
-                ifDebugFatalError("Bad URL: \(defaultURL?.absoluteString ?? "nil")")
-                return nil
-            }
-
+            // Checked before the default URL is built, so no URL is ever made from a museum's nickname (Data#102).
             guard !self.organizationType.isMuseum else { return nil } // no level2URL for a museum
             guard self.organizationType.isClub else { // warn if bad or new OrganizationType
                 ifDebugFatalError("Unexpected organizationType: \(self.organizationType.organizationTypeName)")
                 return nil // for production code
+            }
+
+            // use a default unless level2URL points to the club's own website
+            let defaultURL: URL? = URL(string: "https://www.vdhamer.com/\(self.nickName)/index.html")
+            guard let defaultURL else {
+                ifDebugFatalError("Bad default Level 2 URL for nickname \(self.nickName)")
+                return nil
             }
 
             guard self.level2URL_ != nil else { return defaultURL } // nobody provided a URL
