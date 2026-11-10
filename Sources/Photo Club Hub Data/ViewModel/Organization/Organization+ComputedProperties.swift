@@ -43,7 +43,7 @@ extension Organization {
 
 	public var fullName: String {
 		get { return fullName_ ?? "DefaultPhotoClubName" }
-		set { fullName_ = newValue }
+		set { fullName_ = newValue.normalizedTypography } // stored plain, see OrganizationID (Data#100)
 	}
 
     /* https://
@@ -127,7 +127,7 @@ extension Organization {
 
     public var nickName: String {
         get { return nickName_ ?? "Name?" }
-        set { nickName_ = newValue }
+        set { nickName_ = newValue.normalizedTypography } // like OrganizationIdPlus.nickname (Data#100)
     }
 
     public var maintainerEmail: String? {
@@ -149,7 +149,7 @@ extension Organization {
 
 	public var town: String { // may be one word ("Rotterdam") or multiple words ("Den Bosch").
 		get { return town_ ?? "DefaultPhotoClubTown" }  // nil shouldn't occur, but it does?
-		set { town_ = newValue }
+		set { town_ = newValue.normalizedTypography } // stored plain, see OrganizationID (Data#100)
 	}
 
     public var level2URL: URL? {
