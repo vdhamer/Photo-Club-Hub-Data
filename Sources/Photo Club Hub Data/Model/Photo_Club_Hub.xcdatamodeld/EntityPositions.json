@@ -1,88 +1,88 @@
 {
   "information" : {
-    "selectedModelKey" : "Photo_Club_Hub_3_8_0.xcdatamodel",
-    "currentColorMode" : "configurations"
+    "currentColorMode" : "configurations",
+    "selectedModelKey" : "Photo_Club_Hub_3_9_0.xcdatamodel"
   },
   "entitiesPositions" : {
-    "Organization" : [
-      948,
-      505
-    ],
-    "Expertise" : [
-      -137.035000000001,
-      600.9700000000003
-    ],
-    "LocalizedKeyword" : [
-      -125,
-      787
-    ],
-    "Keyword" : [
-      -121,
-      556
-    ],
-    "Canvas...Position" : [
-      -308.035000000001,
-      309.97000000000025
-    ],
-    "LocalizedDescription" : [
-      981,
-      688
-    ],
-    "LocalizedAddress" : [
-      676.964999999999,
-      733.9700000000003
-    ],
-    "PhotographerExpertise" : [
-      126.96499999999901,
-      838.9700000000003
-    ],
     "PhotographerKeyword" : [
       136,
       810
     ],
-    "LogEntry" : [
-      946.964999999999,
-      937.9700000000003
+    "Organization" : [
+      948,
+      505
     ],
     "LocalizedRemark" : [
       680,
       627
     ],
-    "OrganizationType" : [
-      949,
-      395
+    "Canvas...Position" : [
+      -308.035000000001,
+      309.97000000000025
     ],
-    "Photographer" : [
-      128,
-      601
-    ],
-    "LocalizedExpertise" : [
-      -140.035000000001,
-      794.9700000000003
-    ],
-    "Level2" : [
-      -30,
-      483
-    ],
-    "Level3" : [
-      -30,
-      504
-    ],
-    "MemberPortfolio" : [
-      404,
-      725
-    ],
-    "Language" : [
-      405,
-      442
+    "Expertise" : [
+      -137.035000000001,
+      600.9700000000003
     ],
     "Level1" : [
       -30,
       461
     ],
+    "LocalizedDescription" : [
+      981,
+      688
+    ],
+    "Keyword" : [
+      -121,
+      556
+    ],
+    "LogEntry" : [
+      946.964999999999,
+      937.9700000000003
+    ],
+    "Level3" : [
+      -30,
+      504
+    ],
+    "Level2" : [
+      -30,
+      483
+    ],
+    "PhotographerExpertise" : [
+      126.96499999999901,
+      838.9700000000003
+    ],
+    "Language" : [
+      405,
+      442
+    ],
+    "LocalizedAddress" : [
+      678.964999999999,
+      746.9700000000003
+    ],
     "Level0" : [
       -30,
       439
+    ],
+    "MemberPortfolio" : [
+      404,
+      725
+    ],
+    "OrganizationType" : [
+      949,
+      395
+    ],
+    "LocalizedKeyword" : [
+      -125,
+      787
+    ],
+    "LocalizedExpertise" : [
+      -140.035000000001,
+      794.9700000000003
+    ],
+    "Photographer" : [
+      128,
+      601
     ]
   }
 }
