@@ -188,4 +188,35 @@ import CoreLocation // for CLLocationCoordinate2D
         #expect(counts.onErrorPlaceholders == 1) // Amsterdam in Dutch
         #expect(counts.waiting == 2) // Rotterdam in Dutch never provided, Rotterdam in English changed its coordinates
     }
+
+    // MARK: - delete rules (Data#39)
+
+    // An address row belongs to one organization in one language, so it goes when either of them goes.
+    // Other organizations in the same town keep their own rows: a town is text in a row, not a record of its own.
+    @Test("Deleting an organization or a language deletes its addresses, and only those")
+    func addressesCascade() throws {
+        let museumA = makeOrganization(town: "Amsterdam", at: amsterdamCoords)
+        let museumB = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .museum, // same town
+                                                    idPlus: OrganizationIdPlus(fullName: "UnitTest Museum",
+                                                                               town: "Amsterdam",
+                                                                               nickname: "unitTestMuseum"))
+        museumB.coordinates = amsterdamCoords
+        for museum in [museumA, museumB] {
+            storeAddress(for: museum, in: english, town: "Amsterdam", country: "Netherlands",
+                         derivedFrom: amsterdamCoords)
+            storeAddress(for: museum, in: dutch, town: "Amsterdam", country: "Nederland",
+                         derivedFrom: amsterdamCoords)
+        }
+        try viewContext.save()
+        #expect(try viewContext.count(for: LocalizedAddress.fetchRequest()) == 4)
+
+        viewContext.delete(museumA)
+        try viewContext.save()
+        #expect(try viewContext.count(for: LocalizedAddress.fetchRequest()) == 2) // museumB keeps both of its rows
+
+        viewContext.delete(dutch)
+        try viewContext.save()
+        let remaining = try viewContext.fetch(LocalizedAddress.fetchRequest())
+        #expect(remaining.map(\.localizedCountry_) == ["Netherlands"]) // museumB in English
+    }
 }

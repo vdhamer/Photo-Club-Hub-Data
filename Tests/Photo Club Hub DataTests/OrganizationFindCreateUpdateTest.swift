@@ -182,4 +182,101 @@ import CoreData // for NSManagedObjectContext
         }
     }
 
+    // MARK: - identity uses plain typography (Data#100)
+
+    @Test("a name with a curly apostrophe is stored with a plain one, and found with either")
+    func curlyApostropheIsStoredPlain() throws {
+        let curly = OrganizationIdPlus(fullName: "Dia- en Fotoclub ’s-Gravenzande", town: "’s-Gravenzande",
+                                       nickname: "fcDiaGravenzande")
+        let plain = OrganizationID(fullName: "Dia- en Fotoclub 's-Gravenzande", town: "'s-Gravenzande")
+
+        let org1 = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .club, idPlus: curly)
+        #expect(org1.fullName == "Dia- en Fotoclub 's-Gravenzande")
+        #expect(org1.town == "'s-Gravenzande")
+
+        let org2 = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .club, idPlus: curly)
+        #expect(org2 === org1) // a second load of the same JSON finds the same organization
+        #expect(try Organization.find(context: viewContext, organizationID: plain) === org1)
+        #expect(count(plain) == 1)
+    }
+
+    @Test("the fullName and town setters store plain typography") func settersStorePlain() {
+        let organization = Organization(context: viewContext)
+        organization.fullName = "MOMus–Thessaloniki Museum of Photography"
+        organization.town = "Thessaloniki\u{00A0}Centre"
+
+        #expect(organization.fullName_ == "MOMus-Thessaloniki Museum of Photography")
+        #expect(organization.town_ == "Thessaloniki Centre")
+    }
+
+    @Test("a nickname is stored with plain typography, and found with either form")
+    func nicknameIsStoredPlain() throws {
+        let curly = OrganizationIdPlus(fullName: "Witte’s Museum voor Fotografie en Radio", town: "Tuitjenhorn",
+                                       nickname: "Witte’s Museum")
+        #expect(curly.nickname == "Witte's Museum")
+
+        let organization = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .museum,
+                                                         idPlus: curly)
+        #expect(organization.nickName_ == "Witte's Museum")
+        #expect(try Organization.find(context: viewContext, nickname: "Witte’s Museum") === organization)
+        #expect(try Organization.find(context: viewContext, nickname: "Witte's Museum") === organization)
+
+        organization.nickName = "Witte’s"
+        #expect(organization.nickName_ == "Witte's")
+    }
+
+    @Test("a remark is stored with plain typography, and an unchanged remark isn't an update")
+    func remarkIsStoredPlain() {
+        let organization = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .club,
+                                                         idPlus: idPlus)
+        let dutch = Language.findCreate(context: viewContext, isoCode: "nl")
+        let curly = "Foto’s worden besproken op een “forumavond”,\u{00A0}elke maand."
+
+        #expect(LocalizedRemark.findCreateUpdate(bgContext: viewContext, organization: organization,
+                                                 language: dutch, localizedString: curly))
+        let remarks = (organization.localizedRemarks_ as? Set<LocalizedRemark>) ?? []
+        #expect(remarks.map(\.localizedString) == ["Foto's worden besproken op een \"forumavond\", elke maand."])
+
+        // the next load of the same JSON compares the normalized text, so it changes nothing
+        #expect(LocalizedRemark.findCreateUpdate(bgContext: viewContext, organization: organization,
+                                                 language: dutch, localizedString: curly) == false)
+    }
+
+    @Test("a changed remark replaces the stored one on the next load") func changedRemarkIsUpdated() {
+        // Two loads in their own background contexts, configured like the app's (mergeByPropertyStoreTrump), so a
+        // second row caught by the uniqueness constraint would silently keep the stored text.
+        let container = testPersistenceController.container
+        for text in ["old text", "new text"] {
+            let bgContext = LevelLoader.makeBgContext(ctxName: "load \(text)", usedContainer: container)
+            bgContext.performAndWait {
+                let organization = Organization.findCreateUpdate(context: bgContext, organizationTypeEnum: .club,
+                                                                 idPlus: idPlus)
+                let dutch = Language.findCreate(context: bgContext, isoCode: "nl")
+                _ = LocalizedRemark.findCreateUpdate(bgContext: bgContext, organization: organization,
+                                                     language: dutch, localizedString: text)
+                try? bgContext.save()
+            }
+        }
+
+        let request = NSFetchRequest<LocalizedRemark>(entityName: "LocalizedRemark")
+        let remarks = (try? viewContext.fetch(request)) ?? []
+        #expect(remarks.map(\.localizedString) == ["new text"])
+    }
+
+    // MARK: - level2URL (Data#102)
+
+    @Test("a museum has no level2URL, and none is built from its nickname") func museumHasNoLevel2URL() {
+        // a nickname that breaks the rule must not matter: the museum check comes before any URL is built
+        let museumIdPlus = OrganizationIdPlus(fullName: "Fotomuseum aan het Vrijthof", town: "Maastricht",
+                                              nickname: "F/M Vrijthof")
+        let museum = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .museum,
+                                                   idPlus: museumIdPlus)
+        #expect(museum.level2URL == nil)
+    }
+
+    @Test("a club without its own level2URL gets the default one") func clubGetsDefaultLevel2URL() {
+        let club = Organization.findCreateUpdate(context: viewContext, organizationTypeEnum: .club, idPlus: idPlus)
+        #expect(club.level2URL?.absoluteString == "https://www.vdhamer.com/nick/index.html")
+    }
+
 }

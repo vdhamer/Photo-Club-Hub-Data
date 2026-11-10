@@ -133,6 +133,106 @@ struct LevelLoaderTests {
         }
     }
 
+    @Test("Every organization name, town, nickname and remark, and every photographer name, uses plain typography")
+    func namesStoredWithPlainTypography() async {
+        // Data#100: the Level 1 files may write "’s-Gravenzande" or "MOMus–Thessaloniki", but the store holds the
+        // plain form. This checks every production file on every run, so a new path that writes a name, town or
+        // nickname without going through OrganizationID(Plus) or the Organization setters, a remark without going
+        // through LocalizedRemark.findCreateUpdate, or a photographer's name without going through PersonName,
+        // shows up here.
+        // Apple's towns and countries aren't covered: this pass makes no network calls, so nothing is geocoded.
+        let persistenceController = PersistenceController(inMemory: true)
+        await LevelLoader.loadAllLevels(usedContainer: persistenceController.container,
+                                        isBeingTested: true,
+                                        useOnlyInBundleFile: true)
+
+        let request = NSFetchRequest<Organization>(entityName: "Organization")
+        let organizations = (try? persistenceController.container.viewContext.fetch(request)) ?? []
+        #expect(organizations.isEmpty == false, "The load pass stored no organizations at all")
+
+        let remarks = organizations.flatMap { organization in
+            ((organization.localizedRemarks_ as? Set<LocalizedRemark>) ?? []).map(\.localizedString)
+        }
+        let typographic = (organizations.flatMap { [$0.fullName_, $0.town_, $0.nickName_] } + remarks)
+            .compactMap { $0 }
+            .filter { $0 != $0.normalizedTypography }
+        #expect(typographic.isEmpty, "Stored with typographic characters: \(typographic.sorted())")
+
+        let photographerRequest = NSFetchRequest<Photographer>(entityName: "Photographer")
+        let photographers = (try? persistenceController.container.viewContext.fetch(photographerRequest)) ?? []
+        #expect(photographers.isEmpty == false, "The load pass stored no photographers at all")
+
+        let typographicNames = photographers.flatMap { [$0.givenName_, $0.infixName_, $0.familyName_] }
+            .compactMap { $0 }
+            .filter { $0 != $0.normalizedTypography }
+        #expect(typographicNames.isEmpty,
+                "Photographer names with typographic characters: \(typographicNames.sorted())")
+    }
+
+    @Test("The production JSON files themselves use plain typography")
+    func jsonFilesUsePlainTypography() throws {
+        // Data#100: the apps normalize when loading, but the review-page scripts in Photo-Club-Hub-Project read these
+        // files directly, and website visitors search what those pages show. So the files are kept plain too, and
+        // this reads them as files rather than through the store. URLs are percent-encoded, not exempted.
+        // Two exceptions. root.level1.json: only app versions before 2.9.0 read it, and Data#45 deletes it.
+        // Organization names: iOS 3.0.4 and older would show a straightened name as a duplicate (Data#101 ends this).
+        let urls = try #require(Bundle.photoClubHubDataModule.urls(forResourcesWithExtension: "json",
+                                                                   subdirectory: nil))
+        #expect(urls.count > 40, "Found only \(urls.count) production JSON files")
+
+        var typographic: [String] = []
+        for url in urls where url.lastPathComponent != "root.level1.json" {
+            let json = try JSONSerialization.jsonObject(with: Data(contentsOf: url))
+            for (keyPath, value) in Self.stringValues(in: json, keyPath: "")
+            where value != value.normalizedTypography && !keyPath.hasSuffix("idPlus.fullName") {
+                typographic.append("\(url.lastPathComponent) \(keyPath): \(value)")
+            }
+        }
+        #expect(typographic.isEmpty, "Typographic characters in production JSON: \(typographic.sorted())")
+    }
+
+    @Test("Every nickname in the production JSON uses only ASCII letters, digits and underscore")
+    func nicknamesAreIdentifiers() throws {
+        // Data#102: a club's nickname is its Level 2 file name, part of its vdhamer.com URL and of the website's
+        // members-page path, so a space, slash, "&" or accent there is asking for trouble. Museums follow the same
+        // rule, so nothing breaks once code starts building paths from their nicknames too.
+        // root.level1.json is skipped: only app versions before 2.9.0 read it, and Data#45 deletes it.
+        let urls = try #require(Bundle.photoClubHubDataModule.urls(forResourcesWithExtension: "json",
+                                                                   subdirectory: nil))
+        let allowed = try Regex("[A-Za-z0-9_]+")
+
+        var nicknames: [String] = []
+        var badNicknames: [String] = []
+        for url in urls where url.lastPathComponent != "root.level1.json" {
+            let json = try JSONSerialization.jsonObject(with: Data(contentsOf: url))
+            for (keyPath, value) in Self.stringValues(in: json, keyPath: "")
+            where keyPath.hasSuffix("idPlus.nickName") {
+                nicknames.append(value)
+                if value.wholeMatch(of: allowed) == nil {
+                    badNicknames.append("\(url.lastPathComponent) \(keyPath): \(value)")
+                }
+            }
+        }
+        #expect(nicknames.count > 100, "Found only \(nicknames.count) nicknames in production JSON")
+        #expect(badNicknames.isEmpty, "Nicknames that aren't identifiers: \(badNicknames.sorted())")
+    }
+
+    /// Every string value in a parsed JSON tree, with its key path such as "clubs.optional.remark.value".
+    private static func stringValues(in node: Any, keyPath: String) -> [(keyPath: String, value: String)] {
+        switch node {
+        case let dictionary as [String: Any]:
+            return dictionary.flatMap { key, value in
+                stringValues(in: value, keyPath: keyPath.isEmpty ? key : "\(keyPath).\(key)")
+            }
+        case let array as [Any]:
+            return array.flatMap { stringValues(in: $0, keyPath: keyPath) }
+        case let string as String:
+            return [(keyPath, string)]
+        default:
+            return []
+        }
+    }
+
     private func supportedExpertiseIDs(in controller: PersistenceController) -> Set<String> {
         let request = NSFetchRequest<Expertise>(entityName: "Expertise")
         let expertises = (try? controller.container.viewContext.fetch(request)) ?? []

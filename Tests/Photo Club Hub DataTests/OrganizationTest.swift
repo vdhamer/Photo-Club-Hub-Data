@@ -153,4 +153,26 @@ import CoreData // for NSManagedObjectContext
         #expect(club.fullNameLocalizedTown(for: english) == "\(club.fullName) (Aalst)")
     }
 
+    // MARK: - plain typography (Data#100)
+
+    @Test("A name with a curly apostrophe gets no suffix for its town written with a plain one")
+    func curlyApostropheInNameMatchesTown() throws {
+        let club = Organization(context: context)
+        club.fullName = "Dia- en Fotoclub ’s-Gravenzande"
+        club.town = "'s-Gravenzande"
+
+        #expect(club.fullNameTown == "Dia- en Fotoclub 's-Gravenzande") // not "... ('s-Gravenzande)"
+        #expect(club.fullNameLocalizedTown(for: dutch) == "Dia- en Fotoclub 's-Gravenzande")
+    }
+
+    @Test("Apple's non-breaking hyphen in a town is stored as a plain hyphen") func geocodedTownStoredPlain() throws {
+        let club = Organization(context: context)
+        club.fullName = "Fotogroep Argus"
+        club.town = "Den Bosch"
+        storeLocalizedTown("'s\u{2011}Hertogenbosch", for: club, in: dutch)
+
+        #expect(club.localizedTown(for: dutch) == "'s-Hertogenbosch")
+        #expect(club.fullNameLocalizedTown(for: dutch) == "Fotogroep Argus ('s-Hertogenbosch)")
+    }
+
 }

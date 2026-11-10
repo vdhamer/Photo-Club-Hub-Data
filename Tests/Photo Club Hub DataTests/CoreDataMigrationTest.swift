@@ -16,7 +16,8 @@ import CoreData // for NSPersistentStoreCoordinator
 @MainActor @Suite("Migrates stores from released model versions to the current one") struct CoreDataMigrationTests {
 
     @Test("A store from an older model opens with the current model, and keeps its data",
-          arguments: ["Photo_Club_Hub_3_7_0", // used by iOS 3.0.3 and 3.0.4 (Data 3.7.0 to 3.7.2)
+          arguments: ["Photo_Club_Hub_3_8_0", // used by app builds that resolve Data 3.8.0, such as the HTML app
+                      "Photo_Club_Hub_3_7_0", // used by iOS 3.0.3 and 3.0.4 (Data 3.7.0 to 3.7.2)
                       "Photo_Club_Hub_3_5_0"]) // used by iOS 3.0.2 (Data 3.5.0)
     func storeMigratesToCurrentModel(oldVersion: String) throws {
         let directory = FileManager.default.temporaryDirectory.appending(path: "MigrationTest-\(UUID().uuidString)")
@@ -33,10 +34,20 @@ import CoreData // for NSPersistentStoreCoordinator
         #expect(club.town == "Oldtown")
         #expect(club.nickName == "migratedClub")
 
+        // Renamed in 3_9_0 (removeOrganization and removeMember became obsolete): the stored value carries over.
+        #expect(club.obsolete == true)
+        let memberships: [MemberPortfolio] = try context.fetch(MemberPortfolio.fetchRequest())
+        #expect(memberships.map(\.obsolete) == [true])
+
         // The attributes that the old model lacked, with their defaults.
         #expect(club.isFormerOrganization == false)
         #expect(club.badWebsites_ == nil)
         #expect(club.logEntries.isEmpty)
+        let expertises: [Expertise] = try context.fetch(Expertise.fetchRequest())
+        #expect(expertises.map(\.id_) == ["migratedExpertise"])
+        #expect(expertises.first?.obsolete == false)
+        let photographers: [Photographer] = try context.fetch(Photographer.fetchRequest())
+        #expect(photographers.map(\.obsolete) == [false])
 
         // The new entity works in the migrated store.
         let entity = try #require(NSEntityDescription.entity(forEntityName: "LogEntry", in: context))
@@ -46,6 +57,12 @@ import CoreData // for NSPersistentStoreCoordinator
         try context.save()
         #expect(club.logEntries.count == 1)
         #expect(club.logEntries.first?.originalDataSourceLevel == 1)
+
+        // From 3_9_0, deleting an organization also deletes its cached addresses (delete rule Cascade, for Data#39).
+        #expect(try context.count(for: LocalizedAddress.fetchRequest()) == 1)
+        context.delete(club)
+        try context.save()
+        #expect(try context.count(for: LocalizedAddress.fetchRequest()) == 0)
     }
 
     // One of the older versions inside the compiled model, which keeps every version.
@@ -68,6 +85,16 @@ import CoreData // for NSPersistentStoreCoordinator
         club.setValue("Migrated Club", forKey: "fullName_")
         club.setValue("Oldtown", forKey: "town_")
         club.setValue("migratedClub", forKey: "nickName_")
+        club.setValue(true, forKey: "removeOrganization")
+        let membership = NSEntityDescription.insertNewObject(forEntityName: "MemberPortfolio", into: context)
+        membership.setValue(club, forKey: "organization_")
+        membership.setValue(true, forKey: "removeMember")
+        let photographer = NSEntityDescription.insertNewObject(forEntityName: "Photographer", into: context)
+        membership.setValue(photographer, forKey: "photographer_")
+        let address = NSEntityDescription.insertNewObject(forEntityName: "LocalizedAddress", into: context)
+        address.setValue(club, forKey: "organization_")
+        let expertise = NSEntityDescription.insertNewObject(forEntityName: "Expertise", into: context)
+        expertise.setValue("migratedExpertise", forKey: "id_")
         try context.save()
 
         let coordinator = try #require(context.persistentStoreCoordinator)

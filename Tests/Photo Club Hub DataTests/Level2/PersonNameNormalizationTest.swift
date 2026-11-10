@@ -88,6 +88,26 @@ import Testing
         #expect(curly.familyName == straight.familyName)
     }
 
+    // The given name is part of the key too, and Smart Punctuation or a website can write it typographically,
+    // or with a stray space at either end.
+    @Test("A given name is stored with plain typography and without surrounding spaces",
+          arguments: [("Jean\u{2011}Pierre", "Jean-Pierre"), ("Jean\u{2013}Pierre", "Jean-Pierre"),
+                      ("Anne\u{00A0}Marie", "Anne Marie"), ("D\u{2019}Arcy", "D'Arcy"), ("D\u{00B4}Arcy", "D'Arcy"),
+                      ("Zoë", "Zoë"), (" Jan", "Jan"), ("Jan ", "Jan"), ("Jan\u{00A0}", "Jan")])
+    func givenNameIsNormalized(input: String, expected: String) {
+        let name = PersonName(givenName: input, infixName: "", familyName: "Hart")
+        #expect(name.givenName == expected)
+        #expect(name.fullNameWithoutParenthesizedRole == "\(expected) Hart")
+    }
+
+    // A dash or non-breaking hyphen becomes a plain hyphen first, so the compound-name rule then applies.
+    @Test("A compound family name written with a dash converges",
+          arguments: ["Haaren \u{2013} van de Kaa", "Haaren\u{2011}van de Kaa", "Haaren\u{2014}Van\u{00A0}de Kaa"])
+    func compoundFamilyNameWithDash(input: String) {
+        let name = PersonName(givenName: "Ans", infixName: "", familyName: input)
+        #expect(name.familyName == "Haaren-van de Kaa")
+    }
+
     // An infix ending in an apostrophe binds straight to the name after it, so it takes no separator.
     @Test("An apostrophe-bound infix is lowercased after a hyphen",
           arguments: [("Jansen-D'Eau", "Jansen-d'Eau"),
