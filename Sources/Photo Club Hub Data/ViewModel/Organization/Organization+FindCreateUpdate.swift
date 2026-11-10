@@ -24,7 +24,7 @@ extension Organization {
                                         organizationTypeEnum: OrganizationTypeEnum,
                                         idPlus: OrganizationIdPlus,
                                         coordinates: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0),
-                                        removeOrganization: Bool = false, // can remove records for removed org's
+                                        obsolete: Bool = false, // can remove records for removed org's
                                         optionalFields: OrganizationOptionalFields = OrganizationOptionalFields(),
                                         pinned: Bool = false) -> Organization {
         // Safe: performAndWait runs synchronously on the context's queue; nothing actually escapes.
@@ -36,7 +36,7 @@ extension Organization {
                               organizationTypeEnum: organizationTypeEnum,
                               idPlus: idPlus,
                               coordinates: coordinates,
-                              removeOrganization: removeOrganization,
+                              obsolete: obsolete,
                               optionalFields: optionalFields,
                               pinned: pinned)
         }
@@ -46,7 +46,7 @@ extension Organization {
                                           organizationTypeEnum: OrganizationTypeEnum,
                                           idPlus: OrganizationIdPlus,
                                           coordinates: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0),
-                                          removeOrganization: Bool = false, // can remove records for removed org's
+                                          obsolete: Bool = false, // can remove records for removed org's
                                           optionalFields: OrganizationOptionalFields = OrganizationOptionalFields(),
                                           pinned: Bool = false) -> Organization {
 
@@ -73,7 +73,7 @@ extension Organization {
                                    organizationTypeEnum: organizationTypeEnum,
                                    nickName: idPlus.nickname,
                                    coordinates: coordinates,
-                                   removeOrganization: removeOrganization,
+                                   obsolete: obsolete,
                                    optionalFields: optionalFields,
                                    pinned: pinned) {
                 print("""
@@ -100,7 +100,7 @@ extension Organization {
                                     organizationTypeEnum: organizationTypeEnum,
                                     nickName: idPlus.nickname,
                                     coordinates: coordinates,
-                                    removeOrganization: removeOrganization,
+                                    obsolete: obsolete,
                                     optionalFields: optionalFields,
                                     pinned: pinned)
             print("\(organization.fullNameTown): Successfully created new \(organizationTypeEnum.rawValue)")
@@ -114,7 +114,7 @@ extension Organization {
                         organizationTypeEnum: OrganizationTypeEnum,
                         nickName: String,
                         coordinates: CLLocationCoordinate2D,
-                        removeOrganization: Bool, // used to remove records for org's that disappeared
+                        obsolete: Bool, // used to remove records for org's that disappeared
                         optionalFields: OrganizationOptionalFields,
                         pinned: Bool) -> Bool {
 
@@ -136,8 +136,8 @@ extension Organization {
             self.latitude_  = coordinates.latitude
             modified = true }
 
-        if self.removeOrganization != removeOrganization {
-            self.removeOrganization = removeOrganization
+        if self.obsolete != obsolete {
+            self.obsolete = obsolete
             modified = true }
 
         if let logEntries = optionalFields.logEntries,
@@ -341,7 +341,8 @@ extension Organization {
                               nickname: String) throws -> Organization {
 
         let predicateFormat: String = "nickName_ = %@" // avoid localization
-        let predicate = NSPredicate(format: predicateFormat, argumentArray: [nickname] )
+        // stored nicknames use plain typography, so "Witte’s Museum" also finds "Witte's Museum" (Data#100)
+        let predicate = NSPredicate(format: predicateFormat, argumentArray: [nickname.normalizedTypography] )
         let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
         fetchRequest.predicate = predicate
         let organizations: [Organization] = (try? context.fetch(fetchRequest)) ?? []
