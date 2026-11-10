@@ -58,6 +58,11 @@ extension LocalizedRemark { // expose computed properties (some related to handl
                                           localizedString: String
                                          ) -> Bool { // true if something got updated
 
+        // Remarks are stored with plain typography, like names (Data#100). The iOS app doesn't search them, but a
+        // website visitor does, with the browser's Find, which can't be relied on to match "Foto’s" when they type
+        // "Foto's". Normalized here, before the comparison below, so an unchanged remark isn't seen as changed.
+        let localizedString = localizedString.normalizedTypography
+
         // get remark if it is already in the database
         let predicateFormat: String = "organization_ = %@ AND language_ = %@" // avoid localization
         let predicate = NSPredicate(format: predicateFormat,
@@ -73,7 +78,10 @@ extension LocalizedRemark { // expose computed properties (some related to handl
             // in release mode, log that there are multiple clubs, but continue using the first one.
         }
 
-        if let localizedRemark = localizedRemarks.first, localizedRemark.localizedString==localizedString {
+        // An existing remark is always updated in place, whatever its text. Inserting a second row for a changed text
+        // would be caught by the uniqueness constraint (organization_ + language_), and the loader's
+        // mergeByPropertyStoreTrump then keeps the stored text, so the change would never arrive.
+        if let localizedRemark = localizedRemarks.first {
             let changed: Bool = localizedRemark.update(bgContext: bgContext, localizedString: localizedString)
             do {
                 if bgContext.hasChanges && Settings.extraCoreDataSaves { // optimization
