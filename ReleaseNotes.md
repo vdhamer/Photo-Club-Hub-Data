@@ -22,6 +22,9 @@ Fotografiska Shanghai and the Lianzhou Museum of Photography held each other's c
 * `museums`, `museumsAU`, `museumsCN`, `museumsDE`, `museumsGB`, `museumsJP`, `museumsNL`, `museumsUS` and `TemplateMax` (Level 1)
 35 museum nicknames renamed to plain identifiers: spaces and slashes became `_`, `&` became `and`, accents became plain letters and apostrophes were dropped, so "V&A London" is now `VandA_London`, "F/M Vrijthof" `FM_Vrijthof` and "土門拳記念館" `KenDomon_Sakata`. A nickname now uses only ASCII letters, digits and `_`, for clubs and museums alike, because a club's nickname is its Level 2 file name, part of its default vdhamer.com URL and of the website's members-page path. Every club already complied. Nothing reads a museum's nickname, and every load overwrites it, so no data reset is needed. `root.level1.json` is unchanged (Data#45). The iOS README (EN and NL) states the rule, and a new `LevelLoaderTest` test fails on any production nickname that breaks it (Data#102).
 
+* `clubsNL02`, `clubsNL10`, `clubsNL12`, `clubsNL16` and `root.level1.json` (Level 1)
+Four club names lose an abbreviation in parentheses, which reads as a wrong town where the apps show "name (town)": (AFO), (FoHa), (DOF) and (IVN). A name is part of an organization's identity, so iOS 3.0.4 and older show each of these clubs twice until they run 3.0.5 and its data reset; pre-2.9.0 versions, which read `root.level1.json`, keep Kiek Nauw twice. Unlike Data#101, not held back.
+
 API
 
 * __`MemberPortfolio.roleDescriptionOfClubTown` now takes a `Language`, and only that.__
