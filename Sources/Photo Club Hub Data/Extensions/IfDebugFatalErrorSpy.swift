@@ -18,7 +18,7 @@ public protocol IfDebugFatalErrorSpying: Sendable {
     var messages: [String] { get }
 }
 
-/// iOS 18+ version of the spy, protected by a `Synchronization.Mutex` (same pattern as `Level1History`).
+/// iOS 18+ version of the spy, protected by a `Synchronization.Mutex`.
 @available(iOS 18, macOS 15, *)
 public final class IfDebugFatalErrorSpy1827: IfDebugFatalErrorSpying, Sendable {
 

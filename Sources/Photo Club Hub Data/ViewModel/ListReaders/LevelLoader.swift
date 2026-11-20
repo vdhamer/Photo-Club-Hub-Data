@@ -21,6 +21,8 @@ public enum LevelLoader {
     /// that split — which turns this constant back into `"root"` — is Data#45.
     static let builtInLevel1RootName = "root_"
 
+    // Its public `newerPackageRequest` lives in Level1JsonReader+MinimumDataPackageVersion.swift (Data#107).
+
     /// Runs one complete load pass:
     /// - Level 0 (awaited to completion), then
     /// - Level 1, then
@@ -80,17 +82,22 @@ public enum LevelLoader {
             fileName = Self.builtInLevel1RootName
         }
 
+        let level1History = Level1History() // not using `load`'s internal default, so level1History can be read out
+
         await Level1JsonReader.load(
             bgContext: makeBgContext(ctxName: "Level 1 loader for \(fileName)", usedContainer: usedContainer),
             fileName: fileName,
             isBeingTested: isBeingTested,
             useOnlyInBundleFile: useOnlyInBundleFile,
             usedContainer: usedContainer, // propagate so the whole Include tree shares one storage container
+            history: level1History,
             explicitRemoteURL: level1RootURL,
             // A custom root has no embedded copy of its custom data, so there is nothing to fall
             // back to. Saying so explicitly also stops a file from outside this project, from sharing a name
             // with a bundled one, from quietly serving this project's clubs instead.
             allowBundleFallback: !usesCustomRoot)
+
+        publishNewerPackageRequest(level1History.newerPackageRequest) // also when nil, to clear the previous pass's
 
         // MARK: - Level 2
 
