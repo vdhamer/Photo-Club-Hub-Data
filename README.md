@@ -70,7 +70,7 @@ release can never arrive unasked.
   conventional `.upToNextMajor` pin unsafe for anyone unaware of the local rules, so it was dropped:
   all three were aligned at **3.0.0** once and their versions float independently from then on. The
   two apps' versions are labels for their users and say nothing about this package.
-- `PhotoClubHubDataVersion.semver` carries the version programmatically, because SwiftPM code cannot read its own git tag and `Bundle.module` carries no version. The release checklist asserts that this constant matches the tag being pushed, and gives the one-line check that reads it out of the tagged tree rather than the working copy (Annex F of the iOS repo's `Documentation/ReleaseProcess.md`); both apps display it, so a stale value misreports which library a binary was built against.
+- `PhotoClubHubDataVersion.semver` carries the version programmatically, because SwiftPM code cannot read its own git tag and `Bundle.module` carries no version. The release checklist asserts that this constant matches the tag being pushed, and gives the one-line check that reads it out of the tagged tree rather than the working copy (Annex F of the iOS repo's `Documentation/ReleaseProcess.md`); both apps display it, so a stale value misreports which library a binary was built against. It is also what a Level 1 file's `minimumDataPackageVersion` is compared with (see [The three-level JSON data](#the-three-level-json-data)), so a stale value can also suppress an upgrade request that should be raised, or raise one that should not.
 - **No build number.** This package produces no artifact to number. A candidate handed to another
   developer is identified by its commit, which their own `Package.resolved` records automatically —
   version *and* revision. See issue #17.
@@ -86,17 +86,60 @@ Data is loaded from JSON files in three sequential levels. A club can be at any 
 | **2** | Members per club, with roles, status and portfolio links | `Level2JsonReader` |
 | **3** | Image portfolios per member | fetched by the apps, not by this package |
 
+For the semantics of individual entities and the JSON file formats, the [Photo Club Hub README](https://github.com/vdhamer/Photo-Club-Hub/blob/main/.github/README.md) is the detailed reference — it is written for club administrators maintaining the data, and is not duplicated here.
+
+### Loading order
+
 **Level 0 must complete and save before Level 2 starts.** Not because loading out of order would produce a wrong value: `findCreateUpdateUndefSupported()` passes `isSupported: nil` and `Expertise.update()` only ever promotes false to true, so a sequential Level 2 then Level 0 run ends up correct either way (`LoadOrderIndependenceTest`). The rule is about contention on the `id_` uniqueness constraint: two contexts that cannot see each other's uncommitted insert both create a row, and Core Data settles that collision property by property down in the store, where the promote-only logic does not run, so a promotion can be lost (`MergePolicyTest`). Awaiting Level 0 commits the expertises it declares before the Level 2 fan-out, leaving those loaders nothing to insert. Level 1 and Level 2 may run concurrently with each other.
 
 The sequencing is this package's responsibility, not the consuming app's: `LevelLoader.loadAllLevels(usedContainer:)` runs one complete pass — Level 0 awaited to completion, then Level 1, then every Level 2 club loader concurrently — and returns only after the last loader has finished. An app supplies only the container to load into; the background contexts' merge policy is set here rather than by the app, because the apps used to disagree about it and this invariant depends on the sequencing rather than on the policy (see `MergePolicyTest` for characterizing the behavioral options, and `LevelLoaderTest` for the ordering assertion).
 
-`loadAllLevels` also takes an optional `level1RootURL`, which replaces the built-in `root_` file with a Level 1 root the user named (Photo-Club-Hub#829). An override changes two things. The hardcoded Level 2 club list is skipped, since those clubs are the production tree's own content and would otherwise be injected into a dataset that never listed them. And no bundled copy may stand in, because an external file sharing a name with an embedded one would otherwise serve this project's clubs in place of the data actually requested. Level 0 is deliberately not conditional: its expertises and languages come from this project's own file, cost nothing when a tree external to this project never references them, and the languages are needed either way. A tree wanting its own vocabulary is better served by a Level 0 override, once there is a use case for one, than by this package guessing whose data a URL holds. Relatedly, Level 1 Includes are fetched at the URL each entry is written with rather than by recomposing its name against the built-in data path, which is what lets an Include tree live outside this project at all.
+**`loadAllLevels` also takes an optional `level1RootURL`** (Photo-Club-Hub#829), which replaces the built-in `root_` file with a Level 1 root the user named.
 
-**A Level 1 organizaton that may have stopped stays in its file, flagged** (Data#91). Its `logbook` is stored as `LogEntry` rows, and the last entry that has `isFormerClub` or `isFormerMuseum` sets `Organization.isFormerOrganization`; the array order decides, never `date`. Only a Level 1 file sets that flag, so a club's own Level 2 file, which nobody may be maintaining any more, can't overrule it (Data#92). Apps leave former organizations out by adding `Organization.currentPredicate` or `MemberPortfolio.currentOrganizationPredicate` to their own fetches. `badWebsites` is stored as written, and a `website` that matches one of them, compared with `URL.canonicalString`, is never stored, whichever file supplies it.
+- **The hardcoded Level 2 club list is skipped.** Those clubs are the production tree's own content and would otherwise be injected into a dataset that never listed them.
+- **No bundled copy may stand in.** An external file sharing a name with an embedded one would otherwise serve this project's clubs in place of the data actually requested.
+- **Level 0 is deliberately unchanged.** Its expertises and languages come from this project's own file, cost nothing when a tree external to this project never references them, and the languages are needed either way. A tree wanting its own vocabulary is better served by a Level 0 override, once there is a use case for one, than by this package guessing whose data a URL holds.
+- **Includes are fetched at the URL they are written with**, with or without an override, rather than by recomposing the name against the built-in data path. That is what lets an Include tree live outside this project at all.
 
-**Bad data in a file stops a Debug build and is tolerated by a release build.** That suits the files this project maintains, where whoever hits the stop can fix the file. Not every file is one of those: a Level 1 Include is fetched from the URL it is written with, so part of an Include tree, or all of it under a user-supplied root (Photo-Club-Hub#829), can live on someone else's server, and a Debug build then stops on data nobody here can fix. Level 0 and Level 2 files are still always read from this project's repository. One rule for files outside this project's control is still to be decided: Data#9 raises it for clubs that host their own Level 2 file, and the same rule should cover external Level 1 files. The checks cover a log entry without a usable `date`, `author` or `text`, a log date more than one day before the entry above it, a flag that isn't a JSON boolean, an unusable `badWebsites`, and a `logbook` or `badWebsites` in a Level 2 file. Every date in every level goes through `String.extractDate()`, which accepts only a real calendar day written as `YYYY-MM-DD`; `""`, which is what a missing key reads as, means "no date". A release build keeps the log entry even when its date is unusable, because the entry may hold the flag.
+### Level 1 files
 
-For the semantics of individual entities and the JSON file formats, the [Photo Club Hub README](https://github.com/vdhamer/Photo-Club-Hub/blob/main/.github/README.md) is the detailed reference — it is written for club administrators maintaining the data, and is not duplicated here.
+**A Level 1 file may recommend upgrading to a newer Data package** (Data#107) by giving an optional `minimumDataPackageVersion` in its header, for example `"3.11.0"`.
+
+- **The file loads anyway.** When `PhotoClubHubDataVersion.semver` is lower (compared number by number), the file still loads, since stale data beats having no data.
+- **The app decides what to show.** This package has no UI of its own, so each app decides how to warn its users or its maintainer. To find out, the app reads the static property `LevelLoader.newerPackageRequest` after `loadAllLevels` has returned. It is `nil` when no file sets `minimumDataPackageVersion`, or when this build meets every value that is set. Otherwise it holds the requesting file and the version that file asked for, and the log records the same.
+- **Only the first request is reported**, from the latest pass. Rarely, fixing that file can reveal the next one.
+- **A malformed value** (not a dotted number) stops a Debug build and is ignored by a release build.
+- **Older apps ignore the field**, as is customary for JSON data handling. So only apps built with Data 3.9.0 or later can act on it.
+- **First use case:** the old Level 1 tree stays in place, frozen, when the data moves into a folder tree (Data#106), and asks users of apps that still read it to update.
+
+**A Level 1 file name may contain dots** (Data#106), because a file is named after its folder path, for example `afd16.NL.clubs.level1.json`.
+
+- **The name is everything before `.level1.json`**, in any letter case (`Level1Source`).
+- **Some names are rejected:** a leading, trailing or doubled dot, or text after `.json`.
+- **Older apps skip them.** Data 3.9.0 can read such names, but released apps (Data 3.8.0 and older) skip an include that has one. The tree they read has to stay free of dots until Data#108 moves the data.
+
+**A Level 1 organization that may have stopped stays in its file, flagged** (Data#91).
+
+- **The logbook sets the flag.** The `logbook` is stored as `LogEntry` rows, and the last entry that has `isFormerClub` or `isFormerMuseum` sets `Organization.isFormerOrganization`. The array order decides, never `date`.
+- **Only Level 1 can set it** (Data#92), so a club's own Level 2 file, which nobody may be maintaining any more, can't overrule it.
+- **Apps filter it themselves** by adding `Organization.currentPredicate` or `MemberPortfolio.currentOrganizationPredicate` to their own fetches.
+
+**A Level 1 file can block bad websites** by listing them in `badWebsites`. The list is stored as written, and a `website` that matches one of them (compared with `URL.canonicalString`) is never stored, whichever file supplies it.
+
+### Bad data
+
+**Bad data in a file stops a Debug build and is tolerated by a release build.**
+
+- **That suits the files this project maintains**, where whoever hits the stop can fix the file.
+- **Not every file is one of those.** A Level 1 Include is fetched from the URL it is written with, so part of an Include tree, or all of it under a user-supplied root (Photo-Club-Hub#829), can live on someone else's server. A Debug build then stops on data nobody here can fix. Level 0 and Level 2 files are still always read from this project's repository.
+- **A rule for files outside this project's control is still to be decided.** Data#9 raises it for clubs that host their own Level 2 file, and the same rule should cover external Level 1 files.
+- **The checks cover:**
+  - a log entry without a usable `date`, `author` or `text`
+  - a log date more than one day before the entry above it
+  - a flag that isn't a JSON boolean
+  - an unusable `badWebsites`
+  - a `logbook` or `badWebsites` in a Level 2 file
+- **Dates must be real calendar days.** Every date in every level goes through `String.extractDate()`, which accepts only a real calendar day written as `YYYY-MM-DD`. `""`, which is what a missing key reads as, means "no date". A release build keeps a log entry even when its date is unusable, because the entry may hold the flag.
 
 ## Core Data model
 
