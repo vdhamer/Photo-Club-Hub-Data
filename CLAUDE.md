@@ -49,7 +49,7 @@ extra expertise), and a test that asserts on it goes red on correct work.
 
 ## The Level 1 entry point is `root_.level1.json`, not `root.level1.json`
 
-`LevelLoader.loadAllLevels()` starts the Level 1 tree at `builtInLevel1RootName` (`"root_"`, `LevelLoader.swift:22`)
+`LevelLoader.loadAllLevels()` starts the Level 1 tree at `builtInLevel1RootName` (`"root_"`, `LevelLoader.swift:23`)
 unless a caller passes `level1RootURL` (vdhamer/Photo-Club-Hub#829), which neither app does. So both apps start at
 `root_.level1.json`. That file is header-only: it includes `clubsNL.level1.json` (which in turn includes one
 `clubsNLxx` file per Fotobond Afdeling, `xx` being the afdeling number, as an empty placeholder where no club is
@@ -86,6 +86,10 @@ root_.level1.json                header only
 ```
 
 Outside the tree: `root.level1.json` (the legacy flat file, see below) and the template clubs' Level 1 files.
+
+The tree's file names must stay free of dots until Data#108 moves the data. Data 3.9.0 reads dotted names such as
+`afd16.NL.clubs.level1.json` (Data#106, Data#107), but released apps skip an include with one (Release builds silently,
+Debug builds stop). That is also why a dotted name must never appear in the iOS repo's `root_` tree.
 
 `root.level1.json` (no underscore) is the legacy flat file from before the Include feature
 (vdhamer/Photo-Club-Hub#638). It still sits in both repos' JSON folders with stale copies of records, but no
