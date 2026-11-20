@@ -212,7 +212,7 @@ private let isBeingTested = true
                                     useOnlyInBundleFile: true,
                                     usedContainer: testPersistenceController.container)
 
-        #expect(allOrganizations().first { $0.nickName == "DottedChild2" }?.fullName == "Dotted Child Club2")
+        #expect(allOrganizations().first { $0.nickName == "DottedChild" }?.fullName == "Dotted Child Club")
     }
 
     // Read recursionATest.level1.json, which Includes recursionBTest.level1.json, which in turn Includes
@@ -303,7 +303,7 @@ private let isBeingTested = true
                 [
                     {
                         "idPlus": { "town": "Test Valley",
-                                    "fullName": \(fullName),
+                                    "fullName": "\(fullName)",
                                     "nickName": "DottedOnline" },
                         "coordinates": { "latitude": 51.12862, "longitude": 1.51063 },
                         "optional": { }

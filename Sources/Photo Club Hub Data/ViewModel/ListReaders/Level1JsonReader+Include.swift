@@ -7,7 +7,6 @@
 
 import CoreData   // for NSManagedObjectContext, NSPersistentContainer
 import SwiftyJSON // for JSON struct
-import os         // for OSAllocatedUnfairLock (a Mutex predecessor)
 
 extension Level1JsonReader {
 
@@ -87,42 +86,6 @@ extension Level1JsonReader {
 
 }
 
-/// Tracks which level1.json files this load pass has already visited, so the Include tree cannot
-/// load a file twice or loop forever.
-///
-/// One instance per load pass, created by `Level1JsonReader.load`'s default argument and propagated
-/// down the Include recursion. It shouldn't be a process-global singleton cleared by
-/// `Model.deleteCoreDataObjects`, which made a second pass in one process (and any two tests running
-/// in parallel) trip the duplicate-file error.
-final public class Level1History: Sendable {
-
-    // A Set instead of array: we only need membership (not order).
-    // Set.insert reports whether the element was already present,
-    // collapsing the old contains()/append() into one operation.
-    //
-    // OSAllocatedUnfairLock rather than Mutex: now that an instance is threaded through a pass it
-    // appears in `load(...)`'s signature, and this package supports iOS 17. Mutex requires iOS 18,
-    // and a type gated to iOS 18 cannot be a parameter of un-gated public API.
-    // So... consider switching back to Mutex as soon as iOS 17 is no longer supported.
-    private let level1History = OSAllocatedUnfairLock<Set<String>>(initialState: [])
-
-    init() {}
-
-    func isVisitedBefore(fileName: String) -> Bool {
-        level1History.withLock { level1History in
-            !level1History.insert(fileName).inserted // false the first time, true on later calls
-        }
-    }
-
-    func clear() {
-        level1History.withLock { level1History in
-            level1History.removeAll()
-        }
-
-    }
-
-}
-
 /// Why a string cannot be used as a Level 1 file reference.
 ///
 /// Distinct cases rather than a `Bool`, because the reason is shown to a user: Photo-Club-Hub#829 reports
@@ -162,31 +125,43 @@ struct Level1Source: Sendable {
     ///
     /// - Throws: `Level1URLError.notAValidURL` if the string is not a URL at all,
     ///   `.notHTTPS` if it uses any other scheme, or `.notALevel1FileName` if the last path component is
-    ///   not of the form `<name>.level1.json`.
+    ///   not a valid Level 1 file name (see `fileName(inLastPathComponent:)`).
     init(urlString: String) throws {
         guard let url = URL(string: urlString) else { throw Level1URLError.notAValidURL(urlString) }
         guard url.scheme?.lowercased() == "https" else { throw Level1URLError.notHTTPS(url) }
-
-        let segments: [Substring] = url.lastPathComponent.split(separator: ".")
-        guard segments.count >= 3, // avoid index-out-of-bounds on e.g. "museums.json"
-              segments[1].lowercased() == "level1",
-              segments[2].lowercased() == "json" else {
+        guard let fileName = Self.fileName(inLastPathComponent: url.lastPathComponent) else {
             throw Level1URLError.notALevel1FileName(url)
         }
 
         self.url = url
-        self.fileName = Self.fileName(of: url) // one derivation, shared with the custom-root path
+        self.fileName = fileName // one derivation, shared with the custom-root path
     }
 
-    /// The file name of a level1.json URL: "clubsNL" from ".../clubsNL.level1.json".
+    /// The file name of a level1.json URL: "clubsNL" from ".../clubsNL.level1.json", or "afd16.NL.clubs"
+    /// from ".../afd16.NL.clubs.level1.json".
     ///
     /// Also used for the custom Level 1 root, which reaches `LevelLoader` as a bare URL the app has
-    /// already validated. The fallback therefore covers only a URL with nothing before the first dot,
-    /// which neither caller can currently produce (Photo-Club-Hub#829).
+    /// already validated. The fallback therefore covers only a URL that is not a Level 1 file name at all,
+    /// such as ".../my.photo.clubs.json", which neither caller can currently produce (Photo-Club-Hub#829).
     static func fileName(of url: URL) -> String {
-        guard let firstSegment = url.lastPathComponent.split(separator: ".").first else {
-            return "customLevel1Root"
-        }
-        return String(firstSegment)
+        fileName(inLastPathComponent: url.lastPathComponent) ?? "customLevel1Root"
+    }
+
+    /// The text before `.level1.json` (in any letter case), or nil if `lastPathComponent` is not a valid
+    /// Level 1 file name.
+    ///
+    /// The text may contain dots, because a file is named after its folder path (`afd16.NL.clubs`, Data#106).
+    /// A dot can only sit *between* two characters of the name: no leading, trailing or doubled dot.
+    /// So the name is split with `omittingEmptySubsequences: false`, as split would otherwise drop
+    /// exactly the empty parts that this check is looking for.
+    private static func fileName(inLastPathComponent lastPathComponent: String) -> String? {
+        let suffix = ".level1.json"
+        guard lastPathComponent.lowercased().hasSuffix(suffix) else { return nil }
+
+        let name = String(lastPathComponent.dropLast(suffix.count))
+        let parts = name.split(separator: ".", omittingEmptySubsequences: false)
+        guard parts.allSatisfy({ $0.isEmpty == false }) else { return nil } // also rejects an empty name
+
+        return name
     }
 }

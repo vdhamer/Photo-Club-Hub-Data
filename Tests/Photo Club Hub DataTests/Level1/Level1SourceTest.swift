@@ -9,9 +9,9 @@ import Testing      // for macros like @Test
 @testable import Photo_Club_Hub_Data
 import Foundation   // for URL
 
-/// Which last path components does `Level1Source` accept as a Level 1 file name, and what does it make of them (Data#107).
-/// The cases are the rows of the table in that ticket. The leading, doubled and trailing dot are separate cases
-/// because each is a position that an implementation can get right while missing another.
+/// Which last path components does `Level1Source` accept as a Level 1 file name, and what does it make of them
+/// (Data#107). The cases are the rows of the table in that ticket. The leading, doubled and trailing dot are
+/// separate cases because each is a position that an implementation can get right while missing another.
 @Suite("Tests which Level 1 file names are accepted") struct Level1SourceTests {
 
     private static let directory = "https://raw.githubusercontent.com/vdhamer/Photo-Club-Hub-Data/main/JSON/"
