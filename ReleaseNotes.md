@@ -37,7 +37,7 @@ Replaces typographic apostrophes and single quotes (’ ‘ ‚ ʼ ‹ ›, and 
 `Organization.findCreateUpdate(…, removeOrganization:)` and `MemberPortfolio.findCreateUpdate(…, removeMember:)` now take `obsolete:`. Removing public names is strictly MAJOR, but as with Data#99 the only consumers are the two apps: the HTML app uses neither, and the iOS app changes its two calls in `MapsViewMap.swift` (preview data) when it resolves this release. So it is treated as MINOR (Data#39).
 
 * __New `LevelLoader.newerPackageRequest` and `NewerPackageRequest`.__
-After `loadAllLevels` returns, `LevelLoader.newerPackageRequest` describes the first Level 1 file of that pass whose header asked for a newer Data package than this build: its `fileName` and the `minimumVersion` as provided. It is `nil` when no file asked. Additive, so MINOR. The apps read it to tell users or the maintainer to update; see the `minimumDataPackageVersion` entry below (Data#107).
+After `loadAllLevels` returns, `LevelLoader.newerPackageRequest` gives the highest Data package version that a Level 1 file of that pass asked for, above this build's: the `minimumVersion` as provided, and the `fileName` of a file that asked for it (if several did, the one whose file name comes first alphabetically). It is `nil` when no file asked. Additive, so MINOR. The apps read it to tell users or the maintainer to update; see the `minimumDataPackageVersion` entry below (Data#107).
 
 BEHAVIOR
 
@@ -63,7 +63,7 @@ Normalizing changes the identity (`fullName` + `town`) of the organizations abov
 `afd16.NL.clubs.level1.json` is now a valid name, whose `fileName` is `afd16.NL.clubs`, so files can be named after their folder path (Data#106). Includes and a custom root follow one rule: the name ends in `.level1.json` (any letter case), and what comes before it has no leading, trailing or doubled dot. Two things differ from before: text after `.json` (`clubsNL.level1.json.bak`) is now rejected, and a custom root URL that is not a Level 1 file name gets the `fileName` `customLevel1Root` instead of the part before its first dot. Released apps skip an include with a dotted name, so the data keeps undotted names until Data#108 (iOS 3.0.7).
 
 * __A Level 1 header may carry `minimumDataPackageVersion`.__
-When it is higher than `PhotoClubHubDataVersion.semver` (compared number by number), the file still loads. The name of the first such file of the pass, and the version it asked for, are logged and kept in `LevelLoader.newerPackageRequest`, and each app decides what to tell its users (Photo-Club-Hub#899, Photo-Club-Hub-HTML#282). A value that is not a dotted number stops a Debug build and is ignored by a release build. Released apps ignore the field, so only apps built with Data 3.9.0 or later act on it (Data#107).
+When it is higher than `PhotoClubHubDataVersion.semver` (compared number by number), the file still loads. Every such request is logged. The highest version asked for in the pass, with the name of a file that asked for it, is kept in `LevelLoader.newerPackageRequest`, and each app decides what to tell its users (Photo-Club-Hub#899, Photo-Club-Hub-HTML#282). A value that is not a dotted number stops a Debug build and is ignored by a release build. Released apps ignore the field, so only apps built with Data 3.9.0 or later act on it (Data#107).
 
 MODEL
 
