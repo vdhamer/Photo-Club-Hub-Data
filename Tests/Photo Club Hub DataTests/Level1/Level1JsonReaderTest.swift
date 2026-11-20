@@ -180,6 +180,41 @@ private let isBeingTested = true
         #expect(club?.town == "Test Valley")
     }
 
+    // A file named after its folder path has dots in its name (Data#106). The bundle lookup takes the name and the
+    // extension separately, so "afd99.XX.clubsTest" + "level1" + "json" must find the fixture in the package's
+    // resource bundle, which a copy-per-file entry in Package.swift puts there with its dots intact.
+    @Test("A Level 1 file with dots in its name loads from the bundle")
+    func dottedFileLoadsFromBundle() async {
+
+        let fileName = "afd99.XX.clubsTest"
+        let bgContext = makeBackgroundContext(named: fileName)
+
+        await Level1JsonReader.load(bgContext: bgContext,
+                                    fileName: fileName,
+                                    isBeingTested: isBeingTested,
+                                    useOnlyInBundleFile: true,
+                                    usedContainer: testPersistenceController.container)
+
+        #expect(allOrganizations().first { $0.nickName == "DottedChild" }?.fullName == "Dotted Child Club")
+    }
+
+    // The same through an include: the parent lists the child by URL, `Level1Source` derives "afd99.XX.clubsTest"
+    // from it, and that derived name is what finds the child in the bundle (the test reads bundle-only).
+    @Test("An include with dots in its name is loaded")
+    func dottedIncludeLoads() async {
+
+        let fileName = "IncludeDottedParentTest"
+        let bgContext = makeBackgroundContext(named: fileName)
+
+        await Level1JsonReader.load(bgContext: bgContext,
+                                    fileName: fileName,
+                                    isBeingTested: isBeingTested,
+                                    useOnlyInBundleFile: true,
+                                    usedContainer: testPersistenceController.container)
+
+        #expect(allOrganizations().first { $0.nickName == "DottedChild2" }?.fullName == "Dotted Child Club2")
+    }
+
     // Read recursionATest.level1.json, which Includes recursionBTest.level1.json, which in turn Includes
     // recursionATest.level1.json again — a deliberate A ⇄ B cycle. The level1History guard must detect
     // the revisit of recursionA and cut the recursion short instead of looping forever.
@@ -254,6 +289,43 @@ private let isBeingTested = true
 
         let club = allOrganizations().first { $0.nickName == "NotInBundle" }
         #expect(club?.fullName == "Not in bundle Club")
+    }
+
+    // The same for a name with dots, which is the case that matters once files are named after their folder path:
+    // the online copy is fetched from the URL, while the name only has to survive the failed bundle lookup.
+    @Test("A file with dots in its name and without a bundled copy should load from its online copy")
+    func dottedFileWithoutBundledCopyLoadsFromOnlineCopy() async throws {
+
+        let fileName = "afd98.XX.notInBundleTest"
+        let fullName = "Dotted Online Club"
+        let jsonFileContent = """
+            { "clubs":
+                [
+                    {
+                        "idPlus": { "town": "Test Valley",
+                                    "fullName": \(fullName),
+                                    "nickName": "DottedOnline" },
+                        "coordinates": { "latitude": 51.12862, "longitude": 1.51063 },
+                        "optional": { }
+                    }
+                ]
+            }
+            """ // careful: jsonFileContent is just level1.json data, so don't add Swift comments for these lines
+        let onlineCopy = FileManager.default
+            .temporaryDirectory
+            .appendingPathComponent("\(fileName)-\(UUID().uuidString).level1.json") // unique file name
+        try jsonFileContent.write(to: onlineCopy, atomically: true, encoding: .utf8)
+        defer { try? FileManager.default.removeItem(at: onlineCopy) }
+
+        let bgContext = makeBackgroundContext(named: fileName)
+        await Level1JsonReader.load(bgContext: bgContext,
+                                    fileName: fileName,
+                                    isBeingTested: isBeingTested,
+                                    useOnlyInBundleFile: false,
+                                    usedContainer: testPersistenceController.container,
+                                    explicitRemoteURL: onlineCopy)
+
+        #expect(allOrganizations().first { $0.nickName == "DottedOnline" }?.fullName == fullName)
     }
 
     // The other half of Data#62: when the bundle is the only source, a missing bundled copy is still a build
