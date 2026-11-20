@@ -133,9 +133,11 @@ Two consequences worth knowing before touching anything in the model directory:
 
 ## Developing app and package together
 
-While co-developing an app and this package, use a **local package override** rather than retagging: add a local checkout of this repository to the app's Xcode workspace (File ▸ Add Files, or drag the folder in), and Xcode shadows the remote dependency with your working copy. Remove it from the workspace to go back to the resolved remote version.
+Both apps open as an `.xcodeproj`, without a workspace, and resolve this package from GitHub at the version pinned in their `Package.resolved`. A change here therefore reaches an app only after a new version is tagged and the app resolves package versions again (File ▸ Packages ▸ Update to Latest Package Versions). The maintainer does the tagging, so a change that spans both usually arrives as two pull requests: one here, and one in the app once the new version exists.
 
-This also restores the package's tests inside Xcode. Xcode surfaces test targets for local packages but **not** for remote package dependencies, so without an override the tests below only run from the command line.
+Develop and test package changes on their own: open this package's folder in Xcode, which shows its tests, or run `swift test` (see [Testing](#testing)).
+
+Do **not** add a local checkout of this package to an app, neither with *Add Package Dependencies ▸ Add Local…* nor by dragging it into a workspace. Add Local writes the local path into the app's `project.pbxproj`, which would put untagged package code into release builds. A workspace builds the package's working tree instead of the pinned tag, and with both a project and a workspace level, settings too easily get edited at the wrong one. If GitHub cannot serve the package, each app's `CLAUDE.md` describes the stopgap: a SwiftPM mirror that resolves the pinned version from a local clone.
 
 ## Linting
 
@@ -156,9 +158,13 @@ Two consequences worth knowing:
 
 ## Testing
 
+In Xcode, open this package's folder, choose *My Mac* as the run destination, and run the tests with ⌘U. On the command line:
+
 ```sh
 swift test
 ```
+
+Both run the same tests, with one difference: Xcode compiles the string catalog and `swift test` does not (see the known issues below).
 
 Every suite runs against its own in-memory Core Data store.
 
@@ -207,6 +213,10 @@ A future new check is appended as a **sibling job**, never as an extra step of a
 | -------------------- | --------------------------- | ------ |
 | [Core Data](https://developer.apple.com/documentation/coredata) | data storage framework | Apple |
 | [SwiftyJSON/SwiftyJSON](https://github.com/SwiftyJSON/SwiftyJSON.git) | JSON parsing | Github |
+
+## Contributing
+
+Help is welcome. [CONTRIBUTING.md](.github/CONTRIBUTING.md) lists where to start and what differs in this repository.
 
 ## License
 
