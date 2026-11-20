@@ -103,7 +103,7 @@ The sequencing is this package's responsibility, not the consuming app's: `Level
 
 ### Level 1 files
 
-**A Level 1 file may recommend upgrading to a newer Data package** (Data#107) by giving an optional `minimumDataPackageVersion` in its header, for example `"3.11.0"`.
+**A Level 1 file may trigger a recommendation to upgrade to a newer Data package** (Data#107) based on an optional `minimumDataPackageVersion` in its header, for example `set to "3.11.0"`.
 
 - **The file loads anyway.** When `PhotoClubHubDataVersion.semver` is lower (compared number by number), the file still loads, since stale data beats having no data.
 - **The app decides what to show.** The Data package has no UI of its own, so each app decides how to warn its users or its maintainer. To detect the issue, the app reads the static property `LevelLoader.newerPackageRequest` after `loadAllLevels` has returned. It is `nil` when no file sets `minimumDataPackageVersion`, or when this build meets every version requirement. Otherwise it holds the name of a requesting file and the package version that file requested. The log records every request.
