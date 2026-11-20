@@ -106,7 +106,7 @@ The sequencing is this package's responsibility, not the consuming app's: `Level
 **A Level 1 file may recommend upgrading to a newer Data package** (Data#107) by giving an optional `minimumDataPackageVersion` in its header, for example `"3.11.0"`.
 
 - **The file loads anyway.** When `PhotoClubHubDataVersion.semver` is lower (compared number by number), the file still loads, since stale data beats having no data.
-- **The app decides what to show.** This package has no UI of its own, so each app decides how to warn its users or its maintainer. To find out, the app reads the static property `LevelLoader.newerPackageRequest` after `loadAllLevels` has returned. It is `nil` when no file sets `minimumDataPackageVersion`, or when this build meets every value that is set. Otherwise it holds the requesting file and the version that file asked for, and the log records the same.
+- **The app decides what to show.** This package has no UI of its own, so each app decides how to warn its users or its maintainer. To find out, the app reads the static property `LevelLoader.newerPackageRequest` after `loadAllLevels` has returned. It is `nil` when no file sets `minimumDataPackageVersion`, or when this build meets every value that is set. Otherwise it holds the name of the requesting file and the version that file asked for, and the log records the same.
 - **Only the first request is reported**, from the latest pass. Rarely, fixing that file can reveal the next one.
 - **A malformed value** (not a dotted number) stops a Debug build and is ignored by a release build.
 - **Older apps ignore the field**, as is customary for JSON data handling. So only apps built with Data 3.9.0 or later can act on it.
