@@ -7,7 +7,7 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
-### 3.9.0 (GitHub commit ???????) ??-11-2026
+### 3.9.0 (GitHub commit 28a45ec) 21-11-2026
 
 DATA
 
@@ -24,6 +24,9 @@ Fotografiska Shanghai and the Lianzhou Museum of Photography held each other's c
 
 * `clubsNL02`, `clubsNL10`, `clubsNL12`, `clubsNL16` and `root.level1.json` (Level 1)
 Four club names lose an abbreviation in parentheses, which reads as a wrong town where the apps show "name (town)": (AFO), (FoHa), (DOF) and (IVN). A name is part of an organization's identity, so iOS 3.0.4 and older show each of these clubs twice until they run 3.0.5 and its data reset; pre-2.9.0 versions, which read `root.level1.json`, keep Kiek Nauw twice. Unlike Data#101, not held back.
+
+* `clubsBE-Antwerpen` (new, Level 1) and `clubsBE` (Level 1)
+The member clubs of Fotogroep Antwerpen, the photo club federation for the province of Antwerp, in a new file that `clubsBE` includes: 61 clubs, of which 58 are new. The other 3 moved there unchanged from `clubsBE`: CreaFoto, Fauna Flora Fotoclub Schoten and Fotokring FIDIFOK (FIDIFOK is new to the bundled copy, which didn't have it yet). 6 of the clubs are outside the province but belong to the federation, and 3 are flagged as possibly stopped. A move doesn't change a club's identity, so no data reset is needed. `Package.swift` lists the new file (Data#105).
 
 API
 
@@ -50,7 +53,7 @@ A nickname is a lookup key (`Organization.find(nickname:)`), must match between 
 * __Photographer names are stored with plain typography too.__
 `PersonName` already straightened apostrophes in the infix and family name. It now applies `normalizedTypography` to all three parts, including the given name, so "Jean‑Pierre" with a non-breaking hyphen, "D’Arcy" or "Haaren – van de Kaa" with an en dash arrive as "Jean-Pierre", "D'Arcy" and "Haaren-van de Kaa". The name is the key a `Photographer` is looked up by, so two typographic forms of one name would otherwise be two people. No production name holds these characters today, so no stored photographer changes; this closes the gap before one does, while the data reset below covers it anyway. The given name is now also trimmed, as the infix and family name already were, so "Jan " and "Jan" are one person; none of the 220 member entries in the current Level 2 files has a padded name part. The iOS People tab's search should normalize its search text the same way (Data#100).
 
-* __An edited remark now replaces the stored one.__
+* __An edited club or museum remark now shows up in apps that already had the old text.__
 `LocalizedRemark.findCreateUpdate` only updated a stored remark whose text was unchanged; a changed text inserted a second row instead. The uniqueness constraint (`organization_` + `language_`) caught it on save, and the loader's `mergeByPropertyStoreTrump` kept the stored text, so no duplicate appeared but the edit never reached an existing install without a data reset. The existing row is now always updated in place, and an unchanged remark still isn't an update. A new test loads two texts with the loader's own context setup and expects the second (Data#103).
 
 * __`Organization.level2URL` checks for a museum before building a URL.__
