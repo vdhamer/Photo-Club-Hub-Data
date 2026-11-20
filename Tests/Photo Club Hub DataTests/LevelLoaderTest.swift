@@ -111,6 +111,20 @@ struct LevelLoaderTests {
                 "Level 2 downgraded these Level 0 expertises to temporary: \(downgraded.sorted())")
     }
 
+    // Data#107: no production file may ask for a newer Data package than the one it is bundled with.
+    // The pass reads the production root and everything it includes, so this also catches a typo in a real header,
+    // or a value that was raised for a package version that isn't there yet.
+    // `.serialized` keeps other passes from overwriting `LevelLoader.newerPackageRequest` between the load and check.
+    @Test("A pass over the production files finds no request for a newer Data package")
+    func productionFilesAskForNoNewerPackage() async {
+        let persistenceController = PersistenceController(inMemory: true)
+        await LevelLoader.loadAllLevels(usedContainer: persistenceController.container,
+                                        isBeingTested: true,
+                                        useOnlyInBundleFile: true)
+
+        #expect(LevelLoader.newerPackageRequest == nil)
+    }
+
     @Test("Two load passes in one process do not trip the visited-file guard",
           .usesIfDebugFatalErrorSpy)
     func secondPassIsNotADuplicate() async {
