@@ -154,6 +154,9 @@ class Level1JsonReader {
         // hand the data to SwiftyJSON to parse
         let jsonRoot = JSON(parseJSON: jsonData) // call to SwiftyJSON
 
+        // The file keeps loading either way: stale data beats none (Level1JsonReader+MinimumDataPackageVersion.swift).
+        checkMinimumDataPackageVersion(in: jsonRoot, fileName: fileName, history: history)
+
         let includes: [Level1Source] = extractIncludes(from: jsonRoot)
 
         // extract the `organizationTypes` in `organizationTypeEnumsToLoad` one-by-one from `jsonRoot`
