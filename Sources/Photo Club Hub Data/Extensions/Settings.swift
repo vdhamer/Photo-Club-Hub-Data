@@ -33,7 +33,6 @@ public struct Settings {
                                                             "dataResetPending272",
                                                             "dataResetPending"]
 
-    // Doesn't really work in Photo Club Hub HTML until the version numbers are synchronized
     public static var dataResetPending: Bool { // stored as a string shown in Settings
         // returns true only when read for the first time
 
