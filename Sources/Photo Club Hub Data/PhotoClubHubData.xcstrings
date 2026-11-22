@@ -171,6 +171,23 @@
         }
       }
     },
+    "May no longer be active" : {
+      "comment" : "Label of a club or museum suspected, without definitive evidence, to no longer be active.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "May no longer be active"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mogelijk niet meer actief"
+          }
+        }
+      }
+    },
     "member" : {
       "comment" : "Default status of member within a club.",
       "localizations" : {
@@ -201,6 +218,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "musea"
+          }
+        }
+      }
+    },
+    "No longer active" : {
+      "comment" : "Label of a club or museum that is no longer active (and we have an definitive source for this).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No longer active"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet meer actief"
           }
         }
       }
