@@ -45,7 +45,29 @@
             "coordinates": { "latitude": 52.9, "longitude": 6.9 },
             "optional": {
                 "logbook": [
-                    { "date": "2026-10-01", "author": "generator", "text": "The value is a string.", "isFormerClub": "true" }
+                    { "date": "2026-10-01", "author": "generator", "text": "The key from before Data 3.10.0.", "isFormerClub": true }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Boolean Status Club", "nickName": "booleanStatusClub" },
+            "coordinates": { "latitude": 52.91, "longitude": 6.91 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-10-01", "author": "list maintainer", "text": "Disbanded.", "status": "inactive" },
+                    { "date": "2026-10-02", "author": "generator", "text": "The value isn't a string.", "status": true }
+                ]
+            }
+        },
+
+        {
+            "idPlus": { "town": "Logtown", "fullName": "Unknown Status Club", "nickName": "unknownStatusClub" },
+            "coordinates": { "latitude": 52.92, "longitude": 6.92 },
+            "optional": {
+                "logbook": [
+                    { "date": "2026-10-01", "author": "list maintainer", "text": "Disbanded.", "status": "inactive" },
+                    { "date": "2026-10-02", "author": "generator", "text": "The value isn't a known one.", "status": "closed" }
                 ]
             }
         },

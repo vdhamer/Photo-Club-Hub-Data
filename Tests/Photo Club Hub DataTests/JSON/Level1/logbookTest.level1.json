@@ -12,9 +12,9 @@
             "coordinates": { "latitude": 51.1, "longitude": 5.1 },
             "optional": {
                 "logbook": [
-                    { "date": "2026-09-12", "author": "generator", "text": "Website went down.", "isFormerClub": true },
-                    { "date": "2026-10-29", "author": "afdeling contact", "text": "Still meeting.", "isFormerClub": false },
-                    { "date": "2026-10-28", "author": "list maintainer", "text": "Disbanded after all.", "isFormerClub": true },
+                    { "date": "2026-09-12", "author": "generator", "text": "Website went down.", "status": "inactive" },
+                    { "date": "2026-10-29", "author": "afdeling contact", "text": "Still meeting.", "status": "active" },
+                    { "date": "2026-10-28", "author": "list maintainer", "text": "Website down again.", "status": "possiblyInactive" },
                     { "date": "2026-10-31", "author": "generator", "text": "Website still down." }
                 ]
             }
@@ -27,21 +27,22 @@
         },
 
         {
-            "idPlus": { "town": "Logtown", "fullName": "Museum Key Club", "nickName": "museumKeyClub" },
+            "idPlus": { "town": "Logtown", "fullName": "Rejected Club", "nickName": "rejectedClub" },
             "coordinates": { "latitude": 51.3, "longitude": 5.3 },
             "optional": {
                 "logbook": [
-                    { "date": "2026-10-01", "author": "generator", "text": "Key copied from a museum.", "isFormerMuseum": true }
+                    { "date": "2026-10-01", "author": "list maintainer", "text": "An art circle, not a photo club.", "status": "rejected" }
                 ]
             }
         },
 
         {
-            "idPlus": { "town": "Logtown", "fullName": "Both Keys Club", "nickName": "bothKeysClub" },
+            "idPlus": { "town": "Logtown", "fullName": "Revived Club", "nickName": "revivedClub" },
             "coordinates": { "latitude": 51.4, "longitude": 5.4 },
             "optional": {
                 "logbook": [
-                    { "date": "2026-10-01", "author": "generator", "text": "The keys disagree.", "isFormerClub": false, "isFormerMuseum": true }
+                    { "date": "2026-09-01", "author": "list maintainer", "text": "Disbanded.", "status": "inactive" },
+                    { "date": "2026-10-01", "author": "afdeling contact", "text": "Restarted.", "status": "active" }
                 ]
             }
         },
@@ -87,7 +88,7 @@
                 "logbook": [
                     { "date": "2026-10-01", "author": "generator", "text": "First version of this text." },
                     { "date": "2026-10-02", "author": "generator", "text": "Second entry." },
-                    { "date": "2026-10-03", "author": "generator", "text": "Third entry.", "isFormerClub": true }
+                    { "date": "2026-10-03", "author": "generator", "text": "Third entry.", "status": "inactive" }
                 ]
             }
         },
@@ -98,7 +99,7 @@
             "optional": {
                 "badWebsites": [ "https://old.example.org/" ],
                 "logbook": [
-                    { "date": "2026-10-01", "author": "generator", "text": "Disbanded.", "isFormerClub": true }
+                    { "date": "2026-10-01", "author": "generator", "text": "Disbanded.", "status": "inactive" }
                 ]
             }
         }
@@ -108,11 +109,11 @@
     "museums": [
 
         {
-            "idPlus": { "town": "Logtown", "fullName": "Club Key Museum", "nickName": "clubKeyMuseum" },
+            "idPlus": { "town": "Logtown", "fullName": "Quiet Museum", "nickName": "quietMuseum" },
             "coordinates": { "latitude": 52.4, "longitude": 6.4 },
             "optional": {
                 "logbook": [
-                    { "date": "2026-10-01", "author": "generator", "text": "Key copied from a club.", "isFormerClub": true }
+                    { "date": "2026-10-01", "author": "generator", "text": "Website gone, no news.", "status": "possiblyInactive" }
                 ]
             }
         },
@@ -124,17 +125,17 @@
                 "website": "https://www.closed.example.org",
                 "badWebsites": [ "https://www.closed.example.org/" ],
                 "logbook": [
-                    { "date": "2026-10-01", "author": "generator", "text": "Museum has closed.", "isFormerMuseum": true }
+                    { "date": "2026-10-01", "author": "generator", "text": "Museum has closed.", "status": "inactive" }
                 ]
             }
         },
 
         {
-            "idPlus": { "town": "Logtown", "fullName": "Both Keys Museum", "nickName": "bothKeysMuseum" },
+            "idPlus": { "town": "Logtown", "fullName": "Rejected Museum", "nickName": "rejectedMuseum" },
             "coordinates": { "latitude": 52.6, "longitude": 6.6 },
             "optional": {
                 "logbook": [
-                    { "date": "2026-10-01", "author": "generator", "text": "The keys disagree.", "isFormerClub": false, "isFormerMuseum": true }
+                    { "date": "2026-10-01", "author": "list maintainer", "text": "A gallery, not a museum.", "status": "rejected" }
                 ]
             }
         }

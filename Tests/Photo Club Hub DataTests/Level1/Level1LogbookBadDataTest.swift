@@ -9,7 +9,8 @@ import Testing      // for macros like @Test
 @testable import Photo_Club_Hub_Data
 import CoreData     // for NSManagedObjectContext
 
-// The rules in Data#91 for data that is wrong: a Debug build stops, and a Release build keeps what it can.
+// The rules in Data#91 and Data#116 for data that is wrong: a Debug build stops, and a Release build keeps what
+// it can.
 @MainActor @Suite("Tests how the logbook and bad websites handle data that breaks the rules")
 struct Level1LogbookBadDataTests {
 
@@ -32,7 +33,7 @@ struct Level1LogbookBadDataTests {
         #expect(spy.messages.contains { $0.contains("Log entry in No Date Club has no date") })
 
         let club = try store.organization("No Date Club")
-        #expect(club.isFormerOrganization == true)
+        #expect(club.status == .inactive)
         #expect(club.logEntries.count == 1)
         #expect(club.logEntries.first?.date_ == nil)
         #expect(club.logEntries.first?.date == Date.distantPast)
@@ -49,7 +50,7 @@ struct Level1LogbookBadDataTests {
         #expect(spy.messages.contains { $0.contains("Illegal date value \"29-10-2026\"") })
 
         let club = try store.organization("Malformed Date Club")
-        #expect(club.isFormerOrganization == true)
+        #expect(club.status == .inactive)
         #expect(club.logEntries.count == 1)
         #expect(club.logEntries.first?.date_ == nil)
     }
@@ -74,19 +75,39 @@ struct Level1LogbookBadDataTests {
         #expect(entries.map(\.text) == ["The author is missing.", "The author is blank.", "Text?", "Text?"])
     }
 
-    @Test("A quoted \"true\" stops a Debug build, and a Release build ignores it",
+    @Test("A leftover isFormerClub stops a Debug build, and a Release build ignores it",
           .usesIfDebugFatalErrorSpy)
-    func quotedFlagStopsDebugAndIsIgnored() async throws {
+    func leftoverKeyStopsDebugAndIsIgnored() async throws {
         let spy = makeIfDebugFatalErrorSpy()
         installIfDebugFatalErrorSpy(spy)
         defer { removeIfDebugFatalErrorSpy() } // spy is process-global, so remove it promptly
 
         await store.loadLevel1File(fileName: "logbookBadEntriesTest")
-        #expect(spy.messages.contains { $0.contains("Log entry in Quoted Flag Club has an isFormerClub") })
+        #expect(spy.messages.contains { $0.contains("Log entry in Leftover Key Club has isFormerClub") })
 
-        let club = try store.organization("Quoted Flag Club")
-        #expect(club.isFormerOrganization == false)
-        #expect(club.logEntries.first?.isFormerOrganization == nil)
+        let club = try store.organization("Leftover Key Club")
+        #expect(club.status == .active)
+        #expect(club.logEntries.count == 1)
+        #expect(club.logEntries.first?.status == nil)
+    }
+
+    // Both records have an earlier entry with "inactive", which still decides once the bad entry is ignored.
+    @Test("A status that isn't a string or a known value stops a Debug build, and a Release build ignores it",
+          .usesIfDebugFatalErrorSpy)
+    func badStatusStopsDebugAndIsIgnored() async throws {
+        let spy = makeIfDebugFatalErrorSpy()
+        installIfDebugFatalErrorSpy(spy)
+        defer { removeIfDebugFatalErrorSpy() } // spy is process-global, so remove it promptly
+
+        await store.loadLevel1File(fileName: "logbookBadEntriesTest")
+        #expect(spy.messages.contains { $0.contains("in Boolean Status Club has a status that isn't a string") })
+        #expect(spy.messages.contains { $0.contains("in Unknown Status Club has an unknown status \"closed\"") })
+
+        for fullName in ["Boolean Status Club", "Unknown Status Club"] {
+            let club = try store.organization(fullName)
+            #expect(club.status == .inactive, "\(fullName)")
+            #expect(club.logEntries.map(\.status) == [.inactive, nil], "\(fullName)")
+        }
     }
 
     // One day back is allowed, and Last Key Club in logbookTest has such an entry, loaded without a spy.

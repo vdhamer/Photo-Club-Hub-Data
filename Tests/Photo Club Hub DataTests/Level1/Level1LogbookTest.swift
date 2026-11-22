@@ -10,41 +10,44 @@ import Testing      // for macros like @Test
 import CoreData     // for NSManagedObjectContext
 import CoreLocation // for CLLocationCoordinate2D
 
-// The spec in Data#91: how `logbook` and `badWebsites` in a Level 1 file end up in the CoreData store.
+// The spec in Data#91 and Data#116: how `logbook` and `badWebsites` in a Level 1 file end up in the CoreData store.
 @MainActor @Suite("Tests the logbook and bad websites in a Level 1 file") struct Level1LogbookTests {
 
     private let store = LogbookTestStore()
 
-    // MARK: - Which entry decides whether an organization is former
+    // MARK: - Which entry decides the status of an organization
 
     @Test("The last entry with the key decides, and an entry without the key changes nothing")
     func lastKeyDecides() async throws {
         await store.loadLevel1File(fileName: "logbookTest")
         let club = try store.organization("Last Key Club")
-        // The deciding entry is dated a day before the one it overrules, so a date-based rule would give false.
-        #expect(club.isFormerOrganization == true)
-        #expect(club.logEntries.map(\.isFormerOrganization) == [true, false, true, nil])
+        // The deciding entry is dated a day before the one it overrules, so a date-based rule would give active.
+        #expect(club.status == .possiblyInactive)
+        #expect(club.logEntries.map(\.status) == [.inactive, .active, .possiblyInactive, nil])
     }
 
-    @Test("An organization without a logbook is not former") func noLogbookIsNotFormer() async throws {
+    @Test("An organization without a logbook is active") func noLogbookIsActive() async throws {
         await store.loadLevel1File(fileName: "logbookTest")
         let club = try store.organization("No Log Club")
-        #expect(club.isFormerOrganization == false)
+        #expect(club.status == .active)
+        #expect(club.status_ == "active") // stored explicitly, not only the fallback of the wrapper
         #expect(club.logEntries.isEmpty)
     }
 
-    @Test("Either JSON keyword works on either kind of organisation") func keysAreAliases() async throws {
+    @Test("An entry with status active brings an organization back") func activeBringsBack() async throws {
         await store.loadLevel1File(fileName: "logbookTest")
-        #expect(try store.organization("Museum Key Club").isFormerOrganization == true)
-        #expect(try store.organization("Club Key Museum").isFormerOrganization == true)
-        #expect(try store.organization("Closed Museum").isFormerOrganization == true)
+        let club = try store.organization("Revived Club")
+        #expect(club.status == .active)
+        #expect(club.logEntries.map(\.status) == [.inactive, .active])
     }
 
-    // Both records have isFormerClub false and isFormerMuseum true in one entry.
-    @Test("The record's own key wins if one entry has both keys with different values") func ownKeyWins() async throws {
+    @Test("Each of the four values is read, for clubs and museums alike") func allValuesAreRead() async throws {
         await store.loadLevel1File(fileName: "logbookTest")
-        #expect(try store.organization("Both Keys Club").isFormerOrganization == false)
-        #expect(try store.organization("Both Keys Museum").isFormerOrganization == true)
+        #expect(try store.organization("Rejected Club").status == .rejected)
+        #expect(try store.organization("Changing Log Club").status == .inactive)
+        #expect(try store.organization("Rejected Museum").status == .rejected)
+        #expect(try store.organization("Quiet Museum").status == .possiblyInactive)
+        #expect(try store.organization("Closed Museum").status == .inactive)
     }
 
     // MARK: - The fields of an entry
@@ -56,7 +59,7 @@ import CoreLocation // for CLLocationCoordinate2D
         // The third entry is dated a day before the second, so sorting by date would fail this test.
         #expect(entries.map(\.text) == ["Website went down.",
                                         "Still meeting.",
-                                        "Disbanded after all.",
+                                        "Website down again.",
                                         "Website still down."]) // order in JSON array
         #expect(entries.map(\.originalDataSourceLevel) == [1, 1, 1, 1]) // all loaded by loadLevel1File
         #expect(entries[1].author == "afdeling contact")
@@ -81,24 +84,24 @@ import CoreLocation // for CLLocationCoordinate2D
     func changedLogUpdatesInPlace() async throws {
         await store.loadLevel1File(fileName: "logbookTest")
         let firstRowBefore = try #require(try store.organization("Changing Log Club").logEntries.first).objectID
-        #expect(try store.organization("Changing Log Club").isFormerOrganization == true)
+        #expect(try store.organization("Changing Log Club").status == .inactive)
 
         await store.loadLevel1File(fileName: "logbookChangedTest")
         let club = try store.organization("Changing Log Club")
         #expect(club.logEntries.map(\.text) == ["Second version of this text.", "Second entry."])
         #expect(club.logEntries.first?.objectID == firstRowBefore)
-        #expect(club.isFormerOrganization == false) // the entry holding the key is gone
+        #expect(club.status == .active) // the entry holding the key is gone
     }
 
     @Test("Removing the logbook clears the state and the rows, and removing the list clears the bad websites")
     func removedLogClearsEverything() async throws {
         await store.loadLevel1File(fileName: "logbookTest")
-        #expect(try store.organization("Removed Log Club").isFormerOrganization == true)
+        #expect(try store.organization("Removed Log Club").status == .inactive)
         #expect(try store.organization("Removed Log Club").badWebsites.count == 1)
 
         await store.loadLevel1File(fileName: "logbookChangedTest")
         let club = try store.organization("Removed Log Club")
-        #expect(club.isFormerOrganization == false)
+        #expect(club.status == .active)
         #expect(club.logEntries.isEmpty)
         #expect(club.badWebsites.isEmpty)
         // Deleted, not just unlinked: an unlinked row would stay in the store, invisible to the club.
@@ -193,35 +196,47 @@ import CoreLocation // for CLLocationCoordinate2D
             idPlus: OrganizationIdPlus(fullName: "Removed Log Club", town: "Logtown", nickname: "removedLogClub")
         )
         let club = try store.organization("Removed Log Club")
-        #expect(club.isFormerOrganization == true)
+        #expect(club.status == .inactive)
         #expect(club.logEntries.count == 1)
         #expect(club.badWebsites.count == 1)
     }
 
-    // MARK: - Leaving out former organizations (#891)
+    // MARK: - Which organizations the apps show (#891, #892)
 
-    @Test("currentPredicate leaves out former organizations") func currentPredicateLeavesOutFormer() async throws {
-        await store.loadLevel1File(fileName: "logbookTest")
+    // logbookTest has 10 clubs and 3 museums:
+    // - active: No Log, Hijacked, Good Website, Unusual Bad Website, Later Bad Website and Revived Club
+    // - rejected: Rejected Club and Rejected Museum
+    // - inactive or possiblyInactive: Last Key, Changing Log and Removed Log Club, Quiet and Closed Museum
+    private func fullNames(matching predicate: NSPredicate) throws -> Set<String> {
         let fetchRequest: NSFetchRequest<Organization> = Organization.fetchRequest()
-        fetchRequest.predicate = Organization.currentPredicate // organizations without the isFormerOrganization ones
-        let fullNames: Set<String> = Set(try store.viewContext.fetch(fetchRequest).map(\.fullName))
-        #expect(fullNames.contains("No Log Club"))
-        #expect(fullNames.contains("Last Key Club") == false) // former
-        #expect(fullNames.contains("Closed Museum") == false) // former, and a museum
+        fetchRequest.predicate = predicate
+        return Set(try store.viewContext.fetch(fetchRequest).map(\.fullName))
     }
 
-    @Test("count excludes former organizations") func countExcludesFormer() async throws {
+    @Test("activePredicate matches only the active organizations") func activePredicateMatchesActive() async throws {
         await store.loadLevel1File(fileName: "logbookTest")
-        // 10 clubs, of which Last Key, Museum Key, Changing Log and Removed Log Club are former.
-        #expect(Organization.count(context: store.viewContext, organizationTypeE: .club) == 6)
-        // 3 museums, all of them former.
-        #expect(Organization.count(context: store.viewContext, organizationTypeE: .museum) == 0)
-        #expect(try store.organization("No Log Club").isFormerOrganization == false) // counted
-        #expect(try store.organization("Last Key Club").isFormerOrganization == true) // not counted
+        let fullNames = try fullNames(matching: Organization.activePredicate)
+        #expect(fullNames == ["No Log Club", "Hijacked Club", "Good Website Club", "Unusual Bad Website Club",
+                              "Later Bad Website Club", "Revived Club"])
     }
 
-    @Test("currentOrganizationPredicate leaves out the portfolios of former clubs")
-    func currentOrganizationPredicateLeavesOutFormer() async throws {
+    @Test("inScopePredicate matches every organization except the rejected ones")
+    func inScopePredicateLeavesOutRejected() async throws {
+        await store.loadLevel1File(fileName: "logbookTest")
+        let fullNames = try fullNames(matching: Organization.inScopePredicate)
+        #expect(fullNames.count == 11)
+        #expect(fullNames.isDisjoint(with: ["Rejected Club", "Rejected Museum"]))
+        #expect(fullNames.isSuperset(of: ["Last Key Club", "Quiet Museum", "Closed Museum"])) // the ghosts
+    }
+
+    @Test("count includes only active organizations") func countIncludesOnlyActive() async throws {
+        await store.loadLevel1File(fileName: "logbookTest")
+        #expect(Organization.count(context: store.viewContext, organizationTypeE: .club) == 6)
+        #expect(Organization.count(context: store.viewContext, organizationTypeE: .museum) == 0)
+    }
+
+    @Test("The MemberPortfolio predicates match the portfolios of the same organizations")
+    func memberPortfolioPredicatesFollowOrganization() async throws {
         await store.loadLevel1File(fileName: "logbookTest")
         let bgContext = store.makeBackgroundContext()
         let photographer = Photographer.findCreateUpdate(context: bgContext,
@@ -229,7 +244,7 @@ import CoreLocation // for CLLocationCoordinate2D
                                                                                 infixName: "",
                                                                                 familyName: "Member"),
                                                          optionalFields: PhotographerOptionalFields())
-        for fullName in ["Last Key Club", "No Log Club"] {
+        for fullName in ["Last Key Club", "No Log Club", "Rejected Club"] {
             let club = try Organization.find(context: bgContext,
                                              organizationID: OrganizationID(fullName: fullName, town: "Logtown"))
             _ = MemberPortfolio.findCreateUpdate(bgContext: bgContext, organization: club, photographer: photographer)
@@ -237,10 +252,14 @@ import CoreLocation // for CLLocationCoordinate2D
         try bgContext.performAndWait { try bgContext.save() } // like the Level 2 reader, which saves at its end
 
         store.viewContext.refreshAllObjects()
-        let fetchRequest: NSFetchRequest<MemberPortfolio> = MemberPortfolio.fetchRequest()
-        fetchRequest.predicate = MemberPortfolio.currentOrganizationPredicate
-        let portfolios: [MemberPortfolio] = try store.viewContext.fetch(fetchRequest)
-        #expect(portfolios.map(\.organization.fullName) == ["No Log Club"])
+        func clubNames(matching predicate: NSPredicate) throws -> Set<String> {
+            let fetchRequest: NSFetchRequest<MemberPortfolio> = MemberPortfolio.fetchRequest()
+            fetchRequest.predicate = predicate
+            return Set(try store.viewContext.fetch(fetchRequest).map(\.organization.fullName))
+        }
+        #expect(try clubNames(matching: MemberPortfolio.activeOrganizationPredicate) == ["No Log Club"])
+        #expect(try clubNames(matching: MemberPortfolio.inScopeOrganizationPredicate) == ["No Log Club",
+                                                                                            "Last Key Club"])
     }
 
 }
