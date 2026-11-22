@@ -144,8 +144,8 @@ extension Organization {
                             updateStoredLogEntries(fileRows: logEntries, level: .level1, bgContext: bgContext) {
             modified = true }
 
-        if let isFormer = optionalFields.isFormerOrganization, self.isFormerOrganization != isFormer {
-            self.isFormerOrganization = isFormer
+        if let status = optionalFields.status, self.status_ != status.rawValue {
+            self.status_ = status.rawValue
             modified = true }
 
         // Before the website, which depends on the bad websites being up to date.
@@ -265,14 +265,9 @@ extension Organization {
             if storedRow.text_ != fileRow.text {
                 storedRow.text_ = fileRow.text
                 modified = true }
-            if storedRow.isFormerOrganization != fileRow.isFormerOrganization {
-                if let isFormer = fileRow.isFormerOrganization { // CoreData stores an optional Bool as NSNumber?
-                    storedRow.isFormerOrganization_ = NSNumber(value: isFormer)
-                } else {
-                    storedRow.isFormerOrganization_ = nil
-                }
-                modified = true
-            }
+            if storedRow.status_ != fileRow.status?.rawValue {
+                storedRow.status_ = fileRow.status?.rawValue
+                modified = true }
         }
 
         // The file got shorter: rows at positions beyond the last entry no longer exist in the file

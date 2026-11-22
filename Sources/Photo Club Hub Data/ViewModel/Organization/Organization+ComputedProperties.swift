@@ -206,11 +206,23 @@ extension Organization {
         }
     }
 
-    // Matches the organizations that are current, meaning not former (Data#91).
-    // Apps combine it with their own filters, so that the Maps tab hides former clubs and museums (#891).
-    // A computed var rather than a constant, because NSPredicate isn't Sendable.
-    public static var currentPredicate: NSPredicate {
-        NSPredicate(format: "isFormerOrganization == NO")
+    // Set by the last Level 1 log entry that has a `"status"` key (Data#116), and `active` if no entry has one.
+    // A stored value that isn't a known status can only come from a newer model, so it counts as active.
+    public var status: OrganizationStatus {
+        OrganizationStatus(rawValue: status_) ?? .active
+    }
+
+    // Apps combine these two with their own filters (#891, #892). Both are computed vars rather than constants,
+    // because NSPredicate isn't Sendable.
+
+    // Matches the active organizations: what the apps show by default.
+    public static var activePredicate: NSPredicate {
+        NSPredicate(format: "status_ == %@", OrganizationStatus.active.rawValue)
+    }
+
+    // Matches every organization except the rejected ones: what the apps show when inactive ones are asked for.
+    public static var inScopePredicate: NSPredicate {
+        NSPredicate(format: "status_ != %@", OrganizationStatus.rejected.rawValue)
     }
 
     // Stored as one string with a URL per line. The encoding is internal, so it can change without apps noticing.

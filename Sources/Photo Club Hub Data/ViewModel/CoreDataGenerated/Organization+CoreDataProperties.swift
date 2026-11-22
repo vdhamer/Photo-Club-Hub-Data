@@ -21,7 +21,6 @@ extension Organization {
     @NSManaged nonisolated public var badWebsites_: String?
     @NSManaged nonisolated public var fotobondClubNumber_: NSNumber?
     @NSManaged nonisolated public var fullName_: String?
-    @NSManaged nonisolated public var isFormerOrganization: Bool
     @NSManaged nonisolated public var latitude_: Double
     @NSManaged nonisolated public var level2URL_: URL?
     @NSManaged nonisolated public var longitude_: Double
@@ -30,6 +29,7 @@ extension Organization {
     @NSManaged nonisolated public var organizationWebsite: URL?
     @NSManaged nonisolated public var pinned: Bool
     @NSManaged nonisolated public var obsolete: Bool
+    @NSManaged nonisolated public var status_: String
     @NSManaged nonisolated public var town_: String?
     @NSManaged nonisolated public var wikipedia: URL?
     @NSManaged nonisolated public var localizedAddresses_: NSSet?

@@ -9,8 +9,8 @@ import CoreData
 
 extension Organization {
 
-    /// Counts only current organizations, leaving out former ones (Data#91), so that the iOS app's README count of
-    /// clubs always matches what the Maps and Clubs tabs show (#891).
+    /// Counts only active organizations (Data#116), so that the iOS app's README count of clubs always matches
+    /// what the Maps and Clubs tabs show by default (#891).
     public static func count(context: NSManagedObjectContext, organizationTypeE: OrganizationTypeEnum) -> Int {
 
         let organizationCount: Int = context.performAndWait {
@@ -22,7 +22,7 @@ extension Organization {
             let predicateFormat: String = "organizationType_ = %@" // avoid localization
             let typePredicate = NSPredicate(format: predicateFormat, argumentArray: [organizationType])
             fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [typePredicate,
-                                                                                         Organization.currentPredicate])
+                                                                                         Organization.activePredicate])
 
             do {
                 return try context.fetch(fetchRequest).count

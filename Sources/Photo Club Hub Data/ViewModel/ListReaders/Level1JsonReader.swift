@@ -225,17 +225,16 @@ class Level1JsonReader {
             maintainerEmail: maintainerEmail,
             localizedRemarks: localizedRemarks
         )
-        // A Level 1 record without these keys has no log or bad websites and isn't former, so always set them.
+        // A Level 1 record without these keys has no log or bad websites and is active, so always set them.
         let logEntries: [LogEntryFields] = logEntries(jsonOptionals: jsonOrganizationOptionals,
-                                                      organizationTypeEnum: organizationTypeEnum,
                                                       fullName: idPlus.fullName)
         optionalFields.logEntries = logEntries
         optionalFields.badWebsites = extractBadWebsites(jsonOptionals: jsonOrganizationOptionals,
                                                         fullName: idPlus.fullName)
-        // The last entry with the key decides. If no entry has it, the organization is not former.
-        let decidingEntry: LogEntryFields? = logEntries.last { $0.isFormerOrganization != nil }
-        let isFormerOrganizationDefault = false
-        optionalFields.isFormerOrganization = decidingEntry?.isFormerOrganization ?? isFormerOrganizationDefault
+        // The last entry with a usable status decides (Data#116). If no entry has one, the organization is active.
+        let decidingEntry: LogEntryFields? = logEntries.last { $0.status != nil }
+        let statusDefault: OrganizationStatus = .active
+        optionalFields.status = decidingEntry?.status ?? statusDefault
         _ = Organization.findCreateUpdate(context: bgContext,
                                           organizationTypeEnum: organizationTypeEnum,
                                           idPlus: idPlus,
@@ -247,12 +246,7 @@ class Level1JsonReader {
 
     /// Reads the `logbook` array of a Level 1 record (Data#91).
     private static func logEntries(jsonOptionals: JSON,
-                                   organizationTypeEnum: OrganizationTypeEnum,
                                    fullName: String) -> [LogEntryFields] {
-        // The two keys are aliases, accepted on any record, so a key copied from a club to a museum can't fail.
-        // If one entry has both with different values, the record's own key wins.
-        let ownKey: String = organizationTypeEnum == .museum ? "isFormerMuseum" : "isFormerClub"
-        let otherKey: String = organizationTypeEnum == .museum ? "isFormerClub" : "isFormerMuseum"
         var logEntries: [LogEntryFields] = []
         var precedingDate: Date? // the date of the nearest entry above this one that has a usable date
         let oneDay: TimeInterval = 24 * 60 * 60 // exact, because dates are held as midnight GMT, which has no DST
@@ -273,21 +267,37 @@ class Level1JsonReader {
             }
             if let date { precedingDate = date }
 
-            // `.bool` is nil for anything but a JSON boolean, so a value such as "true" (quoted) counts as absent.
-            // That would silently keep a stopped club listed, so it stops a Debug build.
-            for key in [ownKey, otherKey] where jsonLogEntry[key].exists() && jsonLogEntry[key].bool == nil {
-                ifDebugFatalError("Log entry in \(fullName) has an \(key) that isn't true or false")
-            }
-            let isFormerOrganization: Bool? = jsonLogEntry[ownKey].bool ?? jsonLogEntry[otherKey].bool
-
             let logEntry = LogEntryFields(date: date,
                                           author: jsonLogEntry["author"].string,
                                           text: jsonLogEntry["text"].string,
-                                          isFormerOrganization: isFormerOrganization)
+                                          status: status(of: jsonLogEntry, fullOrgName: fullName))
             logEntries.append(logEntry)
         }
 
         return logEntries
+    }
+
+    /// Reads the `"status"` key of one log entry (Data#116). nil means that the entry doesn't change the status.
+    /// A problem that would silently show or hide an organization stops a Debug build. In Release the entry is kept,
+    /// with its status ignored.
+    private static func status(of jsonLogEntry: JSON, fullOrgName: String) -> OrganizationStatus? {
+        // The booleans that `"status"` replaced in Data 3.10.0. No released app read them, so they aren't aliases.
+        for key in ["isFormerClub", "isFormerMuseum"] where jsonLogEntry[key].exists() {
+            ifDebugFatalError("Log entry in \(fullOrgName) has \(key), which was replaced by \"status\" (Data#116)")
+        } // this check can be removed at some point.
+
+        let key = "status"
+        guard jsonLogEntry[key].exists() else { return nil }
+        // `.string` is nil for anything but a JSON string, such as `true`, so check that separately.
+        guard let value: String = jsonLogEntry[key].string else {
+            ifDebugFatalError("Log entry in \(fullOrgName) has a \(key) that isn't a string")
+            return nil
+        }
+        guard let status = OrganizationStatus(rawValue: value) else {
+            ifDebugFatalError("Log entry in \(fullOrgName) has an unknown \(key) \"\(value)\"")
+            return nil
+        }
+        return status
     }
 
     /// Reads and returns the `badWebsites` array of a Level 1 record (Data#91), keeping each string as written.

@@ -53,12 +53,12 @@ extension OrganizationStatus {
             return String(localized: "No longer active",
                           table: "PhotoClubHubData",
                           bundle: languageBundle,
-                          comment: "Label of a club or museum that a source confirms is no longer active.")
+                          comment: "Label of a club or museum confirmed by a source to be no longer active.")
         case .possiblyInactive:
             return String(localized: "May no longer be active",
                           table: "PhotoClubHubData",
                           bundle: languageBundle,
-                          comment: "Label of a club or museum assumed, without confirmation, to be no longer active.")
+                          comment: "Label of a club or museum suspected, without proof, to be no longer active.")
         }
     }
 }

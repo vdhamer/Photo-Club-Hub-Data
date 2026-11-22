@@ -24,7 +24,7 @@ public struct OrganizationOptionalFields {
     // Only Level1JsonReader sets them, which is why they aren't in the public init.
     var logEntries: [LogEntryFields]? // in array order: the only order the entries have
     var badWebsites: [String]? // as written in the file, because parsing a URL can rewrite it (Data#63)
-    var isFormerOrganization: Bool? // separate from logEntries, because a Level 2 log won't decide this (Data#92)
+    var status: OrganizationStatus? // separate from logEntries, because a Level 2 log won't decide this (Data#92)
 
     public init(organizationWebsite: URL? = nil,
                 level2URL: URL? = nil,
@@ -47,11 +47,11 @@ struct LogEntryFields {
     let date: Date?
     let author: String?
     let text: String?
-    let isFormerOrganization: Bool? // nil means that this entry has no intention to change the state
+    let status: OrganizationStatus? // nil means that this entry doesn't change the organization's status
 
     // `date`, `author` and `text` are required and can't be blank.
     // Called before the entry is parsed, so each missing field gets a custom error message.
-    // In Release the entry is kept, because it may hold the isFormerClub key and cause display of a stopped club back.
+    // In Release the entry is kept, because it may hold a status key, such as one that brings a stopped club back.
     static func checkRequiredKeys(of jsonLogEntry: JSON, fullName: String) {
         for key in ["date", "author", "text"] {
             let value: String = (jsonLogEntry[key].string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)

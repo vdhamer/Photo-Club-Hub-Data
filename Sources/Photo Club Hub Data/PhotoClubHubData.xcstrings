@@ -172,7 +172,7 @@
       }
     },
     "May no longer be active" : {
-      "comment" : "Label of a club or museum suspected, without definitive evidence, to no longer be active.",
+      "comment" : "Label of a club or museum suspected, without proof, to be no longer active.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -223,7 +223,7 @@
       }
     },
     "No longer active" : {
-      "comment" : "Label of a club or museum that is no longer active (and we have an definitive source for this).",
+      "comment" : "Label of a club or museum confirmed by a source to be no longer active.",
       "localizations" : {
         "en" : {
           "stringUnit" : {

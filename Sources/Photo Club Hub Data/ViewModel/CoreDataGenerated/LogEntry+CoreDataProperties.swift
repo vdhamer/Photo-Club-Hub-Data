@@ -20,9 +20,9 @@ extension LogEntry {
 
     @NSManaged nonisolated public var author_: String?
     @NSManaged nonisolated public var date_: Date?
-    @NSManaged nonisolated public var isFormerOrganization_: NSNumber?
     @NSManaged nonisolated public var originalDataSourceLevel: Int16
     @NSManaged nonisolated public var position: Int16
+    @NSManaged nonisolated public var status_: String?
     @NSManaged nonisolated public var text_: String?
     @NSManaged nonisolated public var organization_: Organization?
 

@@ -28,7 +28,8 @@ import Foundation // for Bundle
 
     @Test("The labels are translated into Dutch") func labelsInDutch() {
         let dutch = Bundle.photoClubHubDataModuleForLanguage("nl")
-        #expect(OrganizationStatus.inactive.displayNameForHTML(languageBundle: dutch) == "Niet meer actief")
+        #expect(OrganizationStatus.inactive.displayNameForHTML(languageBundle: dutch) ==
+                "Niet meer actief")
         #expect(OrganizationStatus.possiblyInactive.displayNameForHTML(languageBundle: dutch) ==
                 "Mogelijk niet meer actief")
     }

@@ -23,11 +23,15 @@ extension MemberPortfolio { // expose computed properties (some related to handl
 
     public static let emptyPortfolioURL: String = "https://www.vdhamer.com/fgWaalre/Empty_Website/"
 
-    // Matches the portfolios whose club is current, meaning not former (Data#91). Apps combine it with their own
-    // filters, so that the Clubs tab agrees with the Maps tab and hides former clubs (#891).
-    // A computed var rather than a constant, because NSPredicate isn't Sendable.
-    public static var currentOrganizationPredicate: NSPredicate {
-        NSPredicate(format: "organization_.isFormerOrganization == NO")
+    // The counterparts of `Organization.activePredicate` and `Organization.inScopePredicate` (Data#116), for the
+    // portfolios of those organizations, so that the Clubs tab agrees with the Maps tab (#891, #892).
+    // Computed vars rather than constants, because NSPredicate isn't Sendable.
+    public static var activeOrganizationPredicate: NSPredicate { // test for .active state
+        NSPredicate(format: "organization_.status_ == %@", OrganizationStatus.active.rawValue)
+    }
+
+    public static var inScopeOrganizationPredicate: NSPredicate { // omit .rejected state
+        NSPredicate(format: "organization_.status_ != %@", OrganizationStatus.rejected.rawValue)
     }
 
     public var membershipStartDate: Date? {

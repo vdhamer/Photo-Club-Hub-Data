@@ -12,7 +12,7 @@
             "coordinates": { "latitude": 52.6, "longitude": 6.6 },
             "optional": {
                 "logbook": [
-                    { "date": "29-10-2026", "author": "generator", "text": "This entry has a malformed date.", "isFormerClub": true }
+                    { "date": "29-10-2026", "author": "generator", "text": "This entry has a malformed date.", "status": "inactive" }
                 ]
             }
         },
@@ -22,7 +22,7 @@
             "coordinates": { "latitude": 52.7, "longitude": 6.7 },
             "optional": {
                 "logbook": [
-                    { "author": "generator", "text": "This entry has no date.", "isFormerClub": true }
+                    { "author": "generator", "text": "This entry has no date.", "status": "inactive" }
                 ]
             }
         },
@@ -41,7 +41,7 @@
         },
 
         {
-            "idPlus": { "town": "Logtown", "fullName": "Quoted Flag Club", "nickName": "quotedFlagClub" },
+            "idPlus": { "town": "Logtown", "fullName": "Leftover Key Club", "nickName": "leftoverKeyClub" },
             "coordinates": { "latitude": 52.9, "longitude": 6.9 },
             "optional": {
                 "logbook": [

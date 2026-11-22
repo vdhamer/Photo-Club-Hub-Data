@@ -31,7 +31,7 @@ extension LogEntry { // expose computed properties (some related to handling opt
     // The calendar day on which the entry was written, held as midnight GMT, like membership dates and `bornDT`.
     // So format it in GMT when displaying it, to avoid it showing the previous day in the Americas (West of GMT).
     // A malformed JSON date stops a Debug build (see `extractDate()`).
-    // Otherwise, a missing or malformed date doesn't drop the entry, because that entry may hold the isFormerClub key.
+    // Otherwise, a missing or malformed date doesn't drop the entry, because that entry may hold the status key.
     // The fallback is far enough from any real date to be noticed by someone reading the logbook.
     public var date: Date {
         date_ ?? Date.distantPast
@@ -57,10 +57,10 @@ extension LogEntry { // expose computed properties (some related to handling opt
         return value
     }
 
-    // nil means that this logEntry has no intention to change whether the organization is "former".
-    // So this var only converts a Core Data representation to a standard Swift optional.
-    public var isFormerOrganization: Bool? {
-        isFormerOrganization_?.boolValue
+    // The `"status"` this entry gives its organization (Data#116). nil means that the entry has no `"status"` key,
+    // or one that isn't a known value, so the entry doesn't change the organization's status.
+    public var status: OrganizationStatus? {
+        status_.flatMap { OrganizationStatus(rawValue: $0) }
     }
 
     // Converts the stored Int16 to the enum. nil means the store holds a number that is not a known level.
