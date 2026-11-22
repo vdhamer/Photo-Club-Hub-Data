@@ -118,11 +118,13 @@ The sequencing is this package's responsibility, not the consuming app's: `Level
 - **Some names are rejected:** a leading, trailing or doubled dot, or text after `.json`.
 - **Older apps skip them.** Data 3.9.0 can read such names, but released apps (Data 3.8.0 and older) skip an include that has one. The tree they read has to stay free of dots until Data#108 moves the data.
 
-**A Level 1 organization that may have stopped stays in its file, flagged** (Data#91).
+**A Level 1 organization that may have stopped stays in its file, with a status** (Data#91, Data#116).
 
-- **The logbook sets the flag.** The `logbook` is stored as `LogEntry` rows, and the last entry that has `isFormerClub` or `isFormerMuseum` sets `Organization.isFormerOrganization`. The array order decides, never `date`.
+- **Four values.** A log entry's `"status"` is `"rejected"` (not in scope, such as an art circle listed only so the club-list generator recognizes it), `"active"`, `"inactive"` (a source confirms it) or `"possiblyInactive"` (assumed, not confirmed). In Swift this is `OrganizationStatus`, whose `displayNameForAppUI` gives the label for the two inactive values.
+- **The logbook sets it.** The `logbook` is stored an array of `LogEntry` rows, and the last entry that has `"status"` sets `Organization.status`. The array order (rather than `date`) decides. Without such an entry the organization is `active`, and an entry with `"active"` brings it back.
 - **Only Level 1 can set it** (Data#92), so a club's own Level 2 file, which nobody may be maintaining any more, can't overrule it.
-- **Apps filter it themselves** by adding `Organization.currentPredicate` or `MemberPortfolio.currentOrganizationPredicate` to their own fetches.
+- **Apps can filter it themselves** by adding a predicate to their own fetches: `Organization.activePredicate` for what they show by default, `Organization.inScopePredicate` (everything except `rejected`) when the user asks to see inactive organizations too, and the same pair for portfolios, `MemberPortfolio.activeOrganizationPredicate` and `MemberPortfolio.inScopeOrganizationPredicate`.
+- **Bad values stop a Debug build:** a value that isn't one of the four, a value that isn't a string, and the keys `isFormerClub` or `isFormerMuseum` that `"status"` replaced in Data 3.10.0. A release build keeps the entry and ignores its status.
 
 **A Level 1 file can block bad websites** by listing them in `badWebsites`. The list is stored as written, and a `website` that matches one of them (compared with `URL.canonicalString`) is never stored, whichever file supplies it.
 
