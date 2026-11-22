@@ -7,6 +7,46 @@ TO-DO
 
 ---------------------------------------------------------------------------
 
+### 3.10.0 (GitHub commit ???????) ??-11-2026
+
+DATA
+
+Both files are mirrored in the iOS repo's live copy, which is what the apps currently load; the files here are the bundled fallback.
+
+* `clubsBE-Antwerpen.level1.json`
+The three clubs flagged in 3.9.0 now say how sure that is: Fotoclub Morgana is `"inactive"`, because the Belgian company register (KBO) confirms its vzw is in liquidation, and Fotoclub Fogika and Fotokring Krysto are `"possiblyInactive"` (Data#116) because we don't have conclusive evidence, but believe they are no longer active.
+
+* `TemplateMax.level1.json`
+Its logbooks use `"status"`: the template club was assumed stopped (`"possiblyInactive"`) and came back (`"active"`), and the Leica club and the closed museum are `"inactive"`. This file still isn't loaded by the apps (Data#8).
+
+API
+
+* __New `OrganizationStatus`, with `rejected`, `active`, `inactive` and `possiblyInactive`, replaces the `isFormerOrganization` booleans.__
+The raw values are the JSON values. `displayNameForAppUI` and `displayNameForHTML(languageBundle:)` give "No longer active" / "Niet meer actief" and "May no longer be active" / "Mogelijk niet meer actief", and `nil` for the other two, which have no label. `Organization.status` replaces `Organization.isFormerOrganization`, and `LogEntry.status` (`nil` when the entry has no usable `"status"`) replaces `LogEntry.isFormerOrganization` (Data#116).
+
+* __New `Organization.activePredicate` and `Organization.inScopePredicate`, and `MemberPortfolio.activeOrganizationPredicate` and `MemberPortfolio.inScopeOrganizationPredicate`.__
+They replace `Organization.currentPredicate` and `MemberPortfolio.currentOrganizationPredicate`. The `active` pair matches what the apps show by default; the `inScope` pair matches everything except `rejected`, which is what the iOS setting "Show inactive organizations" shows (vdhamer/Photo-Club-Hub#891, vdhamer/Photo-Club-Hub#892). `Organization.count(context:organizationTypeE:)` counts `active` organizations only, as it counted non-former ones before.
+
+Removing `isFormerOrganization`, `currentPredicate` and `currentOrganizationPredicate` is strictly MAJOR, but the only consumers are the two apps: the iOS app changes its callers in the commit that resolves this release (vdhamer/Photo-Club-Hub#896), and the HTML app calls none of them. So it is treated as MINOR, as for Data#39 and Data#99 in 3.9.0.
+
+BEHAVIOR
+
+* __A log entry's `"status"` replaces `isFormerClub` and `isFormerMuseum`.__
+A Level 1 log entry may hold `"status"` with one of the four values. The last entry that has it decides; without one, the organization is `active`, and an entry with `"active"` brings it back. Array order is still the only order. The booleans could not say whether a stop was confirmed, and had to serve for records that never were a club (Data#94). They are dropped rather than kept as aliases, because no released app read them: iOS 3.0.4 ignores the logbook, and iOS 3.0.5 is the first app that reads the key (Data#116).
+
+* __More bad data stops a Debug build.__
+A release build keeps the entry and ignores its status. New cases:
+  * A leftover `isFormerClub` or `isFormerMuseum`, so a stale record is noticed.
+  * A `"status"` that isn't a string, such as `true`.
+  * A `"status"` that isn't one of the four values.
+
+MODEL
+
+* __Model version `Photo_Club_Hub_3_10_0`: a `status_` string replaces `isFormerOrganization` on `Organization` and `LogEntry`.__
+`Organization.status_` is a non-optional String with default `"active"`, and `LogEntry.status_` an optional String, `nil` when the entry has no usable `"status"`. Both hold the raw value, so the stores and the predicates read as the JSON does. The Booleans `isFormerOrganization` and `isFormerOrganization_` are removed. The type changes, so these are new attributes rather than renames: a lightweight migration drops the old values and makes every organization `active` until the next load sets its status from Level 1. No data reset is needed. `CoreDataMigrationTest` checks the default.
+
+---------------------------------------------------------------------------
+
 ### 3.9.0 (GitHub commit 28a45ec) 21-11-2026
 
 DATA
