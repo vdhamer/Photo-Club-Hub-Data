@@ -79,9 +79,9 @@
     <entity name="LogEntry" representedClassName="LogEntry" syncable="YES">
         <attribute name="author_" optional="YES" attributeType="String"/>
         <attribute name="date_" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="isFormerOrganization_" optional="YES" attributeType="Boolean" usesScalarValueType="NO"/>
         <attribute name="originalDataSourceLevel" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="YES"/>
         <attribute name="position" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="status_" optional="YES" attributeType="String"/>
         <attribute name="text_" optional="YES" attributeType="String"/>
         <relationship name="organization_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Organization" inverseName="logEntries_" inverseEntity="Organization"/>
         <uniquenessConstraints>
@@ -123,7 +123,6 @@
         <attribute name="badWebsites_" optional="YES" attributeType="String"/>
         <attribute name="fotobondClubNumber_" optional="YES" attributeType="Integer 16" usesScalarValueType="NO" elementID="fotobondNumber"/>
         <attribute name="fullName_" attributeType="String" defaultValueString="DefaultPhotoClubName" elementID="name_"/>
-        <attribute name="isFormerOrganization" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="latitude_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="level2URL_" optional="YES" attributeType="URI" elementID="memberListURL_"/>
         <attribute name="longitude_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -132,6 +131,7 @@
         <attribute name="obsolete" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" elementID="removeOrganization"/>
         <attribute name="organizationWebsite" optional="YES" attributeType="URI" elementID="photoClubWebsite"/>
         <attribute name="pinned" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="status_" attributeType="String" defaultValueString="active"/>
         <attribute name="town_" attributeType="String" defaultValueString="DefaultTown"/>
         <attribute name="wikipedia" optional="YES" attributeType="URI"/>
         <relationship name="localizedAddresses_" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="LocalizedAddress" inverseName="organization_" inverseEntity="LocalizedAddress"/>
