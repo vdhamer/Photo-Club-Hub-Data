@@ -156,6 +156,12 @@ public enum LevelLoader {
                     useOnlyInBundleFile: useOnlyInBundleFile)
             }
             group.addTask {
+                await TemplateOutlawsMembersProvider.load(
+                    bgContext: makeBgContext(ctxName: "Level 2 loader TemplateOutlaws", usedContainer: usedContainer),
+                    isBeingTested: isBeingTested,
+                    useOnlyInBundleFile: useOnlyInBundleFile)
+            }
+            group.addTask {
                 await Persoonlijk16MembersProvider.load(
                     bgContext: makeBgContext(ctxName: "Level 2 loader Persoonlijk16", usedContainer: usedContainer),
                     isBeingTested: isBeingTested,

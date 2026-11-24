@@ -1,9 +1,40 @@
 TO-DO
 
-* Data#8: drive Level 2 from Level 1 data, which deletes the fourteen-club list in `LevelLoader.loadAllLevel2Clubs`
+* Data#8: drive Level 2 from Level 1 data, which deletes the fifteen-club list in `LevelLoader.loadAllLevel2Clubs`
 * Data#1: make the test suite safe to run in parallel, so CI can drop `swift test --no-parallel`
 * Consider a SwiftLint step in CI as well, so violations gate pull requests rather than only local builds
 * Untested: to-many relationship conflicts under the merge policy (see Data#12)
+
+---------------------------------------------------------------------------
+
+### 3.10.1 (GitHub commit e6be664) 24-11-2026
+
+DATA
+
+All mirrored in the iOS repo's live copy, which is what the apps load; the files here are the bundled fallback.
+
+* `templates.level1.json` replaces `clubTemplates.level1.json` and is now part of the `root_` tree.
+It holds no organizations of its own, only includes: `TemplateMin.level1.json`, `TemplateMax.level1.json` and the new `TemplateOutlaws.level1.json`. So the files that maintainers copy to start a file are also loaded as live data (vdhamer/Photo-Club-Hub#690).
+
+* `TemplateOutlaws.level1.json`
+*Template Gang of Outlaws* (Gibsland, Louisiana, `TemplateOutlaws`), whose log entry says `"rejected"`. This lets the apps be checked, on real data, to never show a rejected organization.
+
+* `TemplateOutlaws.level2.json`
+Three fictitious members: Bonnie and Clyde Outlaw belong only to the rejected organization, and Mike Blaak is also a member of the TemplateMax club.
+
+* `TemplateMin.level1.json`
+Now bundled, as `TemplateMax.level1.json` already was. Lost its second club, so it holds only TemplateMin.
+
+* `TemplateMax.level1.json`
+The second club is now *Template Club That Stopped* (Gibsland, `TemplateStopped`), and the real Fotografiska New York is replaced by the fictitious *Template Photo Gallery* (Gibsland, `TemplateGallery`). *Template Museum That Closed* moves from "Example Town" in the Netherlands to Gibsland as well. Now that the file is loaded, every organization in it has to be made up.
+
+* `TemplateMin.level2.json`, `TemplateMax.level2.json`, and the Level 1 entries of both clubs
+`level2URL` now points at the real file in the iOS repo instead of an example address.
+
+BEHAVIOR
+
+* __One more Level 2 loader, for `TemplateOutlaws`.__
+`TemplateOutlawsMembersProvider` is `internal`, unlike the other providers, so this release adds no public API. Data#8 removes it with the others.
 
 ---------------------------------------------------------------------------
 
