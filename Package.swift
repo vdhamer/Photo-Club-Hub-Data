@@ -44,6 +44,10 @@ let package = Package(
 
                 .copy("JSON/clubsBE.level1.json"),
                 .copy("JSON/clubsBE-Antwerpen.level1.json"),
+                .copy("JSON/clubsBE-Limburg.level1.json"),
+                .copy("JSON/clubsBE-OostVlaanderen.level1.json"),
+                .copy("JSON/clubsBE-VlaamsBrabant.level1.json"),
+                .copy("JSON/clubsBE-WestVlaanderen.level1.json"),
                 .copy("JSON/clubsNL.level1.json"),
                 .copy("JSON/clubsNL01.level1.json"),
                 .copy("JSON/clubsNL02.level1.json"),
