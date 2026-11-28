@@ -6,7 +6,8 @@
             "https://raw.githubusercontent.com/vdhamer/Photo-Club-Hub/refs/heads/main/JSON/clubsBE-OostVlaanderen.level1.json",
             "https://raw.githubusercontent.com/vdhamer/Photo-Club-Hub/refs/heads/main/JSON/clubsBE-WestVlaanderen.level1.json",
             "https://raw.githubusercontent.com/vdhamer/Photo-Club-Hub/refs/heads/main/JSON/clubsBE-Limburg.level1.json",
-            "https://raw.githubusercontent.com/vdhamer/Photo-Club-Hub/refs/heads/main/JSON/clubsBE-VlaamsBrabant.level1.json"
+            "https://raw.githubusercontent.com/vdhamer/Photo-Club-Hub/refs/heads/main/JSON/clubsBE-VlaamsBrabant.level1.json",
+            "https://raw.githubusercontent.com/vdhamer/Photo-Club-Hub/refs/heads/main/JSON/clubsBE-Brussel.level1.json"
         ],
         "maintainerEmail": "vdhamer@msn.com"
     }
