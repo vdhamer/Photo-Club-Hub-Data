@@ -84,6 +84,16 @@
             "optional": {
                 "website": "http://www.facebook.com/FotogroepTegenlicht",
                 "level2URL": "https://www.example.com/fgTegenlicht.level2.json",
+                "remark": [
+                    {
+                        "language": "EN",
+                        "value": "Goes on a photo excursion every month, alongside a monthly review evening."
+                    },
+                    {
+                        "language": "NL",
+                        "value": "Gaat elke maand op foto-excursie, naast een maandelijkse bespreekavond."
+                    }
+                ],
                 "nlSpecific": {
                     "fotobondNumber": 1766
                 }
@@ -206,6 +216,16 @@
             "optional": {
                 "website": "https://fkzl.nl/",
                 "level2URL": "https://www.example.com/FKZL.level2.json",
+                "remark": [
+                    {
+                        "language": "EN",
+                        "value": "Members come from all over South Limburg; their work extends to experimental images that test the limits of photography."
+                    },
+                    {
+                        "language": "NL",
+                        "value": "De leden komen uit heel Zuid-Limburg; hun werk gaat tot experimentele beelden die de grenzen van de fotografie opzoeken."
+                    }
+                ],
                 "nlSpecific": {
                     "fotobondNumber": 1782
                 }
